@@ -1,9 +1,9 @@
 import "./globals.css"
-import NavBar from "../components/NavBar"
+import NavBar from "@/components/NavBar"
 
 export const metadata = {
   title: "Ochiga",
-  description: "Smart Estate Management",
+  description: "Smart home & estate management",
 }
 
 export default function RootLayout({ children }) {
@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <NavBar />
-        <div className="p-4">{children}</div>
+        {children}
       </body>
     </html>
   )
