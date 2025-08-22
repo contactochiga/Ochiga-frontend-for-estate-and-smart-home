@@ -1,6 +1,6 @@
 import "./globals.css"
-import NavBar from "@/components/NavBar"
-import Footer from "@/components/Footer"
+import NavBar from "@/NavBar"
+import Footer from "@/Footer"
 
 export const metadata = {
   title: "Ochiga",
