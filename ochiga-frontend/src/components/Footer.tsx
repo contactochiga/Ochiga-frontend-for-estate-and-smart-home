@@ -10,10 +10,16 @@ import {
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 
+type NavItem = {
+  name: string;
+  href: string;
+  icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
+};
+
 export default function Footer() {
   const pathname = usePathname();
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { name: "Home", href: "/", icon: HomeIcon },
     { name: "Rooms", href: "/rooms", icon: Squares2X2Icon },
     { name: "Estate", href: "/estate", icon: BuildingOffice2Icon },
