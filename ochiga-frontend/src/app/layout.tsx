@@ -1,12 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";  // fallback relative path
-import { GeistSans, GeistMono } from "geist/font";  // ✅ import fonts
+import Footer from "@/components/Footer";
+import { Inter } from "next/font/google";  // ✅ import Inter font
 
-// ✅ initialize fonts
-const geistSans = GeistSans({ subsets: ["latin"] });
-const geistMono = GeistMono({ subsets: ["latin"] });
+// ✅ initialize Inter
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Ochiga",
@@ -20,8 +19,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* ✅ apply Geist font to body */}
-      <body className={`${geistSans.className} flex flex-col min-h-screen`}>
+      {/* ✅ apply Inter font to body */}
+      <body className={`${inter.className} flex flex-col min-h-screen`}>
         <NavBar />
         <main className="flex-1">{children}</main>
         <Footer />
