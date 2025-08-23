@@ -29,22 +29,24 @@ export default function Footer() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 md:hidden">
-      <ul className="flex justify-between items-center h-16 px-3">
+      <ul className="flex justify-between items-center h-16 px-4">
         {navItems.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;
           return (
-            <li key={item.name} className="flex-1 text-center">
-              <Link href={item.href} className="flex flex-col items-center justify-center space-y-1">
+            <li key={item.name} className="flex-1 flex flex-col items-center">
+              <Link href={item.href} className="flex flex-col items-center space-y-1">
+                {/* ICON */}
                 <div
                   className={`flex items-center justify-center h-9 w-9 rounded-full transition-colors ${
                     active
-                      ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400"
+                      ? "bg-blue-600 text-white"
                       : "text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
                   }`}
                 >
                   <Icon className="h-5 w-5" />
                 </div>
+                {/* TEXT */}
                 <span
                   className={`text-[11px] font-medium ${
                     active
