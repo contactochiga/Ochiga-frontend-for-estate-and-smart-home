@@ -2,6 +2,11 @@ import "./globals.css";
 import type { Metadata } from "next";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import { GeistSans, GeistMono } from "geist/font";  // ✅ import fonts
+
+// ✅ initialize fonts
+const geistSans = GeistSans({ subsets: ["latin"] });
+const geistMono = GeistMono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Ochiga",
@@ -15,7 +20,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="flex flex-col min-h-screen">
+      {/* ✅ apply Geist font to body */}
+      <body className={`${geistSans.className} flex flex-col min-h-screen`}>
         <NavBar />
         <main className="flex-1">{children}</main>
         <Footer />
