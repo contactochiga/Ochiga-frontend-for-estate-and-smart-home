@@ -1,7 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";  // using alias
+import Footer from "../components/Footer";  // fallback relative path
 import { GeistSans, GeistMono } from "geist/font";  // ✅ import fonts
 
 // ✅ initialize fonts
