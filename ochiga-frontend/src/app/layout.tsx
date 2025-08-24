@@ -1,18 +1,25 @@
-import "./globals.css";
-import Footer from "./components/Footer";
+import './globals.css'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
+import type { Metadata } from 'next'
 
-export const metadata = {
-  title: "Ochiga Smart Estate",
-  description: "Smart estate management dashboard",
-};
+export const metadata: Metadata = {
+  title: 'Ochiga App',
+  description: 'Smart Home & Estate Management',
+}
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-        <main className="pb-20">{children}</main>
-        <Footer /> {/* stays fixed at bottom, independent of flex */}
+      <body className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">{children}</main>
+        <Footer />
       </body>
     </html>
-  );
+  )
 }
