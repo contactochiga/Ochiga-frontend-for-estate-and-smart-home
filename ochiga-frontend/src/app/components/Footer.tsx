@@ -1,67 +1,42 @@
+// src/components/Footer.tsx
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  HomeIcon,
-  BuildingOffice2Icon,
-  DevicePhoneMobileIcon,
-  Cog6ToothIcon,
-  Squares2X2Icon,
-} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import { Home, User, Bell, Settings } from "lucide-react";
 
-type NavItem = {
-  name: string;
-  href: string;
-  icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
-};
+const navItems = [
+  { href: "/", icon: Home },
+  { href: "/profile", icon: User },
+  { href: "/notifications", icon: Bell },
+  { href: "/settings", icon: Settings },
+];
 
 export default function Footer() {
   const pathname = usePathname();
 
-  const navItems: NavItem[] = [
-    { name: "Home", href: "/", icon: HomeIcon },
-    { name: "Rooms", href: "/rooms", icon: Squares2X2Icon },
-    { name: "Estate", href: "/estate", icon: BuildingOffice2Icon },
-    { name: "Devices", href: "/devices", icon: DevicePhoneMobileIcon },
-    { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
-  ];
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-50 md:hidden">
-      <ul className="flex justify-around items-center h-16">
-        {navItems.map((item) => {
-          const active = pathname === item.href;
-          const Icon = item.icon;
+    <footer className="fixed bottom-0 left-0 w-full h-20 bg-white border-t shadow-md flex items-center justify-around z-50">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = pathname === item.href;
 
-          return (
-            <li key={item.name} className="flex-1 flex justify-center">
-              <Link href={item.href} className="flex flex-col items-center space-y-1">
-                {/* ICON with circle background when active */}
-                <div
-                  className={`flex items-center justify-center h-10 w-10 rounded-full transition-colors ${
-                    active
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                </div>
-                {/* TEXT */}
-                <span
-                  className={`text-xs font-medium ${
-                    active
-                      ? "text-blue-600 dark:text-blue-400"
-                      : "text-gray-600 dark:text-gray-300"
-                  }`}
-                >
-                  {item.name}
-                </span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="flex items-center justify-center"
+          >
+            <div
+              className={`p-3 rounded-full transition ${
+                isActive ? "bg-blue-500 text-white" : "text-gray-500"
+              }`}
+            >
+              <Icon size={24} />
+            </div>
+          </Link>
+        );
+      })}
+    </footer>
   );
 }
