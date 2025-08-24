@@ -1,3 +1,15 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  HomeIcon,
+  Squares2X2Icon,
+  BuildingOffice2Icon,
+  DevicePhoneMobileIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
+
 export default function Footer() {
   const pathname = usePathname();
 
