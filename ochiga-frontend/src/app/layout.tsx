@@ -22,7 +22,8 @@ export default function RootLayout({
       {/* ✅ apply Inter font to body */}
       <body className={`${inter.className} flex flex-col min-h-screen`}>
         <NavBar />
-        <main className="flex-1">{children}</main>
+        {/* ✅ add pb-16 to prevent content from hiding behind Footer */}
+        <main className="flex-1 pb-16">{children}</main>
         <Footer />
       </body>
     </html>
