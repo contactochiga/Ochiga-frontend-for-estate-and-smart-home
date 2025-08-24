@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import './globals.css'
 import Header from './components/Header'
-import Navbar from './components/Navbar'
+import NavBar from './components/NavBar'
 import Footer from './components/Footer'
 import type { Metadata } from 'next'
 
@@ -22,7 +22,7 @@ export default function RootLayout({
         <Header />
 
         {/* Navbar (below header, if needed) */}
-        <Navbar />
+        <NavBar />
 
         {/* Main content */}
         <main className="flex-1">{children}</main>
