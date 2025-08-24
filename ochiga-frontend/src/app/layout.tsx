@@ -1,6 +1,5 @@
-// app/layout.tsx
 import "./globals.css";
-import Footer from "./components/Footer"; // ✅ correct path
+import Footer from "./components/Footer";
 
 export const metadata = {
   title: "Ochiga Smart Estate",
@@ -10,9 +9,9 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 dark:bg-gray-900 min-h-screen flex flex-col">
-        <main className="flex-1 pb-20">{children}</main>
-        <Footer /> {/* 👈 Always visible at the bottom */}
+      <body className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <main className="pb-20">{children}</main>
+        <Footer /> {/* stays fixed at bottom, independent of flex */}
       </body>
     </html>
   );
