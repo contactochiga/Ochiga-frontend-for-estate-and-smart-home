@@ -22,8 +22,8 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg z-50 md:hidden">
-      <nav className="flex justify-around items-center h-16 w-full">
+    <footer className="fixed bottom-4 left-0 right-0 flex justify-center z-50 md:hidden">
+      <nav className="flex justify-around items-center w-[90%] max-w-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-md rounded-2xl shadow-lg px-2 py-2">
         {navItems.map((item) => {
           const active = pathname === item.href;
           const Icon = item.icon;
