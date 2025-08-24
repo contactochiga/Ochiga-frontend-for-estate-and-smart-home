@@ -1,15 +1,22 @@
 "use client"
+
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
 import { Menu, X, Sun, Moon } from "lucide-react"
 
+// ✅ Define link type
+interface NavLink {
+  href: string
+  label: string
+}
+
 export default function NavBar() {
   const pathname = usePathname()
-  const [isOpen, setIsOpen] = useState(false)
-  const [theme, setTheme] = useState("light")
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [theme, setTheme] = useState<"light" | "dark">("light")
 
-  const links = [
+  const links: NavLink[] = [
     { href: "/", label: "Home" },
     { href: "/login", label: "Login" },
     { href: "/dashboard", label: "Resident Dashboard" },
@@ -19,11 +26,10 @@ export default function NavBar() {
   // ✅ Load saved theme on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme")
-    if (savedTheme) {
+    if (savedTheme === "dark" || savedTheme === "light") {
       setTheme(savedTheme)
       document.documentElement.classList.toggle("dark", savedTheme === "dark")
     } else {
-      // Default: follow system preference
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
       setTheme(prefersDark ? "dark" : "light")
       document.documentElement.classList.toggle("dark", prefersDark)
