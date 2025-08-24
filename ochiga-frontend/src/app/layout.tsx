@@ -17,17 +17,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="flex flex-col min-h-screen">
-        {/* Header at the top */}
+      {/* 👇 this makes sure the footer can "float" properly */}
+      <body className="relative min-h-screen flex flex-col">
+        {/* Header */}
         <Header />
 
-        {/* Navbar (below header, if needed) */}
+        {/* Navbar */}
         <NavBar />
 
-        {/* Main content */}
+        {/* Main content grows */}
         <main className="flex-1">{children}</main>
 
-        {/* Footer at the bottom */}
+        {/* Floating footer */}
         <Footer />
       </body>
     </html>
