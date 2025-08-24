@@ -17,18 +17,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* 👇 this makes sure the footer can "float" properly */}
-      <body className="relative min-h-screen flex flex-col">
-        {/* Header */}
-        <Header />
+      <body className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
+        {/* 🔝 Sticky Header + Navbar */}
+        <header className="fixed top-0 left-0 w-full z-50">
+          <Header />
+          <NavBar />
+        </header>
 
-        {/* Navbar */}
-        <NavBar />
+        {/* 🔄 Page content (add padding so it doesn’t hide behind header/footer) */}
+        <main className="flex-1 pt-24 pb-20">{children}</main>
 
-        {/* Main content grows */}
-        <main className="flex-1">{children}</main>
-
-        {/* Floating footer */}
+        {/* 🔻 Fixed Footer Dock */}
         <Footer />
       </body>
     </html>
