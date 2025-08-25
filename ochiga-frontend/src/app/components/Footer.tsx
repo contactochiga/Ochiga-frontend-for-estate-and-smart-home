@@ -1,35 +1,63 @@
-// ochiga-frontend/src/app/components/Footer.tsx
-import React from "react";
-import {
-  HiOutlineHome,
-  HiOutlineBuildingOffice,
-  HiOutlineDevicePhoneMobile,
-  HiOutlineCog6Tooth,
-} from "react-icons/hi2";
+"use client";
 
-const Footer: React.FC = () => {
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  HomeIcon,
+  Squares2X2Icon,
+  BuildingOffice2Icon,
+  DevicePhoneMobileIcon,
+  Cog6ToothIcon,
+} from "@heroicons/react/24/outline";
+
+export default function Footer() {
+  const pathname = usePathname();
+
+  const navItems = [
+    { name: "Home", href: "/", icon: HomeIcon },
+    { name: "Rooms", href: "/rooms", icon: Squares2X2Icon },
+    { name: "Estate", href: "/estate", icon: BuildingOffice2Icon },
+    { name: "Devices", href: "/devices", icon: DevicePhoneMobileIcon },
+    { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
+  ];
+
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-md">
-      <nav className="flex justify-around items-center h-14">
-        <button className="flex flex-col items-center text-gray-600 hover:text-blue-600">
-          <HiOutlineHome size={22} />
-          <span className="text-[10px]">Home</span>
-        </button>
-        <button className="flex flex-col items-center text-gray-600 hover:text-blue-600">
-          <HiOutlineBuildingOffice size={22} />
-          <span className="text-[10px]">Room</span>
-        </button>
-        <button className="flex flex-col items-center text-gray-600 hover:text-blue-600">
-          <HiOutlineDevicePhoneMobile size={22} />
-          <span className="text-[10px]">Estate</span>
-        </button>
-        <button className="flex flex-col items-center text-gray-600 hover:text-blue-600">
-          <HiOutlineCog6Tooth size={22} />
-          <span className="text-[10px]">Settings</span>
-        </button>
-      </nav>
+    <footer
+      className="fixed bottom-0 left-0 right-0
+        bg-white/90 dark:bg-gray-800/90 backdrop-blur-md
+        border-t border-gray-200 dark:border-gray-700 shadow-lg
+        w-full max-w-md mx-auto px-4
+        flex justify-around items-center rounded-t-2xl z-50
+        h-14 pb-[env(safe-area-inset-bottom)]"
+    >
+      {navItems.map((item) => {
+        const active = pathname === item.href;
+        const Icon = item.icon;
+        return (
+          <Link
+            key={item.name}
+            href={item.href}
+            className="flex flex-col items-center justify-center"
+          >
+            <Icon
+              className={`h-6 w-6 ${
+                active
+                  ? "text-blue-600 dark:text-blue-400"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            />
+            <span
+              className={`text-[10px] mt-1 ${
+                active
+                  ? "text-blue-600 dark:text-blue-400 font-medium"
+                  : "text-gray-500 dark:text-gray-400"
+              }`}
+            >
+              {item.name}
+            </span>
+          </Link>
+        );
+      })}
     </footer>
   );
-};
-
-export default Footer;
+}
