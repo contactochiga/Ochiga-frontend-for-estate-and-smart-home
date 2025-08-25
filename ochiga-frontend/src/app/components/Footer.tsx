@@ -23,11 +23,11 @@ export default function Footer() {
 
   return (
     <footer
-      className="fixed bottom-0 left-0 right-0
-        bg-white/90 dark:bg-gray-800/90 backdrop-blur-md
+      className="w-full
+        bg-white dark:bg-gray-800
         border-t border-gray-200 dark:border-gray-700 shadow-lg
-        w-full max-w-md mx-auto px-4
-        flex justify-around items-center rounded-t-2xl z-50
+        max-w-md mx-auto px-4
+        flex justify-around items-center rounded-t-2xl
         h-14 pb-[env(safe-area-inset-bottom)]"
     >
       {navItems.map((item) => {
