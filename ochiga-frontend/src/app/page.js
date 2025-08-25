@@ -1,5 +1,7 @@
+// ochiga-frontend/src/app/page.js
+
 import Link from "next/link";
-import CommunityPage from "./community/page";
+import ResidentDashboard from "./dashboard/page";
 
 export default function Home() {
   return (
@@ -23,16 +25,20 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Main Content Area */}
+      {/* Welcome Section */}
       <section className="mt-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome to Ochiga Smart Home</h1>
-        <p className="mt-2 text-lg text-gray-600">Your community, connected and secure.</p>
-        
-        {/* Resident Dashboard Content */}
-        <div className="mt-6">
-          <CommunityPage />
-        </div>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Welcome to Ochiga Smart Home
+        </h1>
+        <p className="mt-2 text-lg text-gray-600">
+          Your community, connected and secure.
+        </p>
       </section>
+
+      {/* Resident Dashboard directly below */}
+      <div className="mt-6">
+        <ResidentDashboard />
+      </div>
     </main>
   );
 }
