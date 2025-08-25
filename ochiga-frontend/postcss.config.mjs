@@ -1,5 +1,9 @@
+// Ochiga-frontend/postcss.config.mjs
 const config = {
-  plugins: ["@tailwindcss/postcss"],
+  plugins: {
+    tailwindcss: {}, // ✅ Correct plugin name
+    autoprefixer: {}, // ✅ Essential for browser compatibility
+  },
 };
 
 export default config;
