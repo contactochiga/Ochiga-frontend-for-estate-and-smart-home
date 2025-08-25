@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className="flex flex-col min-h-screen relative z-0">
+      <body className="flex flex-col min-h-screen">
         <TopBar />
         <main className="flex-1 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
   {children}
