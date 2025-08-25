@@ -1,4 +1,4 @@
-// ochiga-frontend/postcss.config.mjs
+// ochiga-frontend/postcss.config.js
 export default {
   plugins: {
     tailwindcss: {},
