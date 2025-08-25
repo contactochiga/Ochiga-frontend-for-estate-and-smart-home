@@ -20,8 +20,8 @@ export default function RootLayout({
         {/* Top header bar */}
         <TopBar />
 
-        {/* Main content with bottom padding so it doesn’t get hidden by footer */}
-        <main className="flex-1 pb-16">{children}</main>
+        {/* Main content with bottom padding equal to footer height */}
+        <main className="flex-1 pb-20">{children}</main>
 
         {/* Fixed footer nav */}
         <Footer />
