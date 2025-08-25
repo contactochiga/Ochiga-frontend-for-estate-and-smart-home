@@ -16,14 +16,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="relative min-h-screen flex flex-col">
+      <body className="flex flex-col min-h-screen">
         {/* Top header bar */}
         <TopBar />
 
-        {/* Main content */}
-        <main className="flex-1">{children}</main>
+        {/* Main content with bottom padding so it doesn’t get hidden by footer */}
+        <main className="flex-1 pb-16">{children}</main>
 
-        {/* Footer nav */}
+        {/* Fixed footer nav */}
         <Footer />
       </body>
     </html>
