@@ -1,12 +1,12 @@
-// src/app/layout.tsx
+// ochiga-frontend/src/app/layout.tsx
+import type { Metadata } from "next";
 import "./globals.css";
 import TopBar from "./components/TopBar";
 import Footer from "./components/Footer";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Ochiga",
-  description: "Live Smart. Live Ochiga.",
+  title: "Ochiga Smart Estate",
+  description: "Smart Estate Dashboard by Ochiga",
 };
 
 export default function RootLayout({
@@ -15,15 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="flex flex-col min-h-screen">
-        {/* Top header bar */}
+    <html lang="en" className="h-full">
+      <body className="flex flex-col min-h-screen relative z-0">
         <TopBar />
-
-        {/* Main content with bottom padding equal to footer height */}
-        <main className="flex-1 pb-24">{children}</main>
-
-        {/* Fixed footer nav */}
+        <main className="flex-1">{children}</main>
         <Footer />
       </body>
     </html>
