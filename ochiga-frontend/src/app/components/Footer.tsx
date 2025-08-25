@@ -22,11 +22,13 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 
-      bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg 
-      border border-gray-200 dark:border-gray-700 shadow-lg
-      rounded-2xl w-[95%] max-w-md mx-auto px-4 py-2 
-      flex justify-around items-center z-50">
+    <footer
+      className="fixed bottom-0 left-0 right-0
+        bg-white/90 dark:bg-gray-800/90 backdrop-blur-md
+        border-t border-gray-200 dark:border-gray-700 shadow-lg
+        w-full max-w-md mx-auto px-4 py-2
+        flex justify-around items-center z-50"
+    >
       {navItems.map((item) => {
         const active = pathname === item.href;
         const Icon = item.icon;
@@ -44,7 +46,7 @@ export default function Footer() {
               }`}
             />
             <span
-              className={`text-[10px] mt-1 ${
+              className={`text-[11px] mt-1 ${
                 active
                   ? "text-blue-600 dark:text-blue-400 font-medium"
                   : "text-gray-500 dark:text-gray-400"
