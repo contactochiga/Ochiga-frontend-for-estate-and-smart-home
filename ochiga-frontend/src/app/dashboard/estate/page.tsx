@@ -2,13 +2,13 @@
 
 export default function EstatePage() {
   return (
-    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-        Estate Info
-      </h1>
-      <p className="text-gray-600 dark:text-gray-400">
-        View estate contacts, rules, and latest updates.
-      </p>
-    </div>
+    <main className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Estate Information</h1>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 space-y-3">
+        <p><strong>Estate Manager:</strong> Mr. Maxwell Ogbogu</p>
+        <p><strong>Security Hotline:</strong> 0800-123-4567</p>
+        <p><strong>Office Hours:</strong> Mon - Fri, 9AM - 5PM</p>
+      </div>
+    </main>
   );
 }
