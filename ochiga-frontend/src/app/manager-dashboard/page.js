@@ -1,75 +1,62 @@
 // src/app/manager-dashboard/page.js
-
 "use client";
 import { useState } from "react";
 
 export default function ManagerDashboard() {
   const [activeTab, setActiveTab] = useState("payments");
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case "payments":
+        return <div className="p-4">💳 Payment Management</div>;
+      case "access":
+        return <div className="p-4">🔑 Access Control</div>;
+      case "requests":
+        return <div className="p-4">📋 Service Requests</div>;
+      case "residents":
+        return <div className="p-4">👥 Residents List</div>;
+      default:
+        return <div className="p-4">Select a tab</div>;
+    }
+  };
+
   return (
-    <main className="flex flex-col h-screen bg-gray-100">
-      {/* 🔹 Top Bar */}
-      <header className="flex items-center justify-between bg-blue-600 text-white p-4 shadow-md">
-        <h1 className="text-lg font-bold">Ochiga Manager</h1>
-        <span className="text-sm">Smart Estate</span>
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      {/* Top Bar */}
+      <header className="bg-green-600 text-white p-4 text-lg font-bold shadow">
+        Manager Dashboard
       </header>
 
-      {/* 🔹 Main Content with Sidebar + Content */}
-      <div className="flex flex-1">
-        {/* Sidebar (collapsible for mobile later) */}
-        <aside className="w-40 bg-white border-r shadow-sm p-3 hidden sm:block">
-          <nav className="flex flex-col space-y-2">
-            <button
-              onClick={() => setActiveTab("payments")}
-              className={`p-2 rounded ${
-                activeTab === "payments" ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
-              }`}
-            >
-              Payments
-            </button>
-            <button
-              onClick={() => setActiveTab("access")}
-              className={`p-2 rounded ${
-                activeTab === "access" ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
-              }`}
-            >
-              Access Control
-            </button>
-            <button
-              onClick={() => setActiveTab("requests")}
-              className={`p-2 rounded ${
-                activeTab === "requests" ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
-              }`}
-            >
-              Service Requests
-            </button>
-            <button
-              onClick={() => setActiveTab("residents")}
-              className={`p-2 rounded ${
-                activeTab === "residents" ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
-              }`}
-            >
-              Residents
-            </button>
-          </nav>
-        </aside>
+      {/* Main Content */}
+      <main className="flex-1">{renderContent()}</main>
 
-        {/* Content Area */}
-        <section className="flex-1 p-4">
-          {activeTab === "payments" && <div>💳 Payments Dashboard</div>}
-          {activeTab === "access" && <div>🔑 Access Control Panel</div>}
-          {activeTab === "requests" && <div>📨 Service Requests</div>}
-          {activeTab === "residents" && <div>👥 Residents Directory</div>}
-        </section>
-      </div>
-
-      {/* 🔹 Footer Bar (Mobile Quick Nav) */}
-      <footer className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-md flex justify-around p-2">
-        <button onClick={() => setActiveTab("payments")} className={activeTab === "payments" ? "text-blue-600 font-bold" : ""}>💳</button>
-        <button onClick={() => setActiveTab("access")} className={activeTab === "access" ? "text-blue-600 font-bold" : ""}>🔑</button>
-        <button onClick={() => setActiveTab("requests")} className={activeTab === "requests" ? "text-blue-600 font-bold" : ""}>📨</button>
-        <button onClick={() => setActiveTab("residents")} className={activeTab === "residents" ? "text-blue-600 font-bold" : ""}>👥</button>
-      </footer>
-    </main>
+      {/* Bottom Nav (Mobile) */}
+      <nav className="fixed bottom-0 left-0 w-full bg-white border-t shadow flex justify-around text-sm">
+        <button
+          className={`p-3 flex-1 ${activeTab === "payments" ? "text-green-600 font-bold" : "text-gray-600"}`}
+          onClick={() => setActiveTab("payments")}
+        >
+          Payments
+        </button>
+        <button
+          className={`p-3 flex-1 ${activeTab === "access" ? "text-green-600 font-bold" : "text-gray-600"}`}
+          onClick={() => setActiveTab("access")}
+        >
+          Access
+        </button>
+        <button
+          className={`p-3 flex-1 ${activeTab === "requests" ? "text-green-600 font-bold" : "text-gray-600"}`}
+          onClick={() => setActiveTab("requests")}
+        >
+          Requests
+        </button>
+        <button
+          className={`p-3 flex-1 ${activeTab === "residents" ? "text-green-600 font-bold" : "text-gray-600"}`}
+          onClick={() => setActiveTab("residents")}
+        >
+          Residents
+        </button>
+      </nav>
+    </div>
   );
 }
