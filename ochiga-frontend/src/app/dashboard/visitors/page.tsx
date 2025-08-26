@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { QRCodeCanvas } from "qrcode.react";
 
 export default function VisitorsPage() {
   const [visitors, setVisitors] = useState([
@@ -18,15 +19,13 @@ export default function VisitorsPage() {
     e.preventDefault();
     if (!newVisitor.name || !newVisitor.purpose) return;
 
-    setVisitors([
-      ...visitors,
-      {
-        id: visitors.length + 1,
-        ...newVisitor,
-        status: "Pending",
-      },
-    ]);
+    const newEntry = {
+      id: visitors.length + 1,
+      ...newVisitor,
+      status: "Pending",
+    };
 
+    setVisitors([...visitors, newEntry]);
     setNewVisitor({ name: "", purpose: "", time: "" });
   };
 
@@ -74,24 +73,36 @@ export default function VisitorsPage() {
         <h2 className="text-lg font-semibold mb-4">Visitor Log</h2>
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {visitors.map((v) => (
-            <li key={v.id} className="py-3 flex justify-between items-center">
+            <li key={v.id} className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="font-medium">{v.name}</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   {v.purpose} — {v.time}
                 </p>
+                <span
+                  className={`inline-block mt-1 px-2 py-1 text-xs rounded ${
+                    v.status === "Pending"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : v.status === "Checked-in"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  {v.status}
+                </span>
               </div>
-              <span
-                className={`px-2 py-1 text-xs rounded ${
-                  v.status === "Pending"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : v.status === "Checked-in"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                {v.status}
-              </span>
+
+              {/* QR Code */}
+              <div className="mt-3 sm:mt-0">
+                <QRCodeCanvas
+                  value={`Visitor:${v.name}|Purpose:${v.purpose}|Time:${v.time}|Status:${v.status}`}
+                  size={64}
+                  bgColor={"#ffffff"}
+                  fgColor={"#000000"}
+                  level={"M"}
+                  includeMargin={false}
+                />
+              </div>
             </li>
           ))}
         </ul>
