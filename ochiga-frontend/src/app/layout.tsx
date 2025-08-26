@@ -1,8 +1,6 @@
-// ochiga-frontend/src/app/layout.tsx
+// src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import TopBar from "./components/TopBar";
-import Footer from "./components/Footer";
 
 export const metadata: Metadata = {
   title: "Ochiga Smart Estate",
@@ -16,12 +14,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-      <body className="flex flex-col min-h-screen">
-        <TopBar />
-        <main className="flex-1 pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
-  {children}
-</main>
-        <Footer />
+      <body className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        {children}
       </body>
     </html>
   );
