@@ -1,61 +1,75 @@
 // src/app/manager-dashboard/page.js
 
+"use client";
+import { useState } from "react";
+
 export default function ManagerDashboard() {
+  const [activeTab, setActiveTab] = useState("payments");
+
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      {/* Header */}
-      <header className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">
-          Manager Dashboard
-        </h1>
-        <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-          Logout
-        </button>
+    <main className="flex flex-col h-screen bg-gray-100">
+      {/* 🔹 Top Bar */}
+      <header className="flex items-center justify-between bg-blue-600 text-white p-4 shadow-md">
+        <h1 className="text-lg font-bold">Ochiga Manager</h1>
+        <span className="text-sm">Smart Estate</span>
       </header>
 
-      {/* Stats Overview */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-semibold">Total Residents</h2>
-          <p className="text-2xl font-bold text-blue-600">120</p>
-        </div>
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-semibold">Pending Payments</h2>
-          <p className="text-2xl font-bold text-yellow-600">₦450,000</p>
-        </div>
-        <div className="p-4 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-semibold">Service Requests</h2>
-          <p className="text-2xl font-bold text-green-600">8</p>
-        </div>
-      </section>
+      {/* 🔹 Main Content with Sidebar + Content */}
+      <div className="flex flex-1">
+        {/* Sidebar (collapsible for mobile later) */}
+        <aside className="w-40 bg-white border-r shadow-sm p-3 hidden sm:block">
+          <nav className="flex flex-col space-y-2">
+            <button
+              onClick={() => setActiveTab("payments")}
+              className={`p-2 rounded ${
+                activeTab === "payments" ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
+              }`}
+            >
+              Payments
+            </button>
+            <button
+              onClick={() => setActiveTab("access")}
+              className={`p-2 rounded ${
+                activeTab === "access" ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
+              }`}
+            >
+              Access Control
+            </button>
+            <button
+              onClick={() => setActiveTab("requests")}
+              className={`p-2 rounded ${
+                activeTab === "requests" ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
+              }`}
+            >
+              Service Requests
+            </button>
+            <button
+              onClick={() => setActiveTab("residents")}
+              className={`p-2 rounded ${
+                activeTab === "residents" ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
+              }`}
+            >
+              Residents
+            </button>
+          </nav>
+        </aside>
 
-      {/* Tabs/Sections */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Payments */}
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Payments & Billing</h2>
-          <ul className="space-y-3">
-            <li className="flex justify-between">
-              <span>Resident A - Service Charge</span>
-              <span className="text-green-600">Paid</span>
-            </li>
-            <li className="flex justify-between">
-              <span>Resident B - Water Bill</span>
-              <span className="text-red-600">Pending</span>
-            </li>
-          </ul>
-        </div>
+        {/* Content Area */}
+        <section className="flex-1 p-4">
+          {activeTab === "payments" && <div>💳 Payments Dashboard</div>}
+          {activeTab === "access" && <div>🔑 Access Control Panel</div>}
+          {activeTab === "requests" && <div>📨 Service Requests</div>}
+          {activeTab === "residents" && <div>👥 Residents Directory</div>}
+        </section>
+      </div>
 
-        {/* Access Control */}
-        <div className="p-6 bg-white rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Access Control Logs</h2>
-          <ul className="space-y-3">
-            <li>Resident A entered at 08:45 AM</li>
-            <li>Visitor (Guest of Resident B) entered at 09:30 AM</li>
-            <li>Resident C exited at 10:15 AM</li>
-          </ul>
-        </div>
-      </section>
+      {/* 🔹 Footer Bar (Mobile Quick Nav) */}
+      <footer className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-md flex justify-around p-2">
+        <button onClick={() => setActiveTab("payments")} className={activeTab === "payments" ? "text-blue-600 font-bold" : ""}>💳</button>
+        <button onClick={() => setActiveTab("access")} className={activeTab === "access" ? "text-blue-600 font-bold" : ""}>🔑</button>
+        <button onClick={() => setActiveTab("requests")} className={activeTab === "requests" ? "text-blue-600 font-bold" : ""}>📨</button>
+        <button onClick={() => setActiveTab("residents")} className={activeTab === "residents" ? "text-blue-600 font-bold" : ""}>👥</button>
+      </footer>
     </main>
   );
 }
