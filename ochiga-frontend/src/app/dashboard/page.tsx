@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   CreditCardIcon,
   UserPlusIcon,
@@ -11,12 +12,12 @@ import {
 
 export default function ResidentDashboard() {
   const cards = [
-    { name: "Wallet", icon: CreditCardIcon, href: "/wallet", desc: "Balance & transactions" },
-    { name: "Visitors", icon: UserPlusIcon, href: "/visitors", desc: "Manage guest access" },
-    { name: "Community", icon: UsersIcon, href: "/community", desc: "Announcements & groups" },
-    { name: "Devices", icon: DevicePhoneMobileIcon, href: "/devices", desc: "Control smart devices" },
-    { name: "Services", icon: Cog6ToothIcon, href: "/services", desc: "Bills & maintenance" },
-    { name: "Estate Info", icon: HomeIcon, href: "/estate", desc: "Contacts & updates" },
+    { name: "Wallet", icon: CreditCardIcon, href: "/dashboard/wallet", desc: "Balance & transactions" },
+    { name: "Visitors", icon: UserPlusIcon, href: "/dashboard/visitors", desc: "Manage guest access" },
+    { name: "Community", icon: UsersIcon, href: "/dashboard/community", desc: "Announcements & groups" },
+    { name: "Devices", icon: DevicePhoneMobileIcon, href: "/dashboard/devices", desc: "Control smart devices" },
+    { name: "Utilities", icon: Cog6ToothIcon, href: "/dashboard/utilities", desc: "Bills & maintenance" },
+    { name: "Estate Info", icon: HomeIcon, href: "/dashboard/estate", desc: "Contacts & updates" },
   ];
 
   return (
@@ -29,7 +30,7 @@ export default function ResidentDashboard() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <a
+            <Link
               key={card.name}
               href={card.href}
               className="flex flex-col items-center justify-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow hover:shadow-lg transition"
@@ -39,7 +40,7 @@ export default function ResidentDashboard() {
               <span className="text-xs text-gray-500 dark:text-gray-400 text-center mt-1">
                 {card.desc}
               </span>
-            </a>
+            </Link>
           );
         })}
       </div>
