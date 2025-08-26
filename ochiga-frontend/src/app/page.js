@@ -4,9 +4,9 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-6">
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">
-        Welcome to Ochiga Smart Home
-      </h1>
+      <h1 className="text-5xl font-bold text-red-600 underline">
+  Tailwind Test 🚀
+</h1>
       <p className="text-lg text-gray-600 mb-8">
         Choose your dashboard to continue.
       </p>
