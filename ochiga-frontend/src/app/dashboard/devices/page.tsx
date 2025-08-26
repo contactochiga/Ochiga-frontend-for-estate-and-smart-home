@@ -1,14 +1,26 @@
 "use client";
 
 export default function DevicesPage() {
+  const devices = [
+    { id: 1, name: "Living Room Light", status: "On" },
+    { id: 2, name: "Front Door Lock", status: "Locked" },
+    { id: 3, name: "CCTV Camera", status: "Active" },
+  ];
+
   return (
-    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-900">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-        Devices
-      </h1>
-      <p className="text-gray-600 dark:text-gray-400">
-        Control and monitor your smart home devices here.
-      </p>
-    </div>
+    <main className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Smart Devices</h1>
+      <ul className="space-y-3">
+        {devices.map((d) => (
+          <li
+            key={d.id}
+            className="p-3 flex justify-between bg-gray-100 dark:bg-gray-700 rounded-md"
+          >
+            <span>{d.name}</span>
+            <span className="font-semibold">{d.status}</span>
+          </li>
+        ))}
+      </ul>
+    </main>
   );
 }
