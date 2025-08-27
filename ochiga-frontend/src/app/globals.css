@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss"; /* v4 style import */
 
 .test-bg {
   @apply bg-purple-500 text-white p-10 text-3xl;
