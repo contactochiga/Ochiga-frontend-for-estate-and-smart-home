@@ -3,130 +3,49 @@
 
 import { FC } from "react";
 
-// -----------------------------
-// Interfaces (Types)
-// -----------------------------
-interface Visitor {
-  id: number;
-  name: string;
-  lastVisit: string;
-}
-
-interface Wallet {
-  balance: number;
-}
-
-interface CommunityUpdate {
-  id: number;
-  title: string;
-  message: string;
-}
-
-// -----------------------------
-// Mock Data
-// -----------------------------
-const visitors: Visitor[] = [
-  { id: 1, name: "John Doe", lastVisit: "Visited 2 days ago" },
-  { id: 2, name: "Jane Smith", lastVisit: "Visited last week" },
-];
-
-const wallet: Wallet = {
-  balance: 12500,
-};
-
-const communityUpdates: CommunityUpdate[] = [
-  {
-    id: 1,
-    title: "Reminder",
-    message: "Community meeting on Saturday at 5PM",
-  },
-  {
-    id: 2,
-    title: "Notice",
-    message: "Pool maintenance tomorrow morning",
-  },
-];
-
-// -----------------------------
-// Dashboard Component
-// -----------------------------
-const Dashboard: FC = () => {
+const DashboardPage: FC = () => {
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Smart Home Controls */}
-      <div className="bg-gray-800 rounded-xl p-4 shadow">
-        <h2 className="text-sm font-semibold text-gray-400 mb-4">SMART HOME CONTROLS</h2>
-        <div className="flex space-x-4 mb-4">
-          <button className="flex flex-col items-center bg-gray-700 p-3 rounded-lg">
-            💡
-            <span className="text-xs mt-1">Lights</span>
-          </button>
-          <button className="flex flex-col items-center bg-gray-700 p-3 rounded-lg">
-            ❄️
-            <span className="text-xs mt-1">AC</span>
-          </button>
-          <button className="flex flex-col items-center bg-gray-700 p-3 rounded-lg">
-            🔒
-            <span className="text-xs mt-1">Door</span>
-          </button>
+    <main className="min-h-screen bg-gray-50 p-6">
+      {/* ✅ Welcome Header */}
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Welcome, Resident 👋</h1>
+        <p className="text-gray-600 mt-2">Here’s your estate overview at a glance</p>
+      </header>
+
+      {/* ✅ Quick Stats Section */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white shadow rounded-lg p-6 text-center">
+          <h2 className="text-lg font-semibold text-gray-700">Bills</h2>
+          <p className="text-2xl font-bold text-green-600 mt-2">₦25,000</p>
+          <p className="text-sm text-gray-500">Outstanding</p>
         </div>
-        <a href="#" className="text-xs text-gray-400">Rooms & Devices →</a>
-      </div>
+        <div className="bg-white shadow rounded-lg p-6 text-center">
+          <h2 className="text-lg font-semibold text-gray-700">Access</h2>
+          <p className="text-2xl font-bold text-blue-600 mt-2">2 Visitors</p>
+          <p className="text-sm text-gray-500">Expected today</p>
+        </div>
+        <div className="bg-white shadow rounded-lg p-6 text-center">
+          <h2 className="text-lg font-semibold text-gray-700">Service Requests</h2>
+          <p className="text-2xl font-bold text-orange-600 mt-2">3 Pending</p>
+          <p className="text-sm text-gray-500">Needs attention</p>
+        </div>
+      </section>
 
-      {/* Visitors */}
-      <div className="bg-gray-800 rounded-xl p-4 shadow">
-        <h2 className="text-sm font-semibold text-gray-400 mb-4">VISITORS</h2>
-        <button className="w-full bg-red-600 py-2 rounded-lg text-white font-semibold mb-4">
-          Invite Visitor
-        </button>
-        {visitors.map((visitor) => (
-          <div
-            key={visitor.id}
-            className="bg-gray-100 text-black p-3 rounded-lg flex justify-between items-center mb-2"
-          >
-            <span>
-              <strong>{visitor.name}</strong>
-              <br />
-              <span className="text-xs text-gray-600">{visitor.lastVisit}</span>
-            </span>
-            <span>→</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Wallet */}
-      <div className="bg-gray-800 rounded-xl p-4 shadow">
-        <h2 className="text-sm font-semibold text-gray-400 mb-2">WALLET</h2>
-        <p className="text-2xl font-bold mb-4">
-          ₦{wallet.balance.toLocaleString()}
-        </p>
-        <button className="w-full bg-gray-700 py-2 rounded-lg text-white font-semibold mb-2">
-          Fund Wallet
-        </button>
-        <button className="w-full bg-gray-700 py-2 rounded-lg text-white font-semibold">
-          Pay Bills
-        </button>
-      </div>
-
-      {/* Community */}
-      <div className="bg-gray-800 rounded-xl p-4 shadow">
-        <h2 className="text-sm font-semibold text-gray-400 mb-2">COMMUNITY</h2>
-        {communityUpdates.map((update) => (
-          <div
-            key={update.id}
-            className="bg-gray-100 text-black p-3 rounded-lg flex justify-between items-center mb-2"
-          >
-            <span>
-              <strong>{update.title}</strong>
-              <br />
-              <span className="text-xs text-gray-600">{update.message}</span>
-            </span>
-            <span>→</span>
-          </div>
-        ))}
-      </div>
-    </div>
+      {/* ✅ Recent Updates */}
+      <section className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Recent Updates</h2>
+        <ul className="space-y-3">
+          <li className="border-b pb-2 text-gray-700">
+            ✅ Power maintenance scheduled for tomorrow.
+          </li>
+          <li className="border-b pb-2 text-gray-700">
+            🚗 Your visitor access for John Doe has been approved.
+          </li>
+          <li className="text-gray-700">💧 Water supply restoration completed in Block B.</li>
+        </ul>
+      </section>
+    </main>
   );
 };
 
-export default Dashboard;
+export default DashboardPage;
