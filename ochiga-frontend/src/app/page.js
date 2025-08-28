@@ -3,8 +3,13 @@
 import { useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 
+interface Visitor {
+  name: string;
+  code: string;
+}
+
 export default function VisitorsPage() {
-  const [visitors, setVisitors] = useState([
+  const [visitors, setVisitors] = useState<Visitor[]>([
     { name: "John Doe", code: "123456" },
     { name: "Jane Smith", code: "654321" },
   ]);
@@ -22,7 +27,7 @@ export default function VisitorsPage() {
     alert("Code copied to clipboard!");
   };
 
-  const shareWhatsApp = (visitor: { name: string; code: string }) => {
+  const shareWhatsApp = (visitor: Visitor) => {
     const message = `Hi, here’s your access code for Ochiga Estate:\n\nVisitor: ${visitor.name}\nCode: ${visitor.code}`;
     const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
