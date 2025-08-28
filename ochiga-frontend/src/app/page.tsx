@@ -4,6 +4,14 @@ import { useRouter } from "next/navigation";
 export default function RoleSelect() {
   const router = useRouter();
 
+  const handleSelect = (role: string) => {
+    if (role === "resident") {
+      router.push("/dashboard"); // Resident dashboard
+    } else if (role === "manager") {
+      router.push("/manager-dashboard"); // Estate Manager dashboard
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-sky-100 via-white to-sky-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <div className="w-full max-w-md p-8 space-y-6 bg-white/70 dark:bg-gray-800/70 rounded-2xl shadow-xl backdrop-blur-md">
@@ -17,7 +25,7 @@ export default function RoleSelect() {
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {/* Resident Card */}
           <button
-            onClick={() => router.push("/home")}
+            onClick={() => handleSelect("resident")}
             className="flex flex-col items-center justify-center p-6 space-y-3 bg-gradient-to-tr from-sky-500 to-sky-600 text-white rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all"
           >
             <svg
@@ -39,7 +47,7 @@ export default function RoleSelect() {
 
           {/* Estate Manager Card */}
           <button
-            onClick={() => router.push("/estate")}
+            onClick={() => handleSelect("manager")}
             className="flex flex-col items-center justify-center p-6 space-y-3 bg-gradient-to-tr from-gray-700 to-gray-900 text-white rounded-xl shadow-md hover:shadow-lg hover:scale-105 transition-all"
           >
             <svg
