@@ -1,96 +1,132 @@
-"// app/dashboard/page.tsx
+// app/dashboard/page.tsx
 "use client";
 
 import { FC } from "react";
 
-const Card: FC<{ children: React.ReactNode; className?: string }> = ({
-  children,
-  className,
-}) => (
-  <div
-    className={`bg-[#1c1f26] rounded-xl p-4 shadow-md text-gray-200 ${className}`}
-  >
-    {children}
-  </div>
-);
+// -----------------------------
+// Interfaces (Types)
+// -----------------------------
+interface Visitor {
+  id: number;
+  name: string;
+  lastVisit: string;
+}
 
-const DashboardPage = () => {
+interface Wallet {
+  balance: number;
+}
+
+interface CommunityUpdate {
+  id: number;
+  title: string;
+  message: string;
+}
+
+// -----------------------------
+// Mock Data
+// -----------------------------
+const visitors: Visitor[] = [
+  { id: 1, name: "John Doe", lastVisit: "Visited 2 days ago" },
+  { id: 2, name: "Jane Smith", lastVisit: "Visited last week" },
+];
+
+const wallet: Wallet = {
+  balance: 12500,
+};
+
+const communityUpdates: CommunityUpdate[] = [
+  {
+    id: 1,
+    title: "Reminder",
+    message: "Community meeting on Saturday at 5PM",
+  },
+  {
+    id: 2,
+    title: "Notice",
+    message: "Pool maintenance tomorrow morning",
+  },
+];
+
+// -----------------------------
+// Dashboard Component
+// -----------------------------
+const Dashboard: FC = () => {
   return (
-    <main className="min-h-screen bg-[#0f1115] p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Smart Home Controls */}
-        <Card className="col-span-1 lg:col-span-2">
-          <h2 className="text-sm text-gray-400 font-medium mb-4">
-            SMART HOME CONTROLS
-          </h2>
-          <div className="flex items-center gap-6 mb-6">
-            <div className="flex flex-col items-center">
-              <div className="bg-gray-700 w-12 h-12 flex items-center justify-center rounded-lg">
-                💡
-              </div>
-              <span className="text-sm mt-2">Lights</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="bg-gray-700 w-12 h-12 flex items-center justify-center rounded-lg">
-                ❄️
-              </div>
-              <span className="text-sm mt-2">AC</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <div className="bg-gray-700 w-12 h-12 flex items-center justify-center rounded-lg">
-                🔒
-              </div>
-              <span className="text-sm mt-2">Door</span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 cursor-pointer">
-            Rooms & Devices →
-          </p>
-        </Card>
-
-        {/* Visitors */}
-        <Card>
-          <h2 className="text-sm text-gray-400 font-medium mb-4">VISITORS</h2>
-          <button className="bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg px-4 py-2 w-full mb-4">
-            Invite Visitor
+    <div className="min-h-screen bg-gray-900 text-white p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Smart Home Controls */}
+      <div className="bg-gray-800 rounded-xl p-4 shadow">
+        <h2 className="text-sm font-semibold text-gray-400 mb-4">SMART HOME CONTROLS</h2>
+        <div className="flex space-x-4 mb-4">
+          <button className="flex flex-col items-center bg-gray-700 p-3 rounded-lg">
+            💡
+            <span className="text-xs mt-1">Lights</span>
           </button>
-          <div className="bg-gray-100 text-gray-800 rounded-lg p-3 text-sm flex justify-between items-center">
-            <div>
-              <p className="font-medium">John Doe</p>
-              <p className="text-xs text-gray-500">Visited 2 days ago</p>
-            </div>
-            <span>→</span>
-          </div>
-        </Card>
-
-        {/* Wallet */}
-        <Card>
-          <h2 className="text-sm text-gray-400 font-medium mb-4">WALLET</h2>
-          <p className="text-2xl font-bold mb-4">₦12,500</p>
-          <button className="bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 w-full mb-2 text-sm">
-            Fund Wallet
+          <button className="flex flex-col items-center bg-gray-700 p-3 rounded-lg">
+            ❄️
+            <span className="text-xs mt-1">AC</span>
           </button>
-          <button className="bg-gray-700 hover:bg-gray-600 rounded-lg px-4 py-2 w-full text-sm">
-            Pay Bills
+          <button className="flex flex-col items-center bg-gray-700 p-3 rounded-lg">
+            🔒
+            <span className="text-xs mt-1">Door</span>
           </button>
-        </Card>
-
-        {/* Community */}
-        <Card>
-          <h2 className="text-sm text-gray-400 font-medium mb-4">COMMUNITY</h2>
-          <div className="bg-gray-100 text-gray-800 rounded-lg p-3 text-sm flex justify-between items-center">
-            <div>
-              <p className="font-medium">Latest</p>
-              <p className="text-xs text-gray-500">
-                Reminder: Community meeting…
-              </p>
-            </div>
-            <span>→</span>
-          </div>
-        </Card>
+        </div>
+        <a href="#" className="text-xs text-gray-400">Rooms & Devices →</a>
       </div>
-    </main>
+
+      {/* Visitors */}
+      <div className="bg-gray-800 rounded-xl p-4 shadow">
+        <h2 className="text-sm font-semibold text-gray-400 mb-4">VISITORS</h2>
+        <button className="w-full bg-red-600 py-2 rounded-lg text-white font-semibold mb-4">
+          Invite Visitor
+        </button>
+        {visitors.map((visitor) => (
+          <div
+            key={visitor.id}
+            className="bg-gray-100 text-black p-3 rounded-lg flex justify-between items-center mb-2"
+          >
+            <span>
+              <strong>{visitor.name}</strong>
+              <br />
+              <span className="text-xs text-gray-600">{visitor.lastVisit}</span>
+            </span>
+            <span>→</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Wallet */}
+      <div className="bg-gray-800 rounded-xl p-4 shadow">
+        <h2 className="text-sm font-semibold text-gray-400 mb-2">WALLET</h2>
+        <p className="text-2xl font-bold mb-4">
+          ₦{wallet.balance.toLocaleString()}
+        </p>
+        <button className="w-full bg-gray-700 py-2 rounded-lg text-white font-semibold mb-2">
+          Fund Wallet
+        </button>
+        <button className="w-full bg-gray-700 py-2 rounded-lg text-white font-semibold">
+          Pay Bills
+        </button>
+      </div>
+
+      {/* Community */}
+      <div className="bg-gray-800 rounded-xl p-4 shadow">
+        <h2 className="text-sm font-semibold text-gray-400 mb-2">COMMUNITY</h2>
+        {communityUpdates.map((update) => (
+          <div
+            key={update.id}
+            className="bg-gray-100 text-black p-3 rounded-lg flex justify-between items-center mb-2"
+          >
+            <span>
+              <strong>{update.title}</strong>
+              <br />
+              <span className="text-xs text-gray-600">{update.message}</span>
+            </span>
+            <span>→</span>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 };
 
-export default DashboardPage;
+export default Dashboard;
