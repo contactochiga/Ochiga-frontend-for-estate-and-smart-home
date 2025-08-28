@@ -1,23 +1,78 @@
-// src/app/page.tsx
-export default function HomePage() {
+"use client";
+
+import { useState } from "react";
+import { QRCodeCanvas } from "qrcode.react";
+
+export default function VisitorsPage() {
+  const [visitors, setVisitors] = useState([
+    { name: "John Doe", code: "123456" },
+    { name: "Jane Smith", code: "654321" },
+  ]);
+
+  const addVisitor = () => {
+    const newCode = Math.random().toString().slice(2, 8);
+    setVisitors([
+      ...visitors,
+      { name: `Guest ${visitors.length + 1}`, code: newCode },
+    ]);
+  };
+
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    alert("Code copied to clipboard!");
+  };
+
+  const shareWhatsApp = (visitor: { name: string; code: string }) => {
+    const message = `Hi, here’s your access code for Ochiga Estate:\n\nVisitor: ${visitor.name}\nCode: ${visitor.code}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  };
+
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col items-center justify-center text-center">
-      <h1 className="text-3xl font-bold text-blue-600">Ochiga Smart Estate</h1>
-      <p className="mt-2 text-gray-600 dark:text-gray-300">
-        Welcome to your smart estate dashboard 🚀
-      </p>
+    <div className="p-6 max-w-2xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">
+        Visitor Access
+      </h1>
 
-      <div className="mt-6 grid gap-4 grid-cols-2">
-        <div className="p-4 rounded-lg shadow bg-white dark:bg-gray-800">
-          <h2 className="text-lg font-semibold">Generator Status</h2>
-          <p className="text-sm text-gray-500">Online ✅</p>
-        </div>
+      <button
+        onClick={addVisitor}
+        className="mb-6 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+      >
+        + Add Visitor
+      </button>
 
-        <div className="p-4 rounded-lg shadow bg-white dark:bg-gray-800">
-          <h2 className="text-lg font-semibold">Water Tank</h2>
-          <p className="text-sm text-gray-500">75% Full 💧</p>
-        </div>
+      <div className="space-y-4">
+        {visitors.map((visitor, idx) => (
+          <div
+            key={idx}
+            className="flex items-center justify-between p-4 border rounded-lg shadow-sm bg-white dark:bg-gray-800"
+          >
+            <div>
+              <p className="font-medium text-gray-900 dark:text-gray-100">
+                {visitor.name}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Code: {visitor.code}
+              </p>
+              <div className="flex space-x-2 mt-2">
+                <button
+                  onClick={() => copyCode(visitor.code)}
+                  className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                >
+                  Copy
+                </button>
+                <button
+                  onClick={() => shareWhatsApp(visitor)}
+                  className="px-2 py-1 text-xs rounded bg-green-500 text-white"
+                >
+                  Share
+                </button>
+              </div>
+            </div>
+            <QRCodeCanvas value={visitor.code} size={64} />
+          </div>
+        ))}
       </div>
-    </main>
+    </div>
   );
 }
