@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAuth } from "../../data/authContext";
 
 export default function ResidentLogin() {
@@ -20,15 +21,18 @@ export default function ResidentLogin() {
     setError("");
 
     try {
-      // Call backend login API
-      const res = await fetch("http://localhost:3000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        }
+      );
 
       if (!res.ok) {
-        throw new Error("Invalid login credentials");
+        const errData = await res.json();
+        throw new Error(errData.message || "Invalid login credentials");
       }
 
       const data = await res.json();
@@ -46,17 +50,17 @@ export default function ResidentLogin() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <h1 className="text-xl font-bold mb-4">Resident Login</h1>
+    <main className="flex flex-col items-center justify-center h-screen bg-gray-100 px-4">
+      <h1 className="text-2xl font-bold mb-4">Resident Login</h1>
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col items-center w-80 bg-white p-6 rounded shadow"
+        className="flex flex-col w-full max-w-sm bg-white p-6 rounded shadow"
       >
-        {error && <p className="text-red-500 mb-2">{error}</p>}
+        {error && <p className="text-red-500 mb-3 text-sm">{error}</p>}
 
         <input
-          type="text"
+          type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -76,10 +80,17 @@ export default function ResidentLogin() {
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+          className="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700 disabled:opacity-50"
         >
           {loading ? "Logging in..." : "Login as Resident"}
         </button>
+
+        <p className="mt-4 text-sm text-center">
+          Don’t have an account?{" "}
+          <Link href="/resident-register" className="text-blue-600 hover:underline">
+            Register here
+          </Link>
+        </p>
       </form>
     </main>
   );
