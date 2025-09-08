@@ -1,33 +1,40 @@
+// src/components/ProtectedRoute.tsx
 "use client";
 
-import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useAuth } from "../data/authContext";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  role?: "resident" | "manager"; // optional: restrict by role
+  role?: "resident" | "manager"; // optional restriction
 }
 
 export default function ProtectedRoute({ children, role }: ProtectedRouteProps) {
-  const { user, token } = useAuth();
   const router = useRouter();
-  const pathname = usePathname(); // ✅ current route
+  const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    if (!token || !user) {
-      // ✅ Save where the user was trying to go
-      if (pathname) {
-        localStorage.setItem("redirectAfterLogin", pathname);
-      }
-      router.replace("/auth");
-    } else if (role && user.role !== role) {
-      // ✅ Wrong role → redirect to correct dashboard
-      router.replace(user.role === "resident" ? "/dashboard" : "/manager-dashboard");
-    }
-  }, [user, token, role, router, pathname]);
+    const token = localStorage.getItem("token");
+    const userRole = localStorage.getItem("role");
 
-  if (!token || !user) {
+    if (!token || !userRole) {
+      // Not logged in → go to auth
+      router.replace("/auth");
+      return;
+    }
+
+    if (role && userRole !== role) {
+      // Wrong role → redirect to correct dashboard
+      router.replace(userRole === "manager" ? "/manager-dashboard" : "/dashboard");
+      return;
+    }
+
+    setIsAuthorized(true);
+    setLoading(false);
+  }, [role, router]);
+
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p className="text-gray-600">Checking authentication...</p>
@@ -35,5 +42,5 @@ export default function ProtectedRoute({ children, role }: ProtectedRouteProps) 
     );
   }
 
-  return <>{children}</>;
+  return isAuthorized ? <>{children}</> : null;
 }
