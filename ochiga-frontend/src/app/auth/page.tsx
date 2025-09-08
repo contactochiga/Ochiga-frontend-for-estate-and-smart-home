@@ -3,17 +3,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../../data/authContext";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [role, setRole] = useState<"resident" | "manager">("resident");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState(""); // <-- was email
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const router = useRouter();
+  const { loginUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,41 +23,21 @@ export default function AuthPage() {
     setError("");
 
     try {
-      let endpoint =
-        mode === "login"
-          ? `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/auth/login`
-          : `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/auth/register`;
-
-      const body: any = { email, password, role };
-      if (mode === "register") body.confirmPassword = confirmPassword;
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || `${mode} failed`);
-      }
-
-      const data = await res.json();
-
-      // ✅ Save token + role in localStorage
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", role);
-      }
-
-      // ✅ Redirect back to the page user wanted, if stored
-      const redirectPath = localStorage.getItem("redirectAfterLogin");
-      if (redirectPath) {
-        localStorage.removeItem("redirectAfterLogin");
-        router.push(redirectPath);
+      if (mode === "login") {
+        const success = await loginUser(username, password);
+        if (success) {
+          router.push(role === "resident" ? "/dashboard" : "/manager-dashboard");
+        } else {
+          setError("Invalid credentials. Try resident1/1234 or manager1/1234");
+        }
       } else {
-        // fallback default
-        router.push(role === "resident" ? "/dashboard" : "/manager-dashboard");
+        // Mock register: just show success and redirect
+        if (password !== confirmPassword) {
+          setError("Passwords do not match");
+          return;
+        }
+        alert(`✅ Registered as ${role}: ${username}`);
+        router.push("/auth");
       }
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -103,13 +85,13 @@ export default function AuthPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
-  type="text"
-  placeholder="Username"
-  value={email}   // <-- you can rename this state later, but leave it for now
-  onChange={(e) => setEmail(e.target.value)}
-  className="p-2 border rounded w-full"
-  required
-/>
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="p-2 border rounded w-full"
+            required
+          />
 
           <input
             type="password"
