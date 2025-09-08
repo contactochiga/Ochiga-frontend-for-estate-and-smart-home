@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../data/authContext";
+import { useAuth } from "../../context/authContext";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
