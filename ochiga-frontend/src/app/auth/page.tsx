@@ -41,7 +41,14 @@ export default function AuthPage() {
       }
 
       const data = await res.json();
-      // TODO: Save token/user to context or localStorage
+
+      // ✅ Save token + role in localStorage
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", role);
+      }
+
+      // Redirect based on role
       router.push(role === "resident" ? "/dashboard" : "/manager-dashboard");
     } catch (err: any) {
       setError(err.message || "Something went wrong");
@@ -51,18 +58,27 @@ export default function AuthPage() {
   };
 
   return (
-    <main className="flex items-center justify-center h-screen bg-cover bg-center" style={{ backgroundImage: "url('/bg.jpg')" }}>
+    <main
+      className="flex items-center justify-center h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/bg.jpg')" }}
+    >
       <div className="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-xl w-full max-w-md">
         {/* Role Switch */}
         <div className="flex justify-center mb-4">
           <button
-            className={`px-4 py-2 rounded-l-md ${role === "resident" ? "bg-[#800000] text-white" : "bg-gray-200"}`}
+            type="button"
+            className={`px-4 py-2 rounded-l-md ${
+              role === "resident" ? "bg-[#800000] text-white" : "bg-gray-200"
+            }`}
             onClick={() => setRole("resident")}
           >
             Resident
           </button>
           <button
-            className={`px-4 py-2 rounded-r-md ${role === "manager" ? "bg-[#800000] text-white" : "bg-gray-200"}`}
+            type="button"
+            className={`px-4 py-2 rounded-r-md ${
+              role === "manager" ? "bg-[#800000] text-white" : "bg-gray-200"
+            }`}
             onClick={() => setRole("manager")}
           >
             Manager
@@ -113,14 +129,23 @@ export default function AuthPage() {
             disabled={loading}
             className="bg-[#800000] text-white py-2 rounded hover:bg-red-900 disabled:opacity-50"
           >
-            {loading ? (mode === "login" ? "Logging in..." : "Registering...") : mode === "login" ? "Login" : "Register"}
+            {loading
+              ? mode === "login"
+                ? "Logging in..."
+                : "Registering..."
+              : mode === "login"
+              ? "Login"
+              : "Register"}
           </button>
         </form>
 
         {/* Switch Mode */}
         <p className="text-sm text-center mt-4">
-          {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
+          {mode === "login"
+            ? "Don't have an account?"
+            : "Already have an account?"}{" "}
           <button
+            type="button"
             className="text-[#800000] font-medium hover:underline"
             onClick={() => setMode(mode === "login" ? "register" : "login")}
           >
