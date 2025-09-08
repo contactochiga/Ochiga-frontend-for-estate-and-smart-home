@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
+import { useAuth } from "../../data/authContext";
 
 export default function ManagerDashboardPage() {
   const [activeTab, setActiveTab] = useState("payments");
+  const { user } = useAuth(); // ✅ Get logged-in manager info
 
   const renderContent = () => {
     switch (activeTab) {
@@ -25,8 +27,14 @@ export default function ManagerDashboardPage() {
     <ProtectedRoute role="manager">
       <div className="flex flex-col min-h-screen bg-gray-100">
         {/* Top Bar */}
-        <header className="bg-green-600 text-white p-4 text-lg font-bold shadow">
-          Manager Dashboard
+        <header className="bg-green-600 text-white p-4 text-lg font-bold shadow flex justify-between items-center">
+          <span>Manager Dashboard</span>
+          {/* ✅ Show logged-in manager */}
+          {user && (
+            <span className="text-sm font-normal">
+              Welcome, {user.email || "Manager"}
+            </span>
+          )}
         </header>
 
         {/* Main Content */}
