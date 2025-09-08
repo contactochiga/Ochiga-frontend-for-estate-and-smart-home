@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../data/authContext";
 
 interface ProtectedRouteProps {
@@ -12,15 +12,20 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, role }: ProtectedRouteProps) {
   const { user, token } = useAuth();
   const router = useRouter();
+  const pathname = usePathname(); // ✅ current route
 
   useEffect(() => {
     if (!token || !user) {
-      router.replace(`/${role ? role + "-login" : "resident-login"}`);
+      // ✅ Save where the user was trying to go
+      if (pathname) {
+        localStorage.setItem("redirectAfterLogin", pathname);
+      }
+      router.replace("/auth");
     } else if (role && user.role !== role) {
-      // e.g. manager trying to access resident dashboard
-      router.replace(`/${user.role}-dashboard`);
+      // ✅ Wrong role → redirect to correct dashboard
+      router.replace(user.role === "resident" ? "/dashboard" : "/manager-dashboard");
     }
-  }, [user, token, role, router]);
+  }, [user, token, role, router, pathname]);
 
   if (!token || !user) {
     return (
