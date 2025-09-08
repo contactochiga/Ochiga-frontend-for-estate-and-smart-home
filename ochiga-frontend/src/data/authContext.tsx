@@ -1,13 +1,17 @@
 // src/data/authContext.tsx
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
-import { User } from "./types";
-import { login } from "./api";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+
+interface User {
+  username: string;
+  role: "resident" | "manager";
+}
 
 interface AuthContextProps {
   user: User | null;
-  loginUser: (email: string, password: string) => Promise<void>;
+  token: string | null;
+  loginUser: (username: string, password: string) => Promise<boolean>;
   logoutUser: () => void;
 }
 
@@ -15,24 +19,54 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  async function loginUser(email: string, password: string) {
-    try {
-      const response = await login(email, password);
-      setUser({ ...response.user, token: response.token });
-      localStorage.setItem("authToken", response.token);
-    } catch (err: any) {
-      alert(err.message || "Login failed");
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
+
+    if (storedUser && storedToken) {
+      setUser(JSON.parse(storedUser));
+      setToken(storedToken);
     }
+  }, []);
+
+  async function loginUser(username: string, password: string) {
+    const mockUsers = [
+      { username: "resident1", password: "1234", role: "resident" },
+      { username: "manager1", password: "1234", role: "manager" },
+    ];
+
+    const foundUser = mockUsers.find(
+      (u) => u.username === username && u.password === password
+    );
+
+    if (foundUser) {
+      const fakeToken = "mock-token-12345";
+      const userData: User = { username: foundUser.username, role: foundUser.role };
+
+      setUser(userData);
+      setToken(fakeToken);
+
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("token", fakeToken);
+
+      return true;
+    }
+
+    alert("Invalid username or password");
+    return false;
   }
 
   function logoutUser() {
     setUser(null);
-    localStorage.removeItem("authToken");
+    setToken(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   }
 
   return (
-    <AuthContext.Provider value={{ user, loginUser, logoutUser }}>
+    <AuthContext.Provider value={{ user, token, loginUser, logoutUser }}>
       {children}
     </AuthContext.Provider>
   );
