@@ -103,13 +103,13 @@ export default function AuthPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="p-2 border rounded w-full"
-            required
-          />
+  type="text"
+  placeholder="Username"
+  value={email}   // <-- you can rename this state later, but leave it for now
+  onChange={(e) => setEmail(e.target.value)}
+  className="p-2 border rounded w-full"
+  required
+/>
 
           <input
             type="password"
