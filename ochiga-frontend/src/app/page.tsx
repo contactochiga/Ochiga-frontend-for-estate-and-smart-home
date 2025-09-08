@@ -4,12 +4,27 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function HomePage() {
+export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace("/auth"); // redirect straight to /auth
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+
+    if (token && role) {
+      if (role === "resident") {
+        router.replace("/dashboard");
+      } else if (role === "manager") {
+        router.replace("/manager-dashboard");
+      }
+    } else {
+      router.replace("/auth");
+    }
   }, [router]);
 
-  return null; // nothing shows, it just redirects
+  return (
+    <main className="flex items-center justify-center h-screen">
+      <p className="text-gray-600">Redirecting...</p>
+    </main>
+  );
 }
