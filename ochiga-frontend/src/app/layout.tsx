@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "../data/authContext";
+import { AuthProvider } from "../context/authContext";
 
 export const metadata: Metadata = {
   title: "Ochiga Smart Estate",
