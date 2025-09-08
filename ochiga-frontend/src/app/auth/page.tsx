@@ -48,8 +48,15 @@ export default function AuthPage() {
         localStorage.setItem("role", role);
       }
 
-      // Redirect based on role
-      router.push(role === "resident" ? "/dashboard" : "/manager-dashboard");
+      // ✅ Redirect back to the page user wanted, if stored
+      const redirectPath = localStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        localStorage.removeItem("redirectAfterLogin");
+        router.push(redirectPath);
+      } else {
+        // fallback default
+        router.push(role === "resident" ? "/dashboard" : "/manager-dashboard");
+      }
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {
