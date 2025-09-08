@@ -1,64 +1,42 @@
-// src/context/authContext.tsx
 "use client";
 
-import React, { createContext, useState, useEffect, useContext } from "react";
-import { saveAuth, getAuth, clearAuth } from "../utils/authStorage";
-
-// Define types (you can expand later with id, role, etc.)
-type User = {
-  username: string;
-  role: "resident" | "manager";
-};
+import { createContext, useContext, useState, ReactNode } from "react";
 
 type AuthContextType = {
-  user: User | null;
-  loginUser: (username: string, password: string) => Promise<boolean>;
-  logoutUser: () => void;
+  token: string | null;
+  role: "resident" | "manager" | null;
+  login: (token: string, role: "resident" | "manager") => void;
+  logout: () => void;
 };
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [token, setToken] = useState<string | null>(null);
+  const [role, setRole] = useState<"resident" | "manager" | null>(null);
 
-  // Load user from localStorage on mount
-  useEffect(() => {
-    const storedUser = getAuth();
-    if (storedUser) {
-      setUser(storedUser);
-    }
-  }, []);
-
-  // Mock login (replace with API/Firebase later)
-  const loginUser = async (username: string, password: string) => {
-    if (username === "resident1" && password === "1234") {
-      const userData = { username, role: "resident" as const };
-      setUser(userData);
-      saveAuth(userData);
-      return true;
-    }
-    if (username === "manager1" && password === "1234") {
-      const userData = { username, role: "manager" as const };
-      setUser(userData);
-      saveAuth(userData);
-      return true;
-    }
-    return false;
+  const login = (newToken: string, newRole: "resident" | "manager") => {
+    setToken(newToken);
+    setRole(newRole);
+    // optional: save in localStorage
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("role", newRole);
   };
 
-  const logoutUser = () => {
-    setUser(null);
-    clearAuth();
+  const logout = () => {
+    setToken(null);
+    setRole(null);
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loginUser, logoutUser }}>
+    <AuthContext.Provider value={{ token, role, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// ✅ Custom hook must be exported
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
