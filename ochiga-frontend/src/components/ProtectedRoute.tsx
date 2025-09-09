@@ -17,9 +17,10 @@ export default function ProtectedRoute({
 
   useEffect(() => {
     if (!token) {
-      router.push("/auth"); // ✅ redirect if not logged in
+      // 🔥 Fix: redirect to /auth instead of /login
+      router.push("/auth");
     } else if (role && userRole !== role) {
-      router.push("/auth"); // ✅ redirect if wrong role
+      router.push("/auth");
     }
   }, [token, userRole, router, role]);
 
