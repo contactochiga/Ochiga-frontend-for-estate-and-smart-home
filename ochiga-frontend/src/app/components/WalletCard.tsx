@@ -15,29 +15,28 @@ export default function WalletCardModern() {
                    dark:from-indigo-700 dark:to-purple-800 
                    flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
       >
-        {/* Balance */}
+        {/* Left Section: Balance + Eye */}
         <div>
           <p className="text-xs uppercase opacity-80">Wallet Balance</p>
-          <h2 className="text-3xl font-bold tracking-wide mt-1">
-            {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
-          </h2>
+          <div className="flex items-center gap-2 mt-1">
+            <h2 className="text-3xl font-bold tracking-wide">
+              {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
+            </h2>
+            <button
+              onClick={() => setShowBalance(!showBalance)}
+              className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition flex items-center justify-center"
+            >
+              {showBalance ? (
+                <EyeIcon className="h-5 w-5" />
+              ) : (
+                <EyeSlashIcon className="h-5 w-5" />
+              )}
+            </button>
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          {/* Toggle Balance */}
-          <button
-            onClick={() => setShowBalance(!showBalance)}
-            className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition flex items-center justify-center"
-          >
-            {showBalance ? (
-              <EyeIcon className="h-5 w-5" />
-            ) : (
-              <EyeSlashIcon className="h-5 w-5" />
-            )}
-          </button>
-
-          {/* Fund Wallet */}
+        {/* Right Section: Fund Wallet */}
+        <div className="flex items-center">
           <button
             className="bg-white text-indigo-600 dark:text-indigo-700 
                        px-4 py-2 rounded-lg font-semibold flex items-center gap-1 
