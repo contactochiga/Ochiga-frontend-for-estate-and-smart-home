@@ -1,72 +1,63 @@
 "use client";
 
+import { EyeIcon, EyeSlashIcon, BoltIcon, WifiIcon, FireHydrantIcon, EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import Link from "next/link";
 
-export default function WalletPage() {
-  const [balance] = useState(25000); // dummy balance
-  const transactions = [
-    { id: 1, date: "2025-08-20", desc: "Service Bill Payment", amount: -5000, status: "Success" },
-    { id: 2, date: "2025-08-18", desc: "Wallet Top-up", amount: 10000, status: "Success" },
-    { id: 3, date: "2025-08-15", desc: "Community Dues", amount: -2000, status: "Pending" },
-  ];
+export default function WalletCard() {
+  const [showBalance, setShowBalance] = useState(true);
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-        Wallet
-      </h1>
-
-      {/* Balance Card */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-6">
-        <h2 className="text-gray-500 dark:text-gray-400 text-sm">Available Balance</h2>
-        <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-          ₦{balance.toLocaleString()}
-        </p>
-
-        <div className="mt-4 flex gap-3">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            Fund Wallet
+    <div className="w-full max-w-md mx-auto space-y-4">
+      {/* Wallet */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl p-5 shadow-lg relative overflow-hidden">
+        {/* Balance */}
+        <div className="flex items-center justify-between">
+          <span className="text-sm opacity-80">Wallet Balance</span>
+          <button onClick={() => setShowBalance(!showBalance)}>
+            {showBalance ? (
+              <EyeIcon className="h-5 w-5 text-white/80" />
+            ) : (
+              <EyeSlashIcon className="h-5 w-5 text-white/80" />
+            )}
           </button>
+        </div>
+        <h2 className="text-3xl font-bold mt-2">
+          {showBalance ? "₦500,000" : "•••••••"}
+        </h2>
 
-          {/* 🔗 Route to Utilities (Pay Bills) */}
-          <Link href="/dashboard/utilities">
-            <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-              Pay Bills
-            </button>
-          </Link>
+        {/* Actions */}
+        <div className="flex items-center justify-between mt-4">
+          <button className="text-sm underline opacity-90">Transaction history</button>
+          <button className="px-4 py-2 rounded-full bg-white text-blue-600 font-medium shadow-md hover:shadow-lg transition">
+            + Fund Wallet
+          </button>
         </div>
       </div>
 
-      {/* Transactions */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          Recent Transactions
+      {/* Utilities */}
+      <div>
+        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-3">
+          Utilities
         </h3>
-
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {transactions.map((tx) => (
-            <div key={tx.id} className="flex justify-between items-center py-3">
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {tx.desc}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{tx.date}</p>
-              </div>
-              <div className="text-right">
-                <p
-                  className={`text-sm font-semibold ${
-                    tx.amount < 0 ? "text-red-600" : "text-green-600"
-                  }`}
-                >
-                  {tx.amount < 0 ? "-" : "+"}₦{Math.abs(tx.amount).toLocaleString()}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{tx.status}</p>
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-4 gap-3">
+          <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-3 rounded-xl shadow hover:shadow-md transition">
+            <BoltIcon className="h-6 w-6 text-yellow-500" />
+            <span className="text-xs mt-1">Electricity</span>
+          </div>
+          <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-3 rounded-xl shadow hover:shadow-md transition">
+            <WifiIcon className="h-6 w-6 text-blue-500" />
+            <span className="text-xs mt-1">Internet</span>
+          </div>
+          <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-3 rounded-xl shadow hover:shadow-md transition">
+            <FireHydrantIcon className="h-6 w-6 text-red-500" />
+            <span className="text-xs mt-1">Water</span>
+          </div>
+          <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-3 rounded-xl shadow hover:shadow-md transition">
+            <EllipsisHorizontalIcon className="h-6 w-6 text-gray-500" />
+            <span className="text-xs mt-1">More</span>
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
