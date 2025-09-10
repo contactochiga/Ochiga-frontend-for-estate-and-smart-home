@@ -19,7 +19,7 @@ export default function WalletCardModern() {
         <div className="flex items-center gap-3">
           <div>
             <p className="text-xs uppercase opacity-80">Wallet Balance</p>
-            <h2 className="text-3xl font-bold tracking-wide">
+            <h2 className="text-2xl font-bold tracking-wide">
               {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
             </h2>
           </div>
@@ -39,7 +39,7 @@ export default function WalletCardModern() {
         <button
           className="bg-white text-indigo-600 dark:text-indigo-700 
                      px-3 py-2 rounded-lg font-semibold text-sm flex items-center gap-1 
-                     shadow hover:bg-gray-100 transition"
+                     whitespace-nowrap shadow hover:bg-gray-100 transition"
         >
           <BanknotesIcon className="h-5 w-5" />
           Fund Wallet
