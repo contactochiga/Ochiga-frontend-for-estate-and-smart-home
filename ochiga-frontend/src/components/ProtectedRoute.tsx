@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/authContext";
 
@@ -13,24 +13,22 @@ export default function ProtectedRoute({
 }) {
   const { token, role: userRole, loading } = useAuth();
   const router = useRouter();
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (loading) return; // ✅ wait until auth context is done
+    if (loading) return; // wait until auth context finishes
+
     if (!token) {
       router.replace("/auth");
     } else if (role && userRole !== role) {
       router.replace("/auth");
+    } else {
+      setChecked(true); // ✅ safe to render
     }
   }, [token, userRole, role, loading, router]);
 
-  // ✅ While still loading, show a spinner or nothing
-  if (loading) {
-    return <p className="text-center mt-10">Checking authentication...</p>;
-  }
-
-  // ✅ After loading, only block if token missing
-  if (!token) {
-    return null;
+  if (loading || !checked) {
+    return <p className="text-center mt-10">Loading...</p>;
   }
 
   return <>{children}</>;
