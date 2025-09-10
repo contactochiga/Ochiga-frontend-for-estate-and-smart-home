@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
-import WalletCard from "../../components/WalletCard"; // 👈 import your new wallet card
-
+import WalletCard from "../components/WalletCard";
 export default function ResidentDashboardPage() {
   // device states
   const [devices, setDevices] = useState({
