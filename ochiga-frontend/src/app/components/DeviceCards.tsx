@@ -1,112 +1,63 @@
 "use client";
 
-import { useState } from "react";
-import {
-  MdLightbulbOutline,
-  MdTv,
-  MdDoorFront,
-  MdAcUnit,
-  MdVideocam,
-} from "react-icons/md";
+import { MdOutlineLightbulb, MdTv, MdDoorFront, MdAcUnit, MdVideocam } from "react-icons/md";
 
-const rooms = ["All", "Favourites", "Living Room", "Kitchen", "Bedroom", "Office"];
+interface DeviceCardProps {
+  name: string;
+  location: string;
+  status: "On" | "Off" | "Locked" | "Unlocked";
+  icon?: React.ReactNode;
+}
 
-export default function RoomsDevices() {
-  const [activeRoom, setActiveRoom] = useState("All");
+export default function DeviceCard({
+  name,
+  location,
+  status,
+  icon = <MdOutlineLightbulb />,
+}: DeviceCardProps) {
+  const isActive = status === "On" || status === "Unlocked";
 
   return (
-    <div className="p-4">
-      {/* Header */}
-      <h2 className="text-xl font-bold mb-4">Rooms & Devices</h2>
-
-      {/* Scrollable Tabs */}
-      <div className="flex space-x-3 overflow-x-auto scrollbar-hide mb-4">
-        {rooms.map((room) => (
-          <button
-            key={room}
-            onClick={() => setActiveRoom(room)}
-            className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-              activeRoom === room
-                ? "bg-blue-600 text-white font-semibold"
-                : "bg-gray-200 text-gray-600 dark:bg-gray-800 dark:text-gray-300"
-            }`}
-          >
-            {room}
-          </button>
-        ))}
+    <div
+      className={`
+        relative rounded-2xl p-5 
+        bg-white/10 dark:bg-[#1f1f1f]/80 
+        backdrop-blur-lg shadow-lg 
+        transition-all duration-300 
+        hover:scale-[1.02] hover:shadow-2xl
+        border border-transparent 
+        hover:border-blue-500/40
+        ${isActive ? "ring-2 ring-blue-500/60" : ""}
+      `}
+    >
+      {/* Icon + Status */}
+      <div className="flex justify-between items-center mb-4">
+        <div
+          className={`
+            w-12 h-12 flex items-center justify-center rounded-xl text-2xl
+            ${isActive 
+              ? "bg-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/40" 
+              : "bg-gray-200 dark:bg-gray-800 text-gray-500"}
+          `}
+        >
+          {icon}
+        </div>
+        <span
+          className={`
+            px-3 py-1 rounded-full text-xs font-medium tracking-wide
+            ${isActive 
+              ? "bg-blue-500/20 text-blue-400 border border-blue-400/40" 
+              : "bg-gray-300 dark:bg-gray-700 text-gray-400 border border-gray-500/40"}
+          `}
+        >
+          {status}
+        </span>
       </div>
 
-      {/* Devices Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Light */}
-        <div className="rounded-xl p-4 flex flex-col justify-between bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow">
-          <div className="flex items-center justify-between">
-            <MdLightbulbOutline className="text-yellow-400 text-2xl" />
-            <button className="px-3 py-1 rounded-full border text-sm border-gray-300 text-gray-600 dark:border-gray-500 dark:text-gray-300">
-              On
-            </button>
-          </div>
-          <div>
-            <h3 className="font-semibold">Light</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Living Room</p>
-          </div>
-        </div>
-
-        {/* CCTV */}
-        <div className="rounded-xl p-4 flex flex-col justify-between bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow">
-          <div className="flex items-center justify-between">
-            <MdVideocam className="text-red-500 text-2xl" />
-            <button className="px-3 py-1 rounded-full border text-sm border-gray-300 text-gray-600 dark:border-gray-500 dark:text-gray-300">
-              Off
-            </button>
-          </div>
-          <div>
-            <h3 className="font-semibold">CCTV</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Outdoor</p>
-          </div>
-        </div>
-
-        {/* TV */}
-        <div className="rounded-xl p-4 flex flex-col justify-between bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow">
-          <div className="flex items-center justify-between">
-            <MdTv className="text-blue-400 text-2xl" />
-            <button className="px-3 py-1 rounded-full border text-sm border-gray-300 text-gray-600 dark:border-gray-500 dark:text-gray-300">
-              Off
-            </button>
-          </div>
-          <div>
-            <h3 className="font-semibold">TV</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Living Room</p>
-          </div>
-        </div>
-
-        {/* Door Lock */}
-        <div className="rounded-xl p-4 flex flex-col justify-between bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow">
-          <div className="flex items-center justify-between">
-            <MdDoorFront className="text-blue-500 text-2xl" />
-            <button className="px-3 py-1 rounded-full border text-sm border-gray-300 text-gray-600 dark:border-gray-500 dark:text-gray-300">
-              Locked
-            </button>
-          </div>
-          <div>
-            <h3 className="font-semibold">Door Lock</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Main Door</p>
-          </div>
-        </div>
-
-        {/* AC */}
-        <div className="rounded-xl p-4 flex flex-col justify-between bg-white text-gray-900 dark:bg-gray-900 dark:text-white shadow">
-          <div className="flex items-center justify-between">
-            <MdAcUnit className="text-cyan-400 text-2xl" />
-            <button className="px-3 py-1 rounded-full border text-sm border-gray-300 text-gray-600 dark:border-gray-500 dark:text-gray-300">
-              On
-            </button>
-          </div>
-          <div>
-            <h3 className="font-semibold">AC</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">Master Bedroom</p>
-          </div>
-        </div>
+      {/* Name + Location */}
+      <div>
+        <h3 className="text-base font-semibold text-white/90">{name}</h3>
+        <p className="text-xs text-gray-400">{location}</p>
       </div>
     </div>
   );
