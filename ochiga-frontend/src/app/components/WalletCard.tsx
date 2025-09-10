@@ -13,10 +13,10 @@ export default function WalletCardModern() {
         className="rounded-2xl p-6 text-white shadow-xl 
                    bg-gradient-to-r from-indigo-600 to-purple-600 
                    dark:from-indigo-700 dark:to-purple-800 
-                   flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+                   flex justify-between items-center gap-6"
       >
         {/* Left Section: Balance + Eye */}
-        <div>
+        <div className="flex flex-col">
           <p className="text-xs uppercase opacity-80">Wallet Balance</p>
           <div className="flex items-center gap-2 mt-1">
             <h2 className="text-3xl font-bold tracking-wide">
@@ -36,16 +36,14 @@ export default function WalletCardModern() {
         </div>
 
         {/* Right Section: Fund Wallet */}
-        <div className="flex items-center">
-          <button
-            className="bg-white text-indigo-600 dark:text-indigo-700 
-                       px-4 py-2 rounded-lg font-semibold flex items-center gap-1 
-                       shadow hover:bg-gray-100 transition"
-          >
-            <BanknotesIcon className="h-5 w-5" />
-            Fund Wallet
-          </button>
-        </div>
+        <button
+          className="bg-white text-indigo-600 dark:text-indigo-700 
+                     px-4 py-2 rounded-lg font-semibold flex items-center gap-1 
+                     shadow hover:bg-gray-100 transition"
+        >
+          <BanknotesIcon className="h-5 w-5" />
+          Fund Wallet
+        </button>
       </div>
     </div>
   );
