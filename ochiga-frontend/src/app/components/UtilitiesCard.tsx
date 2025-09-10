@@ -13,9 +13,14 @@ export default function UtilitiesCard() {
 
   return (
     <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8">
-      <div className="bg-gray-100 dark:bg-gray-900 rounded-2xl p-6 shadow-xl">
+      {/* Outer Card */}
+      <div
+        className="rounded-2xl p-6 shadow-xl 
+                   bg-gradient-to-r from-slate-100 to-gray-200 
+                   dark:from-gray-800 dark:to-gray-900"
+      >
         {/* Header */}
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
+        <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-5">
           Utilities
         </h2>
 
