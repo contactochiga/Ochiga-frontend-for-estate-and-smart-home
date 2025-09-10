@@ -3,8 +3,8 @@
 
 import { useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
-import WalletCard from "../components/WalletCard";        // ✅ keep your updated wallet
-import UtilitiesCard from "../components/UtilitiesCard";  // ✅ new utilities card
+import WalletCard from "../components/WalletCard";
+import UtilitiesCard from "../components/UtilitiesCard";
 import DeviceCards from "../components/DeviceCards";
 import VisitorsCard from "../components/VisitorsCard";
 import CommunityCard from "../components/CommunityCard";
@@ -23,22 +23,25 @@ export default function ResidentDashboardPage() {
 
   return (
     <ProtectedRoute role="resident">
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* ✅ Full-page wrapper prevents side scroll */}
+      <div className="min-h-screen overflow-x-hidden bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         
-        {/* ✅ Wallet (your updated version) */}
-        <WalletCard />
+        {/* ✅ Full-width header (touches both edges) */}
+        <header className="w-screen -mx-6 md:-mx-8 px-6 md:px-8 bg-white dark:bg-gray-800 shadow-md">
+          <div className="flex items-center justify-between h-16">
+            <h1 className="text-xl font-semibold">Resident Dashboard</h1>
+            <div>🔔 Profile</div>
+          </div>
+        </header>
 
-        {/* ✅ Utilities (right under wallet) */}
-        <UtilitiesCard />
-
-        {/* ✅ Smart Home Controls */}
-        <DeviceCards />
-
-        {/* ✅ Visitors */}
-        <VisitorsCard />
-
-        {/* ✅ Community */}
-        <CommunityCard />
+        {/* ✅ Main grid with consistent padding */}
+        <main className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <WalletCard />
+          <UtilitiesCard />
+          <DeviceCards />
+          <VisitorsCard />
+          <CommunityCard />
+        </main>
 
         {/* ✅ Notification Modal */}
         {modal.open && (
