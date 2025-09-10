@@ -8,18 +8,24 @@ export default function TopBar() {
 
   return (
     <>
-      <header className="w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
+      {/* Sticky Full-Width TopBar */}
+      <header
+        className="sticky top-0 z-50 w-screen -mx-4 sm:-mx-6 md:-mx-8 
+        bg-white/70 dark:bg-gray-900/60 
+        backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 
+        shadow-lg transition"
+      >
+        <div className="px-6 py-3 flex items-center justify-between">
           {/* Left side: hamburger + logo */}
           <div className="flex items-center gap-3">
             {/* Hamburger */}
             <button
               onClick={() => setIsOpen(true)}
-              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-gray-700 dark:text-gray-300"
+                className="h-6 w-6 text-gray-700 dark:text-gray-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -35,22 +41,17 @@ export default function TopBar() {
 
             {/* Ochiga Logo */}
             <div className="flex items-center gap-2">
-              <Image
-                src="/ochiga-logo.png"
-                alt="Ochiga"
-                width={28}
-                height={28}
-              />
-              <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+              <Image src="/ochiga-logo.png" alt="Ochiga" width={28} height={28} />
+              <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Ochiga
               </span>
             </div>
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {/* Notifications */}
-            <button className="p-2 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 relative">
+            <button className="relative p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5 text-gray-600 dark:text-gray-300"
@@ -69,12 +70,12 @@ export default function TopBar() {
             </button>
 
             {/* Profile */}
-            <button className="h-8 w-8 rounded-full bg-gray-300 dark:bg-gray-600 border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <button className="h-9 w-9 rounded-full bg-gray-300 dark:bg-gray-600 border border-gray-200 dark:border-gray-700 overflow-hidden">
               <Image
                 src="/user-avatar.png"
                 alt="Profile"
-                width={32}
-                height={32}
+                width={36}
+                height={36}
                 className="object-cover"
               />
             </button>
