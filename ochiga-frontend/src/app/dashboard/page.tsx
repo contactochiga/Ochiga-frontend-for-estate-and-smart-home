@@ -3,10 +3,11 @@
 
 import { useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
-import WalletCard from "../components/WalletCard";
-import DeviceCards from "../components/DeviceCards"; 
-import VisitorsCard from "../components/VisitorsCard"; 
-import CommunityCard from "../components/CommunityCard"; 
+import WalletCard from "../components/WalletCard";        // ✅ keep your updated wallet
+import UtilitiesCard from "../components/UtilitiesCard";  // ✅ new utilities card
+import DeviceCards from "../components/DeviceCards";
+import VisitorsCard from "../components/VisitorsCard";
+import CommunityCard from "../components/CommunityCard";
 
 export default function ResidentDashboardPage() {
   // modal state
@@ -24,16 +25,19 @@ export default function ResidentDashboardPage() {
     <ProtectedRoute role="resident">
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {/* ✅ Wallet */}
+        {/* ✅ Wallet (your updated version) */}
         <WalletCard />
+
+        {/* ✅ Utilities (right under wallet) */}
+        <UtilitiesCard />
 
         {/* ✅ Smart Home Controls */}
         <DeviceCards />
 
-        {/* ✅ Visitors (componentized) */}
+        {/* ✅ Visitors */}
         <VisitorsCard />
 
-        {/* ✅ Community (componentized) */}
+        {/* ✅ Community */}
         <CommunityCard />
 
         {/* ✅ Notification Modal */}
