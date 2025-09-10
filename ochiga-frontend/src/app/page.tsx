@@ -1,4 +1,3 @@
-// src/app/page.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -16,6 +15,8 @@ export default function Home() {
         router.replace("/dashboard");
       } else if (role === "manager") {
         router.replace("/manager-dashboard");
+      } else {
+        router.replace("/auth");
       }
     } else {
       router.replace("/auth");
