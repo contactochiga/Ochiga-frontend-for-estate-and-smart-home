@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
+import WalletCard from "../../components/WalletCard"; // 👈 import your new wallet card
 
 export default function ResidentDashboardPage() {
   // device states
@@ -10,9 +11,6 @@ export default function ResidentDashboardPage() {
     ac: false,
     door: false,
   });
-
-  // wallet state
-  const [walletBalance, setWalletBalance] = useState(12500);
 
   // modal state
   const [modal, setModal] = useState<{
@@ -42,25 +40,6 @@ export default function ResidentDashboardPage() {
     showNotification("Visitor Details", `Viewing details for ${name}`);
   };
 
-  const fundWallet = () => {
-    const amount = 5000;
-    setWalletBalance((prev) => {
-      showNotification("Wallet Funded", `₦${amount.toLocaleString()} added`);
-      return prev + amount;
-    });
-  };
-
-  const payBills = () => {
-    if (walletBalance >= 2000) {
-      setWalletBalance((prev) => {
-        showNotification("Bills Paid", "Your bills have been paid successfully!");
-        return prev - 2000;
-      });
-    } else {
-      showNotification("Insufficient Funds", "Please fund your wallet to pay bills");
-    }
-  };
-
   const viewUpdate = (title: string) => {
     showNotification("Community Update", `Viewing: ${title}`);
   };
@@ -72,25 +51,8 @@ export default function ResidentDashboardPage() {
   return (
     <ProtectedRoute role="resident">
       <div className="min-h-screen bg-gray-100 text-gray-900 p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* ✅ Wallet */}
-        <div className="bg-white rounded-xl p-4 shadow">
-          <h2 className="text-sm font-semibold text-gray-600 mb-2">WALLET</h2>
-          <p className="text-2xl font-bold mb-4" id="wallet-balance">
-            ₦{walletBalance.toLocaleString()}
-          </p>
-          <button
-            className="w-full bg-blue-600 py-2 rounded-lg text-white font-semibold mb-2 hover:bg-blue-700 transition-colors"
-            onClick={fundWallet}
-          >
-            Fund Wallet
-          </button>
-          <button
-            className="w-full bg-blue-600 py-2 rounded-lg text-white font-semibold hover:bg-blue-700 transition-colors"
-            onClick={payBills}
-          >
-            Pay Bills
-          </button>
-        </div>
+        {/* ✅ Wallet (now using shared component) */}
+        <WalletCard />
 
         {/* ✅ Smart Home Controls */}
         <div className="bg-white rounded-xl p-4 shadow">
