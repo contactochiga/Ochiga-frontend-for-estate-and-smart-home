@@ -13,26 +13,26 @@ export default function WalletCardModern() {
         className="rounded-2xl p-6 text-white shadow-xl 
                    bg-gradient-to-r from-indigo-600 to-purple-600 
                    dark:from-indigo-700 dark:to-purple-800 
-                   flex justify-between items-center gap-6"
+                   flex flex-row justify-between items-center"
       >
         {/* Left Section: Balance + Eye */}
-        <div className="flex flex-col">
-          <p className="text-xs uppercase opacity-80">Wallet Balance</p>
-          <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-3">
+          <div>
+            <p className="text-xs uppercase opacity-80">Wallet Balance</p>
             <h2 className="text-3xl font-bold tracking-wide">
               {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
             </h2>
-            <button
-              onClick={() => setShowBalance(!showBalance)}
-              className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition flex items-center justify-center"
-            >
-              {showBalance ? (
-                <EyeIcon className="h-5 w-5" />
-              ) : (
-                <EyeSlashIcon className="h-5 w-5" />
-              )}
-            </button>
           </div>
+          <button
+            onClick={() => setShowBalance(!showBalance)}
+            className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition flex items-center justify-center"
+          >
+            {showBalance ? (
+              <EyeIcon className="h-5 w-5" />
+            ) : (
+              <EyeSlashIcon className="h-5 w-5" />
+            )}
+          </button>
         </div>
 
         {/* Right Section: Fund Wallet */}
