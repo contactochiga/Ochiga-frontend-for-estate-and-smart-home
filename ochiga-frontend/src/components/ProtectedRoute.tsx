@@ -1,4 +1,3 @@
-// src/components/ProtectedRoute.tsx
 "use client";
 
 import { useEffect } from "react";
@@ -16,17 +15,22 @@ export default function ProtectedRoute({
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) return; // wait for auth context to finish
+    if (loading) return; // ✅ wait until auth context is done
     if (!token) {
-      router.replace("/auth"); // ✅ correct path for your login page
+      router.replace("/auth");
     } else if (role && userRole !== role) {
-      router.replace("/auth"); // prevent role mismatch access
+      router.replace("/auth");
     }
   }, [token, userRole, role, loading, router]);
 
-  // While loading or redirecting, don't render children
-  if (loading || !token) {
-    return <p className="text-center mt-10">Loading...</p>;
+  // ✅ While still loading, show a spinner or nothing
+  if (loading) {
+    return <p className="text-center mt-10">Checking authentication...</p>;
+  }
+
+  // ✅ After loading, only block if token missing
+  if (!token) {
+    return null;
   }
 
   return <>{children}</>;
