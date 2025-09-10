@@ -38,7 +38,7 @@ export default function WalletCardModern() {
         {/* Right Section: Fund Wallet */}
         <button
           className="bg-white text-indigo-600 dark:text-indigo-700 
-                     px-4 py-2 rounded-lg font-semibold flex items-center gap-1 
+                     px-3 py-2 rounded-lg font-semibold text-sm flex items-center gap-1 
                      shadow hover:bg-gray-100 transition"
         >
           <BanknotesIcon className="h-5 w-5" />
