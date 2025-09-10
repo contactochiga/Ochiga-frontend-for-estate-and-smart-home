@@ -17,12 +17,11 @@ export default function AuthPage() {
     e.preventDefault();
     setError("");
 
-    // ✅ Mock login check
     if (password === "1234") {
       if (role === "resident") {
         login("fake-resident-token", "resident");
         router.push("/dashboard");
-      } else if (role === "manager") {
+      } else {
         login("fake-manager-token", "manager");
         router.push("/manager-dashboard");
       }
@@ -37,7 +36,6 @@ export default function AuthPage() {
       style={{ backgroundImage: "url('/bg.jpg')" }}
     >
       <div className="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-xl w-full max-w-md">
-        
         {/* Role Toggle */}
         <div className="flex justify-center mb-4">
           <button
@@ -77,7 +75,6 @@ export default function AuthPage() {
             className="p-2 border rounded w-full"
             required
           />
-
           <input
             type="password"
             placeholder="Password (use 1234)"
@@ -86,7 +83,6 @@ export default function AuthPage() {
             className="p-2 border rounded w-full"
             required
           />
-
           <button
             type="submit"
             className="bg-[#800000] text-white py-2 rounded hover:bg-red-900"
