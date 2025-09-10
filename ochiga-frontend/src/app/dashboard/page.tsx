@@ -1,35 +1,18 @@
+// src/app/dashboard/page.tsx
 "use client";
 
 import { useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
 import WalletCard from "../components/WalletCard";
-export default function ResidentDashboardPage() {
-  // device states
-  const [devices, setDevices] = useState({
-    lights: false,
-    ac: false,
-    door: false,
-  });
+import DeviceCards from "../components/DeviceCards"; // ✅ import the new component
 
+export default function ResidentDashboardPage() {
   // modal state
   const [modal, setModal] = useState<{
     open: boolean;
     title: string;
     message: string;
   }>({ open: false, title: "", message: "" });
-
-  // toggle smart devices
-  const toggleDevice = (device: keyof typeof devices) => {
-    setDevices((prev) => {
-      const updated = { ...prev, [device]: !prev[device] };
-      const status = updated[device] ? "ON" : "OFF";
-      showNotification(
-        `${device.charAt(0).toUpperCase() + device.slice(1)} Control`,
-        `${device.charAt(0).toUpperCase() + device.slice(1)} turned ${status}`
-      );
-      return updated;
-    });
-  };
 
   const inviteVisitor = () => {
     showNotification("Invite Visitor", "Visitor invitation sent successfully!");
@@ -50,39 +33,11 @@ export default function ResidentDashboardPage() {
   return (
     <ProtectedRoute role="resident">
       <div className="min-h-screen bg-gray-100 text-gray-900 p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* ✅ Wallet (now using shared component) */}
+        {/* ✅ Wallet */}
         <WalletCard />
 
-        {/* ✅ Smart Home Controls */}
-        <div className="bg-white rounded-xl p-4 shadow">
-          <h2 className="text-sm font-semibold text-gray-600 mb-4">SMART HOME CONTROLS</h2>
-          <div className="flex space-x-4 mb-4">
-            <button
-              className="flex flex-col items-center bg-gray-200 p-3 rounded-lg hover:bg-gray-300 transition-colors"
-              onClick={() => toggleDevice("lights")}
-            >
-              💡
-              <span className="text-xs mt-1">Lights</span>
-            </button>
-            <button
-              className="flex flex-col items-center bg-gray-200 p-3 rounded-lg hover:bg-gray-300 transition-colors"
-              onClick={() => toggleDevice("ac")}
-            >
-              ❄️
-              <span className="text-xs mt-1">AC</span>
-            </button>
-            <button
-              className="flex flex-col items-center bg-gray-200 p-3 rounded-lg hover:bg-gray-300 transition-colors"
-              onClick={() => toggleDevice("door")}
-            >
-              🔒
-              <span className="text-xs mt-1">Door</span>
-            </button>
-          </div>
-          <a href="#" className="text-xs text-blue-600 hover:text-blue-800">
-            Rooms & Devices →
-          </a>
-        </div>
+        {/* ✅ Smart Home Controls (now using DeviceCards component) */}
+        <DeviceCards />
 
         {/* ✅ Visitors */}
         <div className="bg-white rounded-xl p-4 shadow">
