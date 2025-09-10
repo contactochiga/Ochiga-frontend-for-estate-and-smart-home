@@ -20,18 +20,19 @@ export default function UtilitiesCard() {
         </h2>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-4">
           {utilities.map((util) => {
             const Icon = util.icon;
             return (
               <button
                 key={util.name}
                 className="flex flex-col items-center justify-center 
-                           bg-white dark:bg-gray-800 rounded-xl py-5 
-                           shadow hover:shadow-lg hover:scale-[1.03] 
-                           transition-transform duration-200"
+                           bg-white dark:bg-gray-800 rounded-xl 
+                           shadow hover:shadow-lg hover:scale-[1.05] 
+                           transition-transform duration-200
+                           aspect-square"
               >
-                <Icon className={`h-6 w-6 ${util.color}`} />
+                <Icon className={`h-7 w-7 ${util.color}`} />
                 <span className="text-xs mt-2 font-medium text-gray-700 dark:text-gray-300">
                   {util.name}
                 </span>
