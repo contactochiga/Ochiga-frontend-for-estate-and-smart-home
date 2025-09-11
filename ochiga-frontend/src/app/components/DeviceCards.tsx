@@ -9,44 +9,76 @@ import {
   MdVideocam,
 } from "react-icons/md";
 
-const rooms = ["All", "Favourites", "Living Room", "Kitchen", "Bedroom", "Office"];
+const rooms = ["All", "Favourites", "Living Room", "Kitchen", "Bedroom", "Office", "Outdoor"];
 
 const devices = [
   {
+    id: 1,
     name: "Light",
     location: "Living Room",
     status: "On",
     icon: <MdLightbulbOutline className="text-yellow-400 text-2xl" />,
+    type: "light",
+    favourite: true,
   },
   {
+    id: 2,
     name: "CCTV",
     location: "Outdoor",
     status: "Off",
     icon: <MdVideocam className="text-red-500 text-2xl" />,
+    type: "cctv",
+    favourite: true,
   },
   {
+    id: 3,
     name: "TV",
     location: "Living Room",
     status: "Off",
     icon: <MdTv className="text-blue-400 text-2xl" />,
+    type: "tv",
+    favourite: false,
   },
   {
+    id: 4,
     name: "Door Lock",
     location: "Main Door",
     status: "Locked",
     icon: <MdDoorFront className="text-blue-500 text-2xl" />,
+    type: "door",
+    favourite: false,
   },
   {
+    id: 5,
     name: "AC",
-    location: "Master Bedroom",
+    location: "Bedroom",
     status: "On",
     icon: <MdAcUnit className="text-cyan-400 text-2xl" />,
+    type: "ac",
+    favourite: true,
   },
 ];
 
 export default function RoomsDevices() {
   const [activeRoom, setActiveRoom] = useState("All");
+  const [deviceStates, setDeviceStates] = useState(
+    devices.reduce((acc, d) => ({ ...acc, [d.id]: d.status }), {})
+  );
   const [selectedDevice, setSelectedDevice] = useState<any>(null);
+
+  const filteredDevices =
+    activeRoom === "All"
+      ? devices
+      : activeRoom === "Favourites"
+      ? devices.filter((d) => d.favourite)
+      : devices.filter((d) => d.location === activeRoom);
+
+  const toggleDevice = (id: number) => {
+    setDeviceStates((prev) => ({
+      ...prev,
+      [id]: prev[id] === "On" ? "Off" : prev[id] === "Off" ? "On" : prev[id] === "Locked" ? "Unlocked" : "Locked",
+    }));
+  };
 
   return (
     <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8">
@@ -79,16 +111,16 @@ export default function RoomsDevices() {
 
         {/* Devices Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {devices.map((device, index) => (
+          {filteredDevices.map((device) => (
             <div
-              key={index}
+              key={device.id}
               onClick={() => setSelectedDevice(device)}
               className={`rounded-2xl p-4 flex flex-col justify-between cursor-pointer
                 bg-white/10 dark:bg-[#2a2a2a]/80 
                 backdrop-blur-md shadow-lg border 
                 transition-transform duration-300 ease-out hover:scale-[1.05] active:scale-[0.98]
                 ${
-                  device.status === "On"
+                  deviceStates[device.id] === "On" || deviceStates[device.id] === "Unlocked"
                     ? "border-blue-400/40 shadow-blue-500/30"
                     : "border-gray-700/40"
                 }`}
@@ -98,7 +130,7 @@ export default function RoomsDevices() {
                 <div
                   className={`w-12 h-12 flex items-center justify-center rounded-xl 
                     ${
-                      device.status === "On"
+                      deviceStates[device.id] === "On" || deviceStates[device.id] === "Unlocked"
                         ? "bg-blue-500/20 text-blue-400 shadow-inner shadow-blue-500/30"
                         : "bg-gray-200/30 dark:bg-gray-800/70 text-gray-500"
                     }`}
@@ -108,12 +140,12 @@ export default function RoomsDevices() {
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium tracking-wide border
                     ${
-                      device.status === "On"
+                      deviceStates[device.id] === "On" || deviceStates[device.id] === "Unlocked"
                         ? "bg-blue-500/20 text-blue-400 border-blue-400/40"
                         : "bg-gray-300/20 dark:bg-gray-700/40 text-gray-400 border-gray-500/30"
                     }`}
                 >
-                  {device.status}
+                  {deviceStates[device.id]}
                 </span>
               </div>
 
@@ -130,9 +162,7 @@ export default function RoomsDevices() {
       {/* Slide-up Remote Panel */}
       {selectedDevice && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div
-            className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp"
-          >
+          <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -146,15 +176,67 @@ export default function RoomsDevices() {
               </button>
             </div>
 
-            {/* Example Remote View */}
-            <div className="flex flex-col items-center justify-center py-6 text-gray-700 dark:text-gray-300">
+            {/* Dynamic Remote Controls */}
+            <div className="flex flex-col items-center justify-center gap-6 py-6 text-gray-700 dark:text-gray-300">
               {selectedDevice.icon}
-              <p className="mt-4 text-sm">
-                Remote panel for <span className="font-medium">{selectedDevice.name}</span> will show here.
+              <p className="text-sm">
+                Current Status:{" "}
+                <span
+                  className={`font-semibold ${
+                    deviceStates[selectedDevice.id] === "On" || deviceStates[selectedDevice.id] === "Unlocked"
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {deviceStates[selectedDevice.id]}
+                </span>
               </p>
-              <p className="text-xs text-gray-400">
-                (e.g., camera feed, light toggle, TV remote, etc.)
-              </p>
+
+              {/* Device-specific actions */}
+              {selectedDevice.type === "light" && (
+                <button
+                  onClick={() => toggleDevice(selectedDevice.id)}
+                  className="px-6 py-3 rounded-xl bg-yellow-400/90 text-gray-900 font-semibold hover:bg-yellow-500"
+                >
+                  Toggle Light
+                </button>
+              )}
+
+              {selectedDevice.type === "door" && (
+                <button
+                  onClick={() => toggleDevice(selectedDevice.id)}
+                  className="px-6 py-3 rounded-xl bg-blue-500/90 text-white font-semibold hover:bg-blue-600"
+                >
+                  {deviceStates[selectedDevice.id] === "Locked" ? "Unlock Door" : "Lock Door"}
+                </button>
+              )}
+
+              {selectedDevice.type === "ac" && (
+                <div className="flex items-center gap-3">
+                  <button className="px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-800">-</button>
+                  <span className="text-lg font-bold">22°C</span>
+                  <button className="px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-800">+</button>
+                </div>
+              )}
+
+              {selectedDevice.type === "tv" && (
+                <div className="grid grid-cols-3 gap-3">
+                  {["⏮", "⏯", "⏭"].map((btn) => (
+                    <button
+                      key={btn}
+                      className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+                    >
+                      {btn}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {selectedDevice.type === "cctv" && (
+                <div className="w-full h-40 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
+                  <p className="text-sm text-gray-500">🔴 Live Camera Feed</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
