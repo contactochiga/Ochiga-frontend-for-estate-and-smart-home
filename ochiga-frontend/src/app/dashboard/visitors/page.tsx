@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import {
+  UserIcon,
+  ClipboardDocumentIcon,
+  QrCodeIcon,
+  PaperAirplaneIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline";
 
 interface Visitor {
   id: number;
@@ -38,9 +45,11 @@ export default function VisitorsPage() {
     time: "",
   });
 
+  const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null);
+
   const addVisitor = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVisitor.name || !newVisitor.purpose) return;
+    if (!newVisitor.name || !newVisitor.purpose || !newVisitor.time) return;
 
     const newCode = Math.random().toString().slice(2, 8);
 
@@ -75,40 +84,64 @@ export default function VisitorsPage() {
       {/* Add Visitor Form */}
       <form
         onSubmit={addVisitor}
-        className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6 grid gap-4 sm:grid-cols-3"
+        className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg mb-6 space-y-4"
       >
-        <input
-          type="text"
-          placeholder="Visitor Name"
-          value={newVisitor.name}
-          onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
-          className="p-2 rounded border dark:bg-gray-700 dark:border-gray-600"
-        />
-        <input
-          type="text"
-          placeholder="Purpose (e.g. Electrician)"
-          value={newVisitor.purpose}
-          onChange={(e) =>
-            setNewVisitor({ ...newVisitor, purpose: e.target.value })
-          }
-          className="p-2 rounded border dark:bg-gray-700 dark:border-gray-600"
-        />
-        <input
-          type="time"
-          value={newVisitor.time}
-          onChange={(e) => setNewVisitor({ ...newVisitor, time: e.target.value })}
-          className="p-2 rounded border dark:bg-gray-700 dark:border-gray-600"
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Visitor Name
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. John Doe"
+            value={newVisitor.name}
+            onChange={(e) =>
+              setNewVisitor({ ...newVisitor, name: e.target.value })
+            }
+            className="w-full p-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Purpose
+          </label>
+          <input
+            type="text"
+            placeholder="e.g. Electrician"
+            value={newVisitor.purpose}
+            onChange={(e) =>
+              setNewVisitor({ ...newVisitor, purpose: e.target.value })
+            }
+            className="w-full p-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Time of Visit
+          </label>
+          <input
+            type="time"
+            value={newVisitor.time}
+            onChange={(e) =>
+              setNewVisitor({ ...newVisitor, time: e.target.value })
+            }
+            className="w-full p-3 rounded-lg border dark:bg-gray-700 dark:border-gray-600"
+          />
+        </div>
+
         <button
           type="submit"
-          className="col-span-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          className="w-full py-3 rounded-xl font-semibold shadow 
+            bg-gradient-to-r from-indigo-600 to-purple-600 text-white 
+            hover:opacity-90 transition"
         >
-          Add Visitor
+          Invite Visitor
         </button>
       </form>
 
       {/* Visitors List */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Visitor Log</h2>
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {visitors.map((v) => (
@@ -117,8 +150,11 @@ export default function VisitorsPage() {
               className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p className="font-medium">{v.name}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="font-medium text-gray-900 dark:text-gray-100">
+                  {v.name}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <ClockIcon className="h-4 w-4" />
                   {v.purpose} — {v.time}
                 </p>
                 <span
@@ -132,18 +168,27 @@ export default function VisitorsPage() {
                 >
                   {v.status}
                 </span>
-                <div className="flex space-x-2 mt-2">
+                <div className="flex space-x-2 mt-3">
                   <button
                     onClick={() => copyCode(v.code)}
-                    className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
                   >
+                    <ClipboardDocumentIcon className="h-4 w-4" />
                     Copy
                   </button>
                   <button
                     onClick={() => shareWhatsApp(v)}
-                    className="px-2 py-1 text-xs rounded bg-green-500 text-white"
+                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-green-500 text-white"
                   >
+                    <PaperAirplaneIcon className="h-4 w-4" />
                     Share
+                  </button>
+                  <button
+                    onClick={() => setSelectedVisitor(v)}
+                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-indigo-600 text-white"
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    Details
                   </button>
                 </div>
               </div>
@@ -163,6 +208,54 @@ export default function VisitorsPage() {
           ))}
         </ul>
       </div>
+
+      {/* Slide-up Details Modal */}
+      {selectedVisitor && (
+        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
+          <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                Visitor Details
+              </h3>
+              <button
+                onClick={() => setSelectedVisitor(null)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-2 text-gray-700 dark:text-gray-300">
+              <p>
+                <span className="font-medium">Name:</span>{" "}
+                {selectedVisitor.name}
+              </p>
+              <p>
+                <span className="font-medium">Purpose:</span>{" "}
+                {selectedVisitor.purpose}
+              </p>
+              <p>
+                <span className="font-medium">Time:</span> {selectedVisitor.time}
+              </p>
+              <p>
+                <span className="font-medium">Status:</span>{" "}
+                {selectedVisitor.status}
+              </p>
+              <p>
+                <span className="font-medium">Code:</span> {selectedVisitor.code}
+              </p>
+            </div>
+            <div className="flex justify-center mt-4">
+              <QRCodeCanvas
+                value={`Visitor:${selectedVisitor.name}|Code:${selectedVisitor.code}`}
+                size={128}
+                bgColor={"#ffffff"}
+                fgColor={"#000000"}
+                level={"M"}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
