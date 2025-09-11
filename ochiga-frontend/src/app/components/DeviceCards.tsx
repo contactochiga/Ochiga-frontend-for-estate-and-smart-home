@@ -11,8 +11,42 @@ import {
 
 const rooms = ["All", "Favourites", "Living Room", "Kitchen", "Bedroom", "Office"];
 
+const devices = [
+  {
+    name: "Light",
+    location: "Living Room",
+    status: "On",
+    icon: <MdLightbulbOutline className="text-yellow-400 text-2xl" />,
+  },
+  {
+    name: "CCTV",
+    location: "Outdoor",
+    status: "Off",
+    icon: <MdVideocam className="text-red-500 text-2xl" />,
+  },
+  {
+    name: "TV",
+    location: "Living Room",
+    status: "Off",
+    icon: <MdTv className="text-blue-400 text-2xl" />,
+  },
+  {
+    name: "Door Lock",
+    location: "Main Door",
+    status: "Locked",
+    icon: <MdDoorFront className="text-blue-500 text-2xl" />,
+  },
+  {
+    name: "AC",
+    location: "Master Bedroom",
+    status: "On",
+    icon: <MdAcUnit className="text-cyan-400 text-2xl" />,
+  },
+];
+
 export default function RoomsDevices() {
   const [activeRoom, setActiveRoom] = useState("All");
+  const [selectedDevice, setSelectedDevice] = useState<any>(null);
 
   return (
     <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8">
@@ -45,40 +79,10 @@ export default function RoomsDevices() {
 
         {/* Devices Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[
-            {
-              name: "Light",
-              location: "Living Room",
-              status: "On",
-              icon: <MdLightbulbOutline className="text-yellow-400 text-2xl" />,
-            },
-            {
-              name: "CCTV",
-              location: "Outdoor",
-              status: "Off",
-              icon: <MdVideocam className="text-red-500 text-2xl" />,
-            },
-            {
-              name: "TV",
-              location: "Living Room",
-              status: "Off",
-              icon: <MdTv className="text-blue-400 text-2xl" />,
-            },
-            {
-              name: "Door Lock",
-              location: "Main Door",
-              status: "Locked",
-              icon: <MdDoorFront className="text-blue-500 text-2xl" />,
-            },
-            {
-              name: "AC",
-              location: "Master Bedroom",
-              status: "On",
-              icon: <MdAcUnit className="text-cyan-400 text-2xl" />,
-            },
-          ].map((device, index) => (
+          {devices.map((device, index) => (
             <div
               key={index}
+              onClick={() => setSelectedDevice(device)}
               className={`rounded-2xl p-4 flex flex-col justify-between cursor-pointer
                 bg-white/10 dark:bg-[#2a2a2a]/80 
                 backdrop-blur-md shadow-lg border 
@@ -122,6 +126,39 @@ export default function RoomsDevices() {
           ))}
         </div>
       </div>
+
+      {/* Slide-up Remote Panel */}
+      {selectedDevice && (
+        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
+          <div
+            className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                {selectedDevice.name} Control
+              </h3>
+              <button
+                onClick={() => setSelectedDevice(null)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Example Remote View */}
+            <div className="flex flex-col items-center justify-center py-6 text-gray-700 dark:text-gray-300">
+              {selectedDevice.icon}
+              <p className="mt-4 text-sm">
+                Remote panel for <span className="font-medium">{selectedDevice.name}</span> will show here.
+              </p>
+              <p className="text-xs text-gray-400">
+                (e.g., camera feed, light toggle, TV remote, etc.)
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
