@@ -35,13 +35,17 @@ export default function ResidentDashboardPage() {
         </header>
 
         {/* ✅ Main grid (no side gaps on mobile) */}
-        <main className="px-4 md:px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <WalletCard />
-          <UtilitiesCard />
-          <DeviceCards />
-          <VisitorsCard />
-          <CommunityCard />
-        </main>
+        <main className="px-0 sm:px-4 md:px-8 py-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+  {/* Wallet always full width */}
+  <div className="col-span-1 md:col-span-2">
+    <WalletCard />
+  </div>
+
+  <UtilitiesCard />
+  <DeviceCards />
+  <VisitorsCard />
+  <CommunityCard />
+</main>
 
         {/* ✅ Notification Modal */}
         {modal.open && (
