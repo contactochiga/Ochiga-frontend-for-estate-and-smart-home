@@ -6,9 +6,11 @@ import {
   ChevronRightIcon,
   UserIcon,
 } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation"; // ✅ import router
 
 export default function VisitorsCard() {
   const [selectedVisitor, setSelectedVisitor] = useState<any>(null);
+  const router = useRouter(); // ✅ init router
 
   const visitors = [
     { name: "Tunde Abdul", date: "Visited 2 days ago" },
@@ -65,9 +67,9 @@ export default function VisitorsCard() {
         ))}
       </div>
 
-      {/* Invite button */}
+      {/* Invite button → now navigates to /dashboard/visitors */}
       <button
-        onClick={() => setSelectedVisitor({ invite: true })}
+        onClick={() => router.push("/dashboard/visitors")}
         className="w-full flex items-center justify-center gap-2 py-4 mt-6 rounded-xl 
         bg-gradient-to-r from-indigo-600 to-purple-600 
         text-white font-medium shadow-lg hover:opacity-90 transition"
@@ -75,47 +77,6 @@ export default function VisitorsCard() {
         <QrCodeIcon className="h-5 w-5" />
         Invite Visitor
       </button>
-
-      {/* Slide-up panel */}
-      {selectedVisitor && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                {selectedVisitor.invite
-                  ? "Invite Visitor"
-                  : selectedVisitor.name}
-              </h3>
-              <button
-                onClick={() => setSelectedVisitor(null)}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-              >
-                ✕
-              </button>
-            </div>
-
-            {selectedVisitor.invite ? (
-              <div className="text-center py-6 text-gray-700 dark:text-gray-300">
-                <QrCodeIcon className="h-10 w-10 mx-auto mb-3 text-indigo-500" />
-                <p className="text-sm">
-                  Generate a QR code or send an invite link to your visitor.
-                </p>
-              </div>
-            ) : (
-              <div className="text-sm text-gray-700 dark:text-gray-300">
-                <p>
-                  {selectedVisitor.name} last visited:{" "}
-                  <span className="font-medium">{selectedVisitor.date}</span>
-                </p>
-                <p className="mt-4 text-xs text-gray-400">
-                  (Here you could show visitor details, access logs, or
-                  re-invite options.)
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
