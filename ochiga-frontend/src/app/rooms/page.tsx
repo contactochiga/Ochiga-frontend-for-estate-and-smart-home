@@ -1,6 +1,6 @@
 "use client";
 
-import RoomsDevices from "@/components/RoomsDevices";
+import RoomsDevices from "../components/RoomsDevices";
 
 export default function RoomsPage() {
   return (
