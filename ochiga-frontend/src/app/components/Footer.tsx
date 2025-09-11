@@ -17,11 +17,11 @@ export default function Footer() {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const navItems = [
-    { name: "Home", href: "/", icon: HomeIcon },
-    { name: "Rooms", href: "/rooms", icon: Squares2X2Icon },
-    { name: "Wallet", href: "/wallet", icon: WalletIcon },
-    { name: "Visitors", href: "/visitors", icon: UsersIcon },
-    { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
+    { name: "Home", href: "/dashboard", icon: HomeIcon },
+    { name: "Rooms", href: "/dashboard/rooms", icon: Squares2X2Icon },
+    { name: "Wallet", href: "/dashboard/wallet", icon: WalletIcon },
+    { name: "Visitors", href: "/dashboard/visitors", icon: UsersIcon },
+    { name: "Settings", href: "/dashboard/settings", icon: Cog6ToothIcon },
   ];
 
   // Detect scroll direction
@@ -39,6 +39,14 @@ export default function Footer() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  // Check active state (also works for nested routes e.g. /dashboard/wallet/history)
+  const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+    return pathname.startsWith(href);
+  };
+
   return (
     <footer
       className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-300
@@ -47,7 +55,7 @@ export default function Footer() {
     >
       <div className="max-w-md mx-auto flex justify-between items-center h-14 px-6">
         {navItems.map((item) => {
-          const active = pathname === item.href;
+          const active = isActive(item.href);
           const Icon = item.icon;
           return (
             <Link
