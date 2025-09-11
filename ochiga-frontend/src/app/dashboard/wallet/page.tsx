@@ -1,6 +1,7 @@
 "use client";
 
-import { EyeIcon, EyeSlashIcon, BoltIcon, WifiIcon, FireHydrantIcon, EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { EyeIcon, EyeSlashIcon, BoltIcon, WifiIcon, EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
+import { FaTint } from "react-icons/fa"; // water droplet
 import { useState } from "react";
 
 export default function WalletCard() {
@@ -49,7 +50,7 @@ export default function WalletCard() {
             <span className="text-xs mt-1">Internet</span>
           </div>
           <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-3 rounded-xl shadow hover:shadow-md transition">
-            <FireHydrantIcon className="h-6 w-6 text-red-500" />
+            <FaTint className="h-6 w-6 text-cyan-500" />
             <span className="text-xs mt-1">Water</span>
           </div>
           <div className="flex flex-col items-center bg-white dark:bg-gray-800 p-3 rounded-xl shadow hover:shadow-md transition">
