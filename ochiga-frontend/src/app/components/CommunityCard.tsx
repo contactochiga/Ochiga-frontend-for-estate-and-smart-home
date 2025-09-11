@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { ChevronRightIcon, ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/solid";
 
 export default function CommunityCard() {
+  const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
+
   const updates = [
     { title: "Reminder", message: "Community meeting on Saturday at 4:00 PM" },
     { title: "Notice", message: "Pool maintenance tomorrow morning." },
@@ -28,14 +31,15 @@ export default function CommunityCard() {
         {/* Updates list */}
         <div className="space-y-3">
           {updates.map((u, i) => (
-            <div
+            <button
               key={i}
-              className="flex items-center justify-between p-3 rounded-xl 
+              onClick={() => setSelectedUpdate(u)}
+              className="w-full flex items-center justify-between p-3 rounded-xl 
                          bg-white dark:bg-gray-800 
                          shadow hover:shadow-lg hover:scale-[1.02] 
                          transition-transform duration-200"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 text-left">
                 <div
                   className="w-9 h-9 flex items-center justify-center rounded-full 
                              bg-gradient-to-br from-purple-500 to-pink-500 text-white"
@@ -52,7 +56,7 @@ export default function CommunityCard() {
                 </div>
               </div>
               <ChevronRightIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-            </div>
+            </button>
           ))}
         </div>
 
@@ -61,6 +65,31 @@ export default function CommunityCard() {
           See more
         </button>
       </div>
+
+      {/* Slide-up panel */}
+      {selectedUpdate && (
+        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
+          <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                {selectedUpdate.title}
+              </h3>
+              <button
+                onClick={() => setSelectedUpdate(null)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
+              {selectedUpdate.message}
+            </p>
+            <p className="mt-4 text-xs text-gray-400">
+              (Here you could show full community post, comments, or reply options.)
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
