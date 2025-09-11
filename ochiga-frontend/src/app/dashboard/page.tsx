@@ -23,19 +23,19 @@ export default function ResidentDashboardPage() {
 
   return (
     <ProtectedRoute role="resident">
-      {/* ✅ Full-page wrapper prevents side scroll */}
+      {/* ✅ Full-page wrapper (no horizontal scroll) */}
       <div className="min-h-screen overflow-x-hidden bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         
-        {/* ✅ Full-width header (touches both edges) */}
-        <header className="w-screen -mx-6 md:-mx-8 px-6 md:px-8 bg-white dark:bg-gray-800 shadow-md">
-          <div className="flex items-center justify-between h-16">
+        {/* ✅ Full-width header */}
+        <header className="w-full bg-white dark:bg-gray-800 shadow-md">
+          <div className="px-4 md:px-8 flex items-center justify-between h-16">
             <h1 className="text-xl font-semibold">Resident Dashboard</h1>
             <div>🔔 Profile</div>
           </div>
         </header>
 
-        {/* ✅ Main grid with consistent padding */}
-        <main className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* ✅ Main grid (no side gaps on mobile) */}
+        <main className="px-4 md:px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-6">
           <WalletCard />
           <UtilitiesCard />
           <DeviceCards />
