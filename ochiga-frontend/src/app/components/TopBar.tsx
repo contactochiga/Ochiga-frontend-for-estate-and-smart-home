@@ -2,9 +2,32 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import {
+  MegaphoneIcon,
+  WrenchScrewdriverIcon,
+  BoltIcon,
+  UsersIcon,
+  ChartBarIcon,
+  QuestionMarkCircleIcon,
+  DocumentTextIcon,
+  SunIcon,
+  MoonIcon,
+  UserIcon,
+  Cog6ToothIcon,
+  ShieldCheckIcon,
+  ArrowLeftOnRectangleIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline";
 
 export default function TopBar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  const toggleTheme = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle("dark");
+  };
 
   return (
     <>
@@ -49,7 +72,7 @@ export default function TopBar() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 relative">
             {/* Notifications */}
             <button className="relative p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
               <svg
@@ -70,15 +93,55 @@ export default function TopBar() {
             </button>
 
             {/* Profile */}
-            <button className="h-9 w-9 rounded-full bg-gray-300 dark:bg-gray-600 border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <Image
-                src="/user-avatar.png"
-                alt="Profile"
-                width={36}
-                height={36}
-                className="object-cover"
-              />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="h-9 w-9 rounded-full bg-gray-300 dark:bg-gray-600 border border-gray-200 dark:border-gray-700 overflow-hidden"
+              >
+                <Image
+                  src="/user-avatar.png"
+                  alt="Profile"
+                  width={36}
+                  height={36}
+                  className="object-cover"
+                />
+              </button>
+
+              {/* Profile Dropdown */}
+              {profileOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 py-2">
+                  <a href="/profile" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <UserIcon className="h-4 w-4 mr-2" /> My Profile
+                  </a>
+                  <a href="/settings" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <Cog6ToothIcon className="h-4 w-4 mr-2" /> Settings
+                  </a>
+                  <button
+                    onClick={toggleTheme}
+                    className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    {darkMode ? (
+                      <>
+                        <SunIcon className="h-4 w-4 mr-2" /> Light Mode
+                      </>
+                    ) : (
+                      <>
+                        <MoonIcon className="h-4 w-4 mr-2" /> Dark Mode
+                      </>
+                    )}
+                  </button>
+                  <a href="/security" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <ShieldCheckIcon className="h-4 w-4 mr-2" /> Security
+                  </a>
+                  <a href="/activity" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <ClockIcon className="h-4 w-4 mr-2" /> My Activity
+                  </a>
+                  <a href="/logout" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <ArrowLeftOnRectangleIcon className="h-4 w-4 mr-2" /> Logout
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -97,26 +160,30 @@ export default function TopBar() {
         }`}
       >
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <span className="font-semibold text-gray-800 dark:text-gray-100">Menu</span>
-          <button onClick={() => setIsOpen(false)} className="p-1">
-            ✕
-          </button>
+          <span className="font-semibold text-gray-800 dark:text-gray-100">Estate Tools</span>
+          <button onClick={() => setIsOpen(false)} className="p-1">✕</button>
         </div>
         <nav className="p-4 space-y-3">
-          <a href="/dashboard" className="block text-gray-700 dark:text-gray-300 hover:underline">
-            Dashboard
+          <a href="/announcements" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+            <MegaphoneIcon className="h-5 w-5" /> Announcements
           </a>
-          <a href="/wallet" className="block text-gray-700 dark:text-gray-300 hover:underline">
-            Wallet
+          <a href="/maintenance" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+            <WrenchScrewdriverIcon className="h-5 w-5" /> Maintenance Requests
           </a>
-          <a href="/devices" className="block text-gray-700 dark:text-gray-300 hover:underline">
-            Devices
+          <a href="/utilities" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+            <BoltIcon className="h-5 w-5" /> Utilities
           </a>
-          <a href="/visitors" className="block text-gray-700 dark:text-gray-300 hover:underline">
-            Visitors
+          <a href="/directory" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+            <UsersIcon className="h-5 w-5" /> Directory
           </a>
-          <a href="/settings" className="block text-gray-700 dark:text-gray-300 hover:underline">
-            Settings
+          <a href="/reports" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+            <ChartBarIcon className="h-5 w-5" /> Reports & History
+          </a>
+          <a href="/help" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+            <QuestionMarkCircleIcon className="h-5 w-5" /> Help & Support
+          </a>
+          <a href="/legal" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+            <DocumentTextIcon className="h-5 w-5" /> Legal & Policies
           </a>
         </nav>
       </aside>
