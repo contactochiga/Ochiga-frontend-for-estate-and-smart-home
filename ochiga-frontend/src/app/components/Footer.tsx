@@ -8,7 +8,7 @@ import {
   Squares2X2Icon,
   WalletIcon,
   UsersIcon,
-  Cog6ToothIcon,
+  UsersGroupIcon, // ✅ Added for Community
 } from "@heroicons/react/24/outline";
 
 export default function Footer() {
@@ -21,7 +21,7 @@ export default function Footer() {
     { name: "Rooms", href: "/dashboard/rooms", icon: Squares2X2Icon },
     { name: "Wallet", href: "/dashboard/wallet", icon: WalletIcon },
     { name: "Visitors", href: "/dashboard/visitors", icon: UsersIcon },
-    { name: "Settings", href: "/dashboard/settings", icon: Cog6ToothIcon },
+    { name: "Community", href: "/dashboard/community", icon: UsersGroupIcon }, // ✅ Changed
   ];
 
   // Detect scroll direction
