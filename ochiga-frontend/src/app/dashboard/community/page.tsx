@@ -1,7 +1,6 @@
-// src/app/dashboard/community/page.tsx
 "use client";
 
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   PhotoIcon,
   VideoCameraIcon,
@@ -10,335 +9,204 @@ import {
   ChatBubbleLeftIcon,
   ShareIcon,
   PaperAirplaneIcon,
-  XMarkIcon,
-  PencilSquareIcon,
-  UserCircleIcon,
-  BellAlertIcon,
+  EnvelopeIcon,
 } from "@heroicons/react/24/outline";
 
-/**
- * Interactive Community Page for Ochiga
- * - Composer (photo/video/poll)
- * - Pinned manager posts
- * - Groups carousel (join toggle)
- * - Feed: like, comment, share, inline add comment
- * - Simple DM drawer
- *
- * Replace existing page.tsx in /dashboard/community with this file.
- */
-
-type Post = {
-  id: number;
-  author: string;
-  content: string;
-  image?: string | null;
-  video?: string | null;
-  likes: number;
-  liked?: boolean;
-  comments: { id: number; author: string; text: string }[];
-  pinned?: boolean;
-  createdAt?: string;
-};
-
-type Group = { id: number; name: string; members: number; joined?: boolean };
-
 export default function CommunityPage() {
-  // initial posts: estate manager pinned + one sample
-  const [posts, setPosts] = useState<Post[]>([
+  const [posts, setPosts] = useState<any[]>([
     {
       id: 1,
       author: "Estate Manager",
       content:
-        "Welcome to the Ochiga Community Hub 🎉. Please use this space to share important estate updates — official notices will be pinned here.",
-      likes: 12,
-      liked: false,
+        "Welcome to the new Ochiga Community Hub 🎉. Share updates, connect with neighbors, and stay informed about estate events.",
+      image: null,
+      video: null,
+      likes: 8,
       comments: [
-        { id: 1, author: "Jane D.", text: "Thanks! Very helpful." },
-        { id: 2, author: "Mark T.", text: "Great to have this." },
+        { id: 1, author: "Jane D.", text: "This looks amazing 👏" },
+        { id: 2, author: "Mark T.", text: "Finally, something interactive!" },
       ],
       pinned: true,
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 2,
-      author: "Aisha B.",
-      content: "Does anyone recommend a reliable plumber in the estate?",
-      likes: 3,
-      liked: false,
-      comments: [{ id: 1, author: "Paul", text: "Try BrightFix — they helped me." }],
-      pinned: false,
-      createdAt: new Date().toISOString(),
     },
   ]);
 
-  const [groups, setGroups] = useState<Group[]>([
+  const [groups] = useState([
     { id: 1, name: "Gym & Fitness Club", members: 25 },
     { id: 2, name: "Parents Forum", members: 40 },
     { id: 3, name: "Security Watch", members: 18 },
     { id: 4, name: "Football Crew", members: 15 },
   ]);
 
-  // composer state
-  const [newPostText, setNewPostText] = useState("");
-  const [media, setMedia] = useState<{ image?: string | null; video?: string | null }>(
-    {}
-  );
-  const fileRef = useRef<HTMLInputElement | null>(null);
-  const videoRef = useRef<HTMLInputElement | null>(null);
+  const [newPost, setNewPost] = useState("");
+  const [media, setMedia] = useState<{ image?: string; video?: string }>({});
+  const [activeComment, setActiveComment] = useState("");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
 
-  // DM drawer
-  const [dmOpen, setDmOpen] = useState(false);
-  const [activeChatUser, setActiveChatUser] = useState<string | null>(null);
-  const [chatMessages, setChatMessages] = useState<Record<string, { from: string; text: string }[]>>(
-    {
-      "Security Office": [{ from: "Security Office", text: "All units check complete." }],
-    }
-  );
-  const [chatInput, setChatInput] = useState("");
-
-  // helpers
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") => {
-    if (!e.target.files || !e.target.files[0]) return;
-    const url = URL.createObjectURL(e.target.files[0]);
-    setMedia((prev) => ({ ...prev, [type]: url }));
-  };
-
-  const makePost = () => {
-    if (!newPostText.trim() && !media.image && !media.video) return;
-    const newPost: Post = {
-      id: posts.length + 1 + Math.floor(Math.random() * 1000),
-      author: "You",
-      content: newPostText,
-      image: media.image || null,
-      video: media.video || null,
-      likes: 0,
-      liked: false,
-      comments: [],
-      pinned: false,
-      createdAt: new Date().toISOString(),
-    };
-    setPosts([newPost, ...posts]);
-    setNewPostText("");
+  const handlePost = () => {
+    if (!newPost.trim() && !media.image && !media.video) return;
+    setPosts([
+      {
+        id: posts.length + 1,
+        author: "You",
+        content: newPost,
+        image: media.image || null,
+        video: media.video || null,
+        likes: 0,
+        comments: [],
+      },
+      ...posts,
+    ]);
+    setNewPost("");
     setMedia({});
   };
 
-  const toggleLike = (id: number) => {
+  const handleFileUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "image" | "video"
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const url = URL.createObjectURL(e.target.files[0]);
+      setMedia((prev) => ({ ...prev, [type]: url }));
+    }
+  };
+
+  const handleLike = (id: number) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id ? { ...p, likes: p.likes + 1 } : p
+      )
+    );
+  };
+
+  const handleComment = (id: number) => {
+    if (!activeComment.trim()) return;
     setPosts((prev) =>
       prev.map((p) =>
         p.id === id
           ? {
               ...p,
-              liked: !p.liked,
-              likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1,
-            }
-          : p
-      )
-    );
-  };
-
-  const addComment = (postId: number, text: string) => {
-    if (!text.trim()) return;
-    setPosts((prev) =>
-      prev.map((p) =>
-        p.id === postId
-          ? {
-              ...p,
               comments: [
                 ...p.comments,
-                { id: p.comments.length + 1 + Math.floor(Math.random() * 1000), author: "You", text },
+                { id: p.comments.length + 1, author: "You", text: activeComment },
               ],
             }
           : p
       )
     );
+    setActiveComment("");
   };
-
-  const sharePost = async (post: Post) => {
-    // copy a simple text link to clipboard (no backend)
-    const payload = `${post.author}: ${post.content}\n(shared from Ochiga Community)`;
-    await navigator.clipboard.writeText(payload);
-    alert("Post details copied to clipboard. Share it anywhere.");
-  };
-
-  const toggleJoinGroup = (id: number) => {
-    setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, joined: !g.joined } : g)));
-  };
-
-  const openChatWith = (name: string) => {
-    setActiveChatUser(name);
-    setDmOpen(true);
-    if (!chatMessages[name]) setChatMessages((prev) => ({ ...prev, [name]: [] }));
-  };
-
-  const sendChat = () => {
-    if (!activeChatUser || !chatInput.trim()) return;
-    setChatMessages((prev) => ({
-      ...prev,
-      [activeChatUser]: [...(prev[activeChatUser] || []), { from: "You", text: chatInput }],
-    }));
-    setChatInput("");
-  };
-
-  // small UI components inside file for convenience
-  const Composer = (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
-      <textarea
-        placeholder="Share an update with your estate..."
-        className="w-full bg-transparent resize-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-2 rounded-md border border-gray-100 dark:border-gray-700 focus:ring-2 focus:ring-blue-500"
-        rows={3}
-        value={newPostText}
-        onChange={(e) => setNewPostText(e.target.value)}
-      />
-      {media.image && (
-        <img
-          src={media.image}
-          alt="preview"
-          className="mt-3 w-full rounded-lg max-h-64 object-cover"
-        />
-      )}
-      {media.video && (
-        <video controls className="mt-3 w-full rounded-lg max-h-64">
-          <source src={media.video} />
-        </video>
-      )}
-
-      <div className="flex items-center justify-between mt-3">
-        <div className="flex items-center space-x-4 text-gray-500 dark:text-gray-400">
-          <button
-            onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-          >
-            <PhotoIcon className="h-5 w-5" /> <span className="text-sm hidden sm:inline">Photo</span>
-          </button>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={fileRef}
-            onChange={(e) => handleFileUpload(e, "image")}
-          />
-
-          <button
-            onClick={() => videoRef.current?.click()}
-            className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-          >
-            <VideoCameraIcon className="h-5 w-5" /> <span className="text-sm hidden sm:inline">Video</span>
-          </button>
-          <input
-            type="file"
-            accept="video/*"
-            className="hidden"
-            ref={videoRef}
-            onChange={(e) => handleFileUpload(e, "video")}
-          />
-
-          <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-            <ChartBarIcon className="h-5 w-5" /> <span className="text-sm hidden sm:inline">Poll</span>
-          </button>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={makePost}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:opacity-95 transition"
-          >
-            Post
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6">
-      {/* Header row */}
+      {/* Header with DM button */}
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Community</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Connect with neighbors — announcements, groups, and chat.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            title="Announcements"
-            className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition"
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          >
-            <BellAlertIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
-          </button>
-
-          <button
-            title="Direct Messages"
-            className="p-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:opacity-95"
-            onClick={() => setDmOpen(true)}
-          >
-            <PaperAirplaneIcon className="h-5 w-5" />
-          </button>
-        </div>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+          Community
+        </h1>
+        <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+          <EnvelopeIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+        </button>
       </div>
 
-      {/* Composer */}
-      <section className="mb-6">{Composer}</section>
-
-      {/* Pinned */}
+      {/* Post Composer */}
       <section className="mb-6">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg">
+          <textarea
+            value={newPost}
+            onChange={(e) => setNewPost(e.target.value)}
+            placeholder="Share an update with your estate..."
+            className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+            rows={3}
+          />
+          {media.image && (
+            <img
+              src={media.image}
+              alt="preview"
+              className="mt-3 rounded-lg max-h-60 object-cover"
+            />
+          )}
+          {media.video && (
+            <video controls className="mt-3 rounded-lg w-full max-h-64">
+              <source src={media.video} type="video/mp4" />
+            </video>
+          )}
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex space-x-4 text-gray-500 dark:text-gray-400">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1 hover:text-blue-600"
+              >
+                <PhotoIcon className="h-5 w-5" /> Photo
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={(e) => handleFileUpload(e, "image")}
+              />
+              <button
+                onClick={() => videoInputRef.current?.click()}
+                className="flex items-center gap-1 hover:text-blue-600"
+              >
+                <VideoCameraIcon className="h-5 w-5" /> Video
+              </button>
+              <input
+                type="file"
+                accept="video/*"
+                className="hidden"
+                ref={videoInputRef}
+                onChange={(e) => handleFileUpload(e, "video")}
+              />
+              <button className="flex items-center gap-1 hover:text-blue-600">
+                <ChartBarIcon className="h-5 w-5" /> Poll
+              </button>
+            </div>
+            <button
+              onClick={handlePost}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:opacity-90"
+            >
+              Post
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Pinned Post */}
+      <section className="mb-8">
         {posts
           .filter((p) => p.pinned)
-          .map((p) => (
-            <article
-              key={p.id}
-              className="p-4 rounded-xl mb-4 bg-gradient-to-r from-slate-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 shadow-lg border border-gray-200 dark:border-gray-700"
+          .map((post) => (
+            <div
+              key={post.id}
+              className="bg-gradient-to-r from-slate-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 p-5 rounded-xl shadow-lg mb-4"
             >
-              <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-600 text-white">
-                  <UserCircleIcon className="h-6 w-6" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                      {p.author} <span className="text-xs ml-2 bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded-full">Pinned</span>
-                    </h3>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(p.createdAt || "").toLocaleDateString()}</span>
-                  </div>
-                  <p className="mt-2 text-gray-700 dark:text-gray-300">{p.content}</p>
-                </div>
-              </div>
-            </article>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                {post.author} 📌
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300">{post.content}</p>
+            </div>
           ))}
       </section>
 
-      {/* Groups carousel */}
-      <section className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">👥 Groups you may like</h2>
-          <a href="#groups" className="text-sm text-indigo-600 dark:text-indigo-400">See all</a>
-        </div>
-
-        <div className="flex space-x-4 overflow-x-auto pb-2">
+      {/* Groups */}
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold mb-3">👥 Groups you may like</h2>
+        <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
           {groups.map((g) => (
             <div
               key={g.id}
-              className="min-w-[200px] bg-white dark:bg-gray-800 rounded-xl p-4 shadow hover:shadow-md transition"
+              className="min-w-[220px] p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition"
             >
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center">
-                  <PencilSquareIcon className="h-6 w-6" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100">{g.name}</h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{g.members} members</p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => toggleJoinGroup(g.id)}
-                className={`mt-3 w-full py-2 rounded-lg font-semibold transition ${
-                  g.joined ? "bg-gray-200 dark:bg-gray-700 text-gray-800" : "bg-blue-600 text-white"
-                }`}
-              >
-                {g.joined ? "Joined" : "Join Group"}
+              <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                {g.name}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {g.members} members
+              </p>
+              <button className="mt-3 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-1.5 rounded hover:opacity-90">
+                Join Group
               </button>
             </div>
           ))}
@@ -350,214 +218,78 @@ export default function CommunityPage() {
         {posts
           .filter((p) => !p.pinned)
           .map((post) => (
-            <article
+            <div
               key={post.id}
-              className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow"
+              className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow"
             >
-              <div className="flex items-start gap-3">
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-600 text-white">
-                  <UserCircleIcon className="h-6 w-6" />
-                </div>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                {post.author}
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300">{post.content}</p>
+              {post.image && (
+                <img
+                  src={post.image}
+                  alt="post"
+                  className="mt-3 rounded-lg max-h-60 object-cover"
+                />
+              )}
+              {post.video && (
+                <video controls className="mt-3 rounded-lg w-full max-h-64">
+                  <source src={post.video} type="video/mp4" />
+                </video>
+              )}
 
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{post.author}</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(post.createdAt || "").toLocaleString()}</p>
-                    </div>
+              {/* Post Actions */}
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-3">
+                <button
+                  onClick={() => handleLike(post.id)}
+                  className="flex items-center gap-1 hover:text-blue-600"
+                >
+                  <HandThumbUpIcon className="h-4 w-4" /> {post.likes} Likes
+                </button>
+                <button className="flex items-center gap-1 hover:text-blue-600">
+                  <ChatBubbleLeftIcon className="h-4 w-4" />{" "}
+                  {post.comments.length} Comments
+                </button>
+                <button className="flex items-center gap-1 hover:text-blue-600">
+                  <ShareIcon className="h-4 w-4" /> Share
+                </button>
+              </div>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => toggleLike(post.id)}
-                        className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
-                          post.liked ? "bg-blue-50 dark:bg-blue-900 text-blue-600" : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                        }`}
-                      >
-                        <HandThumbUpIcon className="h-4 w-4" /> <span className="text-sm">{post.likes}</span>
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          // focus comment input logic: add small local state per post is heavy; we'll open a quick prompt for simplicity
-                          {
-                            const c = prompt("Add a comment:");
-                            if (c) addComment(post.id, c);
-                          }
-                        }
-                        className="flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      >
-                        <ChatBubbleLeftIcon className="h-4 w-4" /> <span className="text-sm">{post.comments.length}</span>
-                      </button>
-
-                      <button
-                        onClick={() => sharePost(post)}
-                        className="flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                      >
-                        <ShareIcon className="h-4 w-4" /> <span className="text-sm">Share</span>
-                      </button>
-                    </div>
+              {/* Comments */}
+              <div className="mt-3 space-y-2">
+                {post.comments.map((c) => (
+                  <div
+                    key={c.id}
+                    className="text-sm bg-gray-100 dark:bg-gray-700 p-2 rounded-md"
+                  >
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {c.author}:
+                    </span>{" "}
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {c.text}
+                    </span>
                   </div>
-
-                  <p className="mt-3 text-gray-700 dark:text-gray-300">{post.content}</p>
-
-                  {post.image && (
-                    <img src={post.image} alt="post" className="mt-3 rounded-lg max-h-60 object-cover w-full" />
-                  )}
-                  {post.video && (
-                    <video controls className="mt-3 rounded-lg w-full max-h-64">
-                      <source src={post.video} />
-                    </video>
-                  )}
-
-                  {/* Inline comments */}
-                  <div className="mt-3 space-y-2">
-                    {post.comments.map((c) => (
-                      <div key={c.id} className="text-sm bg-gray-100 dark:bg-gray-700 p-3 rounded-md">
-                        <span className="font-medium text-gray-800 dark:text-gray-200">{c.author}:</span>{" "}
-                        <span className="text-gray-700 dark:text-gray-300">{c.text}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* quick add comment input */}
-                  <div className="mt-3 flex items-center gap-2">
-                    <input
-                      placeholder="Write a comment..."
-                      className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm focus:ring-1 focus:ring-blue-500"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          const val = (e.target as HTMLInputElement).value;
-                          addComment(post.id, val);
-                          (e.target as HTMLInputElement).value = "";
-                        }
-                      }}
-                    />
-                    <button
-                      onClick={() => {
-                        const val = (document.activeElement as HTMLElement & { value?: string })?.value || "";
-                        // fallback: prompt
-                        const comment = prompt("Write a comment:");
-                        if (comment) addComment(post.id, comment);
-                      }}
-                      className="p-2 rounded-lg bg-blue-600 text-white"
-                    >
-                      <PaperAirplaneIcon className="h-4 w-4 transform rotate-45" />
-                    </button>
-                  </div>
+                ))}
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="text"
+                    value={activeComment}
+                    onChange={(e) => setActiveComment(e.target.value)}
+                    placeholder="Write a comment..."
+                    className="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm"
+                  />
+                  <button
+                    onClick={() => handleComment(post.id)}
+                    className="p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700"
+                  >
+                    <PaperAirplaneIcon className="h-4 w-4" />
+                  </button>
                 </div>
               </div>
-            </article>
+            </div>
           ))}
       </section>
-
-      {/* DM Drawer */}
-      <div
-        className={`fixed inset-0 z-50 pointer-events-none transition-opacity ${
-          dmOpen ? "opacity-100 pointer-events-auto" : "opacity-0"
-        }`}
-      >
-        <div
-          className="absolute inset-0 bg-black/40"
-          onClick={() => {
-            setDmOpen(false);
-            setActiveChatUser(null);
-          }}
-        />
-        <aside className="absolute right-4 bottom-4 w-full max-w-md bg-white dark:bg-gray-900 rounded-2xl shadow-2xl pointer-events-auto overflow-hidden">
-          <div className="flex items-center justify-between p-4 border-b dark:border-gray-800">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Direct Messages</h3>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  setDmOpen(false);
-                  setActiveChatUser(null);
-                }}
-                className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-
-          <div className="flex h-96">
-            <div className="w-1/3 border-r dark:border-gray-800 overflow-auto">
-              {/* users list */}
-              <ul className="p-3 space-y-2">
-                {["Security Office", "Estate Manager", "Paul", "Aisha B."].map((u) => (
-                  <li key={u}>
-                    <button
-                      onClick={() => openChatWith(u)}
-                      className={`w-full text-left p-2 rounded-md flex items-center gap-2 ${
-                        activeChatUser === u ? "bg-gray-100 dark:bg-gray-800" : "hover:bg-gray-50 dark:hover:bg-gray-800"
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center">
-                        <UserCircleIcon className="h-5 w-5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div className="font-medium text-gray-900 dark:text-gray-100">{u}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">2m</div>
-                        </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Tap to open chat</div>
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="flex-1 flex flex-col">
-              {activeChatUser ? (
-                <>
-                  <div className="p-3 border-b dark:border-gray-800">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center">
-                          <UserCircleIcon className="h-5 w-5" />
-                        </div>
-                        <div>
-                          <div className="font-semibold text-gray-900 dark:text-gray-100">{activeChatUser}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">online</div>
-                        </div>
-                      </div>
-                      <div className="text-xs text-gray-400"># chat</div>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 p-3 overflow-auto space-y-3">
-                    {(chatMessages[activeChatUser] || []).map((m, i) => (
-                      <div key={i} className={`max-w-[75%] p-2 rounded-lg ${m.from === "You" ? "bg-blue-600 text-white ml-auto" : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"}`}>
-                        <div className="text-sm">{m.text}</div>
-                        <div className="text-xs opacity-60 mt-1">{m.from}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="p-3 border-t dark:border-gray-800 flex items-center gap-2">
-                    <input
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") sendChat();
-                      }}
-                      placeholder="Message..."
-                      className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
-                    />
-                    <button onClick={sendChat} className="bg-blue-600 text-white px-3 py-2 rounded-lg">
-                      Send
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                  Select a contact to start chatting
-                </div>
-              )}
-            </div>
-          </div>
-        </aside>
-      </div>
     </main>
   );
 }
