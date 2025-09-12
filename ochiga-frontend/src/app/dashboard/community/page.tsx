@@ -10,10 +10,12 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 
-import ComposerCard from "../../../components/community/ComposerCard";
-import PinnedPostCard from "../../../components/community/PinnedPostCard";
-import GroupsCard from "../../../components/community/GroupsCard";
-import FeedPostCard from "../../../components/community/FeedPostCard";
+import {
+  ComposerCard,
+  PinnedPostCard,
+  GroupsCard,
+  FeedPostCard,
+} from "../../../components/community";
 
 type Post = {
   id: number;
@@ -53,7 +55,9 @@ export default function CommunityPage() {
       content: "Does anyone recommend a reliable plumber in the estate?",
       likes: 3,
       liked: false,
-      comments: [{ id: 1, author: "Paul", text: "Try BrightFix — they helped me." }],
+      comments: [
+        { id: 1, author: "Paul", text: "Try BrightFix — they helped me." },
+      ],
       createdAt: new Date().toISOString(),
     },
   ]);
@@ -93,7 +97,13 @@ export default function CommunityPage() {
   const toggleLike = (id: number) => {
     setPosts((prev) =>
       prev.map((p) =>
-        p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1 } : p
+        p.id === id
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1,
+            }
+          : p
       )
     );
   };
@@ -107,7 +117,11 @@ export default function CommunityPage() {
               ...p,
               comments: [
                 ...p.comments,
-                { id: p.comments.length + 1 + Math.floor(Math.random() * 1000), author: "You", text },
+                {
+                  id: p.comments.length + 1 + Math.floor(Math.random() * 1000),
+                  author: "You",
+                  text,
+                },
               ],
             }
           : p
@@ -122,7 +136,9 @@ export default function CommunityPage() {
   };
 
   const toggleJoinGroup = (id: number) => {
-    setGroups((prev) => prev.map((g) => (g.id === id ? { ...g, joined: !g.joined } : g)));
+    setGroups((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, joined: !g.joined } : g))
+    );
   };
 
   return (
