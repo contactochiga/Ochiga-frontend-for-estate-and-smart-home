@@ -31,7 +31,7 @@ export default function TopBar() {
 
   return (
     <>
-      {/* Sticky Full-Width TopBar */}
+      {/* 🔹 Sticky Header */}
       <header
         className="sticky top-0 z-50 w-screen -mx-4 sm:-mx-6 md:-mx-8 
         bg-white/70 dark:bg-gray-900/60 
@@ -41,7 +41,6 @@ export default function TopBar() {
         <div className="px-6 py-3 flex items-center justify-between">
           {/* Left side: hamburger + logo */}
           <div className="flex items-center gap-3">
-            {/* Hamburger */}
             <button
               onClick={() => setIsOpen(true)}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -53,16 +52,10 @@ export default function TopBar() {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>
               </svg>
             </button>
 
-            {/* Ochiga Logo */}
             <div className="flex items-center gap-2">
               <Image src="/ochiga-logo.png" alt="Ochiga" width={28} height={28} />
               <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -82,17 +75,12 @@ export default function TopBar() {
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V5a2 2 0 10-4 0v.083A6 6 0 004 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5m8 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-5-5.917V5a2 2 0 10-4 0v.083A6 6 0 004 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5m8 0v1a3 3 0 11-6 0v-1m6 0H9"/>
               </svg>
               <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500"></span>
             </button>
 
-            {/* Profile */}
+            {/* Profile Menu */}
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
@@ -107,7 +95,6 @@ export default function TopBar() {
                 />
               </button>
 
-              {/* Profile Dropdown */}
               {profileOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 py-2">
                   <a href="/profile" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -146,7 +133,7 @@ export default function TopBar() {
         </div>
       </header>
 
-      {/* Slide-out Sidebar */}
+      {/* 🔹 Slide-out Sidebar */}
       <div
         className={`fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
@@ -163,6 +150,7 @@ export default function TopBar() {
           <span className="font-semibold text-gray-800 dark:text-gray-100">Estate Tools</span>
           <button onClick={() => setIsOpen(false)} className="p-1">✕</button>
         </div>
+
         <nav className="p-4 space-y-3">
           <a href="/announcements" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
             <MegaphoneIcon className="h-5 w-5" /> Announcements
@@ -173,6 +161,8 @@ export default function TopBar() {
           <a href="/utilities" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
             <BoltIcon className="h-5 w-5" /> Utilities
           </a>
+
+          {/* The rest are placeholders for future expansion */}
           <a href="/directory" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
             <UsersIcon className="h-5 w-5" /> Directory
           </a>
