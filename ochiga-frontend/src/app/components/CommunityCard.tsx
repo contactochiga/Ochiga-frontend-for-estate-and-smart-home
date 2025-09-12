@@ -31,7 +31,7 @@ export default function CommunityCard() {
           {updates.map((u, i) => (
             <Link
               key={i}
-              href="/community"
+              href="/dashboard/community"
               className="w-full flex items-center justify-between p-3 rounded-xl 
                          bg-white dark:bg-gray-800 
                          shadow hover:shadow-lg hover:scale-[1.02] 
@@ -60,7 +60,7 @@ export default function CommunityCard() {
 
         {/* See more */}
         <Link
-          href="/community"
+          href="/dashboard/community"
           className="w-full block mt-5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline text-center"
         >
           See more
