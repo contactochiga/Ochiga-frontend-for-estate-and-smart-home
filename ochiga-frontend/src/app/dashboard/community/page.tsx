@@ -1,21 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { PhotoIcon, VideoCameraIcon, ChartBarIcon, HandThumbUpIcon, ChatBubbleLeftIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { useState, useRef } from "react";
+import {
+  PhotoIcon,
+  VideoCameraIcon,
+  ChartBarIcon,
+  HandThumbUpIcon,
+  ChatBubbleLeftIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
 
 export default function CommunityPage() {
-  const [announcements] = useState([
+  const [posts, setPosts] = useState<any[]>([
     {
       id: 1,
-      title: "General Meeting",
-      content: "All residents are invited for the estate general meeting on Saturday 31st at 12 PM.",
-      date: "2025-08-20",
-    },
-    {
-      id: 2,
-      title: "Water Supply Notice",
-      content: "Water supply will be temporarily unavailable from 9 AM – 2 PM tomorrow due to maintenance.",
-      date: "2025-08-22",
+      author: "Estate Manager",
+      content:
+        "Welcome to the new Ochiga Community Hub 🎉. Share updates, connect with neighbors, and stay informed about estate events.",
+      image: null,
+      video: null,
+      likes: 8,
+      comments: [
+        { id: 1, author: "Jane D.", text: "This looks amazing 👏" },
+        { id: 2, author: "Mark T.", text: "Finally, something interactive!" },
+      ],
+      pinned: true,
     },
   ]);
 
@@ -23,40 +32,37 @@ export default function CommunityPage() {
     { id: 1, name: "Gym & Fitness Club", members: 25 },
     { id: 2, name: "Parents Forum", members: 40 },
     { id: 3, name: "Security Watch", members: 18 },
-  ]);
-
-  const [posts, setPosts] = useState<any[]>([
-    {
-      id: 1,
-      author: "Estate Manager",
-      content: "Welcome to the new Community Hub! 🎉 Share your thoughts, updates, or even photos.",
-      image: null,
-      video: null,
-      likes: 5,
-      comments: [
-        { id: 1, author: "Jane D.", text: "This looks amazing 👏👏" },
-        { id: 2, author: "Mark T.", text: "Finally, something interactive for us!" },
-      ],
-    },
+    { id: 4, name: "Football Crew", members: 15 },
   ]);
 
   const [newPost, setNewPost] = useState("");
+  const [media, setMedia] = useState<{ image?: string; video?: string }>({});
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
 
   const handlePost = () => {
-    if (!newPost.trim()) return;
+    if (!newPost.trim() && !media.image && !media.video) return;
     setPosts([
       {
         id: posts.length + 1,
         author: "You",
         content: newPost,
-        image: null,
-        video: null,
+        image: media.image || null,
+        video: media.video || null,
         likes: 0,
         comments: [],
       },
       ...posts,
     ]);
     setNewPost("");
+    setMedia({});
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") => {
+    if (e.target.files && e.target.files[0]) {
+      const url = URL.createObjectURL(e.target.files[0]);
+      setMedia((prev) => ({ ...prev, [type]: url }));
+    }
   };
 
   return (
@@ -65,36 +71,98 @@ export default function CommunityPage() {
         Community
       </h1>
 
-      {/* Announcements */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold mb-3">📢 Announcements</h2>
-        <div className="space-y-4">
-          {announcements.map((a) => (
-            <div
-              key={a.id}
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow"
-            >
-              <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                {a.title}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">{a.content}</p>
-              <p className="text-xs text-gray-400 mt-2">📅 {a.date}</p>
+      {/* Post Composer */}
+      <section className="mb-6">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg">
+          <textarea
+            value={newPost}
+            onChange={(e) => setNewPost(e.target.value)}
+            placeholder="Share an update with your estate..."
+            className="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+            rows={3}
+          />
+          {media.image && (
+            <img src={media.image} alt="preview" className="mt-3 rounded-lg max-h-60 object-cover" />
+          )}
+          {media.video && (
+            <video controls className="mt-3 rounded-lg w-full max-h-64">
+              <source src={media.video} type="video/mp4" />
+            </video>
+          )}
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex space-x-4 text-gray-500 dark:text-gray-400">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1 hover:text-blue-600"
+              >
+                <PhotoIcon className="h-5 w-5" /> Photo
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={(e) => handleFileUpload(e, "image")}
+              />
+              <button
+                onClick={() => videoInputRef.current?.click()}
+                className="flex items-center gap-1 hover:text-blue-600"
+              >
+                <VideoCameraIcon className="h-5 w-5" /> Video
+              </button>
+              <input
+                type="file"
+                accept="video/*"
+                className="hidden"
+                ref={videoInputRef}
+                onChange={(e) => handleFileUpload(e, "video")}
+              />
+              <button className="flex items-center gap-1 hover:text-blue-600">
+                <ChartBarIcon className="h-5 w-5" /> Poll
+              </button>
             </div>
-          ))}
+            <button
+              onClick={handlePost}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:opacity-90"
+            >
+              Post
+            </button>
+          </div>
         </div>
       </section>
 
-      {/* Groups */}
+      {/* Pinned / Estate Manager Post */}
       <section className="mb-8">
-        <h2 className="text-lg font-semibold mb-3">👥 Groups</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {posts
+          .filter((p) => p.pinned)
+          .map((post) => (
+            <div
+              key={post.id}
+              className="bg-gradient-to-r from-slate-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 p-5 rounded-xl shadow-lg mb-4"
+            >
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                {post.author} 📌
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300">{post.content}</p>
+            </div>
+          ))}
+      </section>
+
+      {/* Groups you may like (horizontal scroll) */}
+      <section className="mb-8">
+        <h2 className="text-lg font-semibold mb-3">👥 Groups you may like</h2>
+        <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
           {groups.map((g) => (
             <div
               key={g.id}
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition"
+              className="min-w-[200px] p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition"
             >
-              <h3 className="font-medium text-gray-900 dark:text-gray-100">{g.name}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{g.members} members</p>
+              <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                {g.name}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {g.members} members
+              </p>
               <button className="mt-3 w-full bg-blue-600 text-white py-1.5 rounded hover:bg-blue-700">
                 Join Group
               </button>
@@ -103,86 +171,60 @@ export default function CommunityPage() {
         </div>
       </section>
 
-      {/* Post Composer */}
-      <section className="mb-6">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-          <textarea
-            value={newPost}
-            onChange={(e) => setNewPost(e.target.value)}
-            placeholder="Share an update with your estate..."
-            className="w-full p-2 rounded-md border dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
-            rows={3}
-          />
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex space-x-3 text-gray-500 dark:text-gray-400">
-              <button className="flex items-center gap-1 hover:text-blue-600">
-                <PhotoIcon className="h-5 w-5" /> Photo
-              </button>
-              <button className="flex items-center gap-1 hover:text-blue-600">
-                <VideoCameraIcon className="h-5 w-5" /> Video
-              </button>
-              <button className="flex items-center gap-1 hover:text-blue-600">
-                <ChartBarIcon className="h-5 w-5" /> Poll
-              </button>
-            </div>
-            <button
-              onClick={handlePost}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Post
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* Feed */}
       <section className="space-y-6">
-        {posts.map((post) => (
-          <div
-            key={post.id}
-            className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow"
-          >
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              {post.author}
-            </h3>
-            <p className="text-gray-700 dark:text-gray-300">{post.content}</p>
-            {post.image && (
-              <img src={post.image} alt="post" className="mt-3 rounded-lg" />
-            )}
-            {post.video && (
-              <video controls className="mt-3 rounded-lg w-full">
-                <source src={post.video} type="video/mp4" />
-              </video>
-            )}
-            {/* Actions */}
-            <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-3">
-              <button className="flex items-center gap-1 hover:text-blue-600">
-                <HandThumbUpIcon className="h-4 w-4" /> {post.likes} Likes
-              </button>
-              <button className="flex items-center gap-1 hover:text-blue-600">
-                <ChatBubbleLeftIcon className="h-4 w-4" /> {post.comments.length} Comments
-              </button>
-              <button className="flex items-center gap-1 hover:text-blue-600">
-                <ShareIcon className="h-4 w-4" /> Share
-              </button>
+        {posts
+          .filter((p) => !p.pinned)
+          .map((post) => (
+            <div
+              key={post.id}
+              className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow"
+            >
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                {post.author}
+              </h3>
+              <p className="text-gray-700 dark:text-gray-300">{post.content}</p>
+              {post.image && (
+                <img
+                  src={post.image}
+                  alt="post"
+                  className="mt-3 rounded-lg max-h-60 object-cover"
+                />
+              )}
+              {post.video && (
+                <video controls className="mt-3 rounded-lg w-full max-h-64">
+                  <source src={post.video} type="video/mp4" />
+                </video>
+              )}
+              <div className="flex justify-between text-sm text-gray-500 dark:text-gray-400 mt-3">
+                <button className="flex items-center gap-1 hover:text-blue-600">
+                  <HandThumbUpIcon className="h-4 w-4" /> {post.likes} Likes
+                </button>
+                <button className="flex items-center gap-1 hover:text-blue-600">
+                  <ChatBubbleLeftIcon className="h-4 w-4" />{" "}
+                  {post.comments.length} Comments
+                </button>
+                <button className="flex items-center gap-1 hover:text-blue-600">
+                  <ShareIcon className="h-4 w-4" /> Share
+                </button>
+              </div>
+              <div className="mt-3 space-y-2">
+                {post.comments.map((c) => (
+                  <div
+                    key={c.id}
+                    className="text-sm bg-gray-100 dark:bg-gray-700 p-2 rounded-md"
+                  >
+                    <span className="font-medium text-gray-800 dark:text-gray-200">
+                      {c.author}:
+                    </span>{" "}
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {c.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-
-            {/* Comments */}
-            <div className="mt-3 space-y-2">
-              {post.comments.map((c) => (
-                <div
-                  key={c.id}
-                  className="text-sm bg-gray-100 dark:bg-gray-700 p-2 rounded-md"
-                >
-                  <span className="font-medium text-gray-800 dark:text-gray-200">
-                    {c.author}:
-                  </span>{" "}
-                  <span className="text-gray-700 dark:text-gray-300">{c.text}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+          ))}
       </section>
     </main>
   );
