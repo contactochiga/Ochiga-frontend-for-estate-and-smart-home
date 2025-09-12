@@ -33,13 +33,13 @@ export default function TopBar() {
     <>
       {/* 🔹 Sticky Header */}
       <header
-        className="sticky top-0 z-50 w-screen -mx-4 sm:-mx-6 md:-mx-8 
+        className="sticky top-0 z-50 w-full 
         bg-white/70 dark:bg-gray-900/60 
         backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 
-        shadow-lg transition"
+        shadow-md transition"
       >
         <div className="px-6 py-3 flex items-center justify-between">
-          {/* Left side: hamburger + logo */}
+          {/* Left: Menu + Logo */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsOpen(true)}
@@ -64,8 +64,8 @@ export default function TopBar() {
             </div>
           </div>
 
-          {/* Right side */}
-          <div className="flex items-center gap-4 relative">
+          {/* Right: Notification + Profile */}
+          <div className="flex items-center gap-4">
             {/* Notifications */}
             <button className="relative p-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
               <svg
@@ -80,7 +80,7 @@ export default function TopBar() {
               <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500"></span>
             </button>
 
-            {/* Profile Menu */}
+            {/* Profile Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
@@ -152,41 +152,25 @@ export default function TopBar() {
         </div>
 
         <nav className="p-4 space-y-3">
-          {/* Announcements → Community Page */}
-          <a
-            href="/dashboard/community"
-            className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline"
-          >
+          <a href="/dashboard/community" className="flex items-center gap-2 hover:underline">
             <MegaphoneIcon className="h-5 w-5" /> Announcements
           </a>
-
-          {/* Maintenance → Maintenance Page */}
-          <a
-            href="/dashboard/maintenance"
-            className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline"
-          >
+          <a href="/dashboard/maintenance" className="flex items-center gap-2 hover:underline">
             <WrenchScrewdriverIcon className="h-5 w-5" /> Maintenance Requests
           </a>
-
-          {/* Utilities → Utilities Page */}
-          <a
-            href="/dashboard/Utilities"
-            className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline"
-          >
+          <a href="/dashboard/utilities" className="flex items-center gap-2 hover:underline">
             <BoltIcon className="h-5 w-5" /> Utilities
           </a>
-
-          {/* 🔹 Placeholders for future */}
-          <a href="/directory" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+          <a href="/directory" className="flex items-center gap-2 hover:underline">
             <UsersIcon className="h-5 w-5" /> Directory
           </a>
-          <a href="/reports" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+          <a href="/reports" className="flex items-center gap-2 hover:underline">
             <ChartBarIcon className="h-5 w-5" /> Reports & History
           </a>
-          <a href="/help" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+          <a href="/help" className="flex items-center gap-2 hover:underline">
             <QuestionMarkCircleIcon className="h-5 w-5" /> Help & Support
           </a>
-          <a href="/legal" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+          <a href="/legal" className="flex items-center gap-2 hover:underline">
             <DocumentTextIcon className="h-5 w-5" /> Legal & Policies
           </a>
         </nav>
