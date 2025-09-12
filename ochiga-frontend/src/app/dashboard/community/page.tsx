@@ -98,9 +98,7 @@ export default function CommunityPage() {
   const toggleLike = (id: number) => {
     setPosts((prev) =>
       prev.map((p) =>
-        p.id === id
-          ? { ...p, liked: !p.liked, likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1 }
-          : p
+        p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1 } : p
       )
     );
   };
@@ -179,27 +177,29 @@ export default function CommunityPage() {
       {Composer}
 
       {/* Pinned */}
-      {posts.filter((p) => p.pinned).map((p) => (
-        <article
-          key={p.id}
-          className="p-4 rounded-xl bg-gradient-to-r from-slate-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 shadow-lg border border-gray-200 dark:border-gray-700"
-        >
-          <div className="flex items-start gap-3">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-600 text-white">
-              <UserCircleIcon className="h-6 w-6" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                  {p.author} <span className="text-xs ml-2 bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded-full">Pinned</span>
-                </h3>
-                <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(p.createdAt || "").toLocaleDateString()}</span>
+      {posts
+        .filter((p) => p.pinned)
+        .map((p) => (
+          <article
+            key={p.id}
+            className="p-4 rounded-xl bg-gradient-to-r from-slate-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 shadow-lg border border-gray-200 dark:border-gray-700"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-600 text-white">
+                <UserCircleIcon className="h-6 w-6" />
               </div>
-              <p className="mt-2 text-gray-700 dark:text-gray-300">{p.content}</p>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">
+                    {p.author} <span className="text-xs ml-2 bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded-full">Pinned</span>
+                  </h3>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(p.createdAt || "").toLocaleDateString()}</span>
+                </div>
+                <p className="mt-2 text-gray-700 dark:text-gray-300">{p.content}</p>
+              </div>
             </div>
-          </div>
-        </article>
-      ))}
+          </article>
+        ))}
 
       {/* Groups */}
       <section>
@@ -222,7 +222,7 @@ export default function CommunityPage() {
               <button
                 onClick={() => toggleJoinGroup(g.id)}
                 className={`mt-3 w-full py-2 rounded-lg font-semibold transition ${
-                  g.joined ? "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200" : "bg-indigo-600 text-white"
+                  g.joined ? "bg-gray-200 dark:bg-gray-700 text-gray-800" : "bg-indigo-600 text-white"
                 }`}
               >
                 {g.joined ? "Joined" : "Join Group"}
@@ -234,81 +234,83 @@ export default function CommunityPage() {
 
       {/* Feed */}
       <section className="space-y-6">
-        {posts.filter((p) => !p.pinned).map((post) => (
-          <article key={post.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
-            <div className="flex items-start gap-3">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-600 text-white">
-                <UserCircleIcon className="h-6 w-6" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{post.author}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(post.createdAt || "").toLocaleString()}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleLike(post.id)}
-                      className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
-                        post.liked ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600" : "hover:bg-gray-100 dark:hover:bg-gray-700"
-                      }`}
-                    >
-                      <HandThumbUpIcon className="h-4 w-4" /> <span className="text-sm">{post.likes}</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        const c = prompt("Add a comment:");
-                        if (c) addComment(post.id, c);
-                      }}
-                      className="flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                      <ChatBubbleLeftIcon className="h-4 w-4" /> <span className="text-sm">{post.comments.length}</span>
-                    </button>
-                    <button
-                      onClick={() => sharePost(post)}
-                      className="flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                    >
-                      <ShareIcon className="h-4 w-4" /> <span className="text-sm">Share</span>
-                    </button>
-                  </div>
+        {posts
+          .filter((p) => !p.pinned)
+          .map((post) => (
+            <article key={post.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
+              <div className="flex items-start gap-3">
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-600 text-white">
+                  <UserCircleIcon className="h-6 w-6" />
                 </div>
-                <p className="mt-3 text-gray-700 dark:text-gray-300">{post.content}</p>
-                {post.image && <img src={post.image} alt="post" className="mt-3 rounded-lg max-h-60 object-cover w-full" />}
-                {post.video && (
-                  <video controls className="mt-3 rounded-lg w-full max-h-64">
-                    <source src={post.video} />
-                  </video>
-                )}
-                {/* Comments */}
-                <div className="mt-3 space-y-2">
-                  {post.comments.map((c) => (
-                    <div key={c.id} className="text-sm bg-gray-100 dark:bg-gray-700 p-3 rounded-md">
-                      <span className="font-medium text-gray-800 dark:text-gray-200">{c.author}:</span>{" "}
-                      <span className="text-gray-700 dark:text-gray-300">{c.text}</span>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{post.author}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(post.createdAt || "").toLocaleString()}</p>
                     </div>
-                  ))}
-                </div>
-                {/* Add comment */}
-                <div className="mt-3 flex items-center gap-2">
-                  <input
-                    placeholder="Write a comment..."
-                    className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm focus:ring-1 focus:ring-indigo-500"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        const val = (e.target as HTMLInputElement).value;
-                        addComment(post.id, val);
-                        (e.target as HTMLInputElement).value = "";
-                      }
-                    }}
-                  />
-                  <button className="p-2 rounded-lg bg-indigo-600 text-white">
-                    <PaperAirplaneIcon className="h-4 w-4 transform rotate-45" />
-                  </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => toggleLike(post.id)}
+                        className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
+                          post.liked ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600" : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                        }`}
+                      >
+                        <HandThumbUpIcon className="h-4 w-4" /> <span className="text-sm">{post.likes}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const c = prompt("Add a comment:");
+                          if (c) addComment(post.id, c);
+                        }}
+                        className="flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        <ChatBubbleLeftIcon className="h-4 w-4" /> <span className="text-sm">{post.comments.length}</span>
+                      </button>
+                      <button
+                        onClick={() => sharePost(post)}
+                        className="flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                      >
+                        <ShareIcon className="h-4 w-4" /> <span className="text-sm">Share</span>
+                      </button>
+                    </div>
+                  </div>
+                  <p className="mt-3 text-gray-700 dark:text-gray-300">{post.content}</p>
+                  {post.image && <img src={post.image} alt="post" className="mt-3 rounded-lg max-h-60 object-cover w-full" />}
+                  {post.video && (
+                    <video controls className="mt-3 rounded-lg w-full max-h-64">
+                      <source src={post.video} />
+                    </video>
+                  )}
+                  {/* Comments */}
+                  <div className="mt-3 space-y-2">
+                    {post.comments.map((c) => (
+                      <div key={c.id} className="text-sm bg-gray-100 dark:bg-gray-700 p-3 rounded-md">
+                        <span className="font-medium text-gray-800 dark:text-gray-200">{c.author}:</span>{" "}
+                        <span className="text-gray-700 dark:text-gray-300">{c.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Add comment */}
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      placeholder="Write a comment..."
+                      className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-sm focus:ring-1 focus:ring-indigo-500"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const val = (e.target as HTMLInputElement).value;
+                          addComment(post.id, val);
+                          (e.target as HTMLInputElement).value = "";
+                        }
+                      }}
+                    />
+                    <button onClick={() => {}} className="p-2 rounded-lg bg-indigo-600 text-white">
+                      <PaperAirplaneIcon className="h-4 w-4 transform rotate-45" />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
       </section>
     </main>
   );
