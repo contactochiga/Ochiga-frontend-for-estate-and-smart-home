@@ -458,3 +458,16 @@ export default function CommunityPage() {
                           addComment(post.id, input.value);
                           input.value = "";
                         }
+                      }}
+                      className="bg-indigo-600 text-white px-3 py-2 rounded-lg hover:bg-indigo-700 transition"
+                    >
+                      Comment
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+        </section>
+      </main>
+    );
+}
