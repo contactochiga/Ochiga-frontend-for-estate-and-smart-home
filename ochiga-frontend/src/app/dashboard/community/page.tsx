@@ -10,13 +10,13 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 
-// ✅ Centralized card imports
+// ✅ Centralized card imports (fixed path)
 import {
   ComposerCard,
   PinnedPostCard,
   GroupsCard,
   FeedPostCard,
-} from "../../../components/community";
+} from "./components";
 
 // ✅ Import shared types
 import { Post, Group } from "../../../types";
