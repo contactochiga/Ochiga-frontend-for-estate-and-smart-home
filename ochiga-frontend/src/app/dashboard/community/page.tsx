@@ -10,6 +10,7 @@ import {
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
 
+// ✅ Centralized card imports
 import {
   ComposerCard,
   PinnedPostCard,
@@ -17,20 +18,8 @@ import {
   FeedPostCard,
 } from "../../../components/community";
 
-type Post = {
-  id: number;
-  author: string;
-  content: string;
-  image?: string | null;
-  video?: string | null;
-  likes: number;
-  liked?: boolean;
-  comments: { id: number; author: string; text: string }[];
-  pinned?: boolean;
-  createdAt?: string;
-};
-
-type Group = { id: number; name: string; members: number; joined?: boolean };
+// ✅ Import shared types
+import { Post, Group } from "../../../types";
 
 export default function CommunityPage() {
   // posts state
