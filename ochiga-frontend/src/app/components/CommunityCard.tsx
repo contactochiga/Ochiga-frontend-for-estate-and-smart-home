@@ -1,11 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import { ChevronRightIcon, ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/solid";
 
 export default function CommunityCard() {
-  const [selectedUpdate, setSelectedUpdate] = useState<any>(null);
-
   const updates = [
     { title: "Reminder", message: "Community meeting on Saturday at 4:00 PM" },
     { title: "Notice", message: "Pool maintenance tomorrow morning." },
@@ -31,9 +29,9 @@ export default function CommunityCard() {
         {/* Updates list */}
         <div className="space-y-3">
           {updates.map((u, i) => (
-            <button
+            <Link
               key={i}
-              onClick={() => setSelectedUpdate(u)}
+              href="/community"
               className="w-full flex items-center justify-between p-3 rounded-xl 
                          bg-white dark:bg-gray-800 
                          shadow hover:shadow-lg hover:scale-[1.02] 
@@ -56,40 +54,18 @@ export default function CommunityCard() {
                 </div>
               </div>
               <ChevronRightIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-            </button>
+            </Link>
           ))}
         </div>
 
         {/* See more */}
-        <button className="w-full mt-5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+        <Link
+          href="/community"
+          className="w-full block mt-5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline text-center"
+        >
           See more
-        </button>
+        </Link>
       </div>
-
-      {/* Slide-up panel */}
-      {selectedUpdate && (
-        <div className="fixed inset-0 bg-black/50 flex items-end z-50">
-          <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                {selectedUpdate.title}
-              </h3>
-              <button
-                onClick={() => setSelectedUpdate(null)}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-              >
-                ✕
-              </button>
-            </div>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              {selectedUpdate.message}
-            </p>
-            <p className="mt-4 text-xs text-gray-400">
-              (Here you could show full community post, comments, or reply options.)
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
