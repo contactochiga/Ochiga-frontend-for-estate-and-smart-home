@@ -152,17 +152,31 @@ export default function TopBar() {
         </div>
 
         <nav className="p-4 space-y-3">
-          <a href="/announcements" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+          {/* Announcements → Community Page */}
+          <a
+            href="/dashboard/community"
+            className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline"
+          >
             <MegaphoneIcon className="h-5 w-5" /> Announcements
           </a>
-          <a href="/maintenance" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+
+          {/* Maintenance → Maintenance Page */}
+          <a
+            href="/dashboard/maintenance"
+            className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline"
+          >
             <WrenchScrewdriverIcon className="h-5 w-5" /> Maintenance Requests
           </a>
-          <a href="/utilities" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
+
+          {/* Utilities → Utilities Page */}
+          <a
+            href="/dashboard/Utilities"
+            className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline"
+          >
             <BoltIcon className="h-5 w-5" /> Utilities
           </a>
 
-          {/* The rest are placeholders for future expansion */}
+          {/* 🔹 Placeholders for future */}
           <a href="/directory" className="flex items-center gap-2 text-gray-700 dark:text-gray-300 hover:underline">
             <UsersIcon className="h-5 w-5" /> Directory
           </a>
