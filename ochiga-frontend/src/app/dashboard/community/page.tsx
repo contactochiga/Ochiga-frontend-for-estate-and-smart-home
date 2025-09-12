@@ -17,17 +17,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { format } from "date-fns";
 
-/**
- * Interactive Community Page for Ochiga
- * - Composer (photo/video/poll)
- * - Pinned manager posts
- * - Groups carousel (join toggle)
- * - Feed: like, comment, share, inline add comment
- * - Simple DM drawer
- *
- * Replace existing page.tsx in /dashboard/community with this file.
- */
-
 type Post = {
   id: number;
   author: string;
@@ -44,7 +33,6 @@ type Post = {
 type Group = { id: number; name: string; members: number; joined?: boolean };
 
 export default function CommunityPage() {
-  // initial posts: estate manager pinned + one sample
   const [posts, setPosts] = useState<Post[]>([
     {
       id: 1,
@@ -79,23 +67,20 @@ export default function CommunityPage() {
     { id: 4, name: "Football Crew", members: 15 },
   ]);
 
-  // composer state
   const [newPostText, setNewPostText] = useState("");
   const [media, setMedia] = useState<{ image?: string | null; video?: string | null }>({});
   const fileRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLInputElement | null>(null);
 
-  // DM drawer
   const [dmOpen, setDmOpen] = useState(false);
   const [activeChatUser, setActiveChatUser] = useState<string | null>(null);
-  const [chatMessages, setChatMessages] = useState<Record<string, { from: string; text: string }[]>>(
-    {
-      "Security Office": [{ from: "Security Office", text: "All units check complete." }],
-    }
-  );
+  const [chatMessages, setChatMessages] = useState<
+    Record<string, { from: string; text: string }[]>
+  >({
+    "Security Office": [{ from: "Security Office", text: "All units check complete." }],
+  });
   const [chatInput, setChatInput] = useState("");
 
-  // helpers
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") => {
     if (!e.target.files || !e.target.files[0]) return;
     const url = URL.createObjectURL(e.target.files[0]);
@@ -210,7 +195,7 @@ export default function CommunityPage() {
             onClick={() => fileRef.current?.click()}
             className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
           >
-            <PhotoIcon className="h-5 w-5" />{" "}
+            <PhotoIcon className="h-5 w-5" />
             <span className="text-sm hidden sm:inline">Photo</span>
           </button>
           <input
@@ -225,7 +210,7 @@ export default function CommunityPage() {
             onClick={() => videoRef.current?.click()}
             className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
           >
-            <VideoCameraIcon className="h-5 w-5" />{" "}
+            <VideoCameraIcon className="h-5 w-5" />
             <span className="text-sm hidden sm:inline">Video</span>
           </button>
           <input
@@ -237,7 +222,7 @@ export default function CommunityPage() {
           />
 
           <button className="flex items-center gap-1 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-            <ChartBarIcon className="h-5 w-5" />{" "}
+            <ChartBarIcon className="h-5 w-5" />
             <span className="text-sm hidden sm:inline">Poll</span>
           </button>
         </div>
@@ -259,9 +244,7 @@ export default function CommunityPage() {
       {/* Header row */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Community
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Community</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Connect with neighbors — announcements, groups, and chat.
           </p>
@@ -343,12 +326,8 @@ export default function CommunityPage() {
                   <PencilSquareIcon className="h-6 w-6" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                    {g.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {g.members} members
-                  </p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">{g.name}</h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{g.members} members</p>
                 </div>
               </div>
 
@@ -372,10 +351,7 @@ export default function CommunityPage() {
         {posts
           .filter((p) => !p.pinned)
           .map((post) => (
-            <article
-              key={post.id}
-              className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow"
-            >
+            <article key={post.id} className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow">
               <div className="flex items-start gap-3">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-600 text-white">
                   <UserCircleIcon className="h-6 w-6" />
@@ -388,9 +364,7 @@ export default function CommunityPage() {
                         {post.author}
                       </h3>
                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {post.createdAt
-                          ? format(new Date(post.createdAt), "dd/MM/yyyy HH:mm")
-                          : ""}
+                        {post.createdAt ? format(new Date(post.createdAt), "dd/MM/yyyy HH:mm") : ""}
                       </p>
                     </div>
 
@@ -403,7 +377,7 @@ export default function CommunityPage() {
                             : "hover:bg-gray-100 dark:hover:bg-gray-700"
                         }`}
                       >
-                        <HandThumbUpIcon className="h-4 w-4" />{" "}
+                        <HandThumbUpIcon className="h-4 w-4" />
                         <span className="text-sm">{post.likes}</span>
                       </button>
 
@@ -414,7 +388,7 @@ export default function CommunityPage() {
                         }}
                         className="flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
-                        <ChatBubbleLeftIcon className="h-4 w-4" />{" "}
+                        <ChatBubbleLeftIcon className="h-4 w-4" />
                         <span className="text-sm">{post.comments.length}</span>
                       </button>
 
@@ -422,15 +396,13 @@ export default function CommunityPage() {
                         onClick={() => sharePost(post)}
                         className="flex items-center gap-1 px-3 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                       >
-                        <ShareIcon className="h-4 w-4" />{" "}
+                        <ShareIcon className="h-4 w-4" />
                         <span className="text-sm">Share</span>
                       </button>
                     </div>
                   </div>
 
-                  <p className="mt-3 text-gray-700 dark:text-gray-300">
-                    {post.content}
-                  </p>
+                  <p className="mt-3 text-gray-700 dark:text-gray-300">{post.content}</p>
 
                   {post.image && (
                     <img
@@ -455,15 +427,29 @@ export default function CommunityPage() {
                         <span className="font-medium text-gray-800 dark:text-gray-200">
                           {c.author}:
                         </span>{" "}
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {c.text}
-                        </span>
+                        <span className="text-gray-700 dark:text-gray-300">{c.text}</span>
                       </div>
                     ))}
                   </div>
 
-                  {/* quick add comment input */}
+                  {/* Fixed quick add comment input */}
                   <div className="mt-3 flex items-center gap-2">
                     <input
                       placeholder="Write a comment..."
-                      className="flex-1 p-2
+                      className="flex-1 p-2 rounded-lg border border-gray-300 dark:border-gray-700 
+                                 bg-white dark:bg-gray-800 text-sm text-gray-800 dark:text-gray-200 
+                                 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button className="px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:opacity-90">
+                      Comment
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+      </section>
+
+      {/* DM drawer */}
+      {dmOpen && (
+        <div className="fixed right-0 top-0 bottom-0 w-80 bg-white dark:bg-gray-800 shadow-xl
