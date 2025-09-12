@@ -2,9 +2,11 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { ChatBubbleOvalLeftEllipsisIcon } from "@heroicons/react/24/outline";
+import {
+  ChatBubbleOvalLeftEllipsisIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
-// ✅ Centralized card imports
 import {
   ComposerCard,
   PinnedPostCard,
@@ -12,7 +14,6 @@ import {
   FeedPostCard,
 } from "./components";
 
-// ✅ Import shared types
 import { Post, Group } from "../../../types";
 
 export default function CommunityPage() {
@@ -57,6 +58,9 @@ export default function CommunityPage() {
   const [media, setMedia] = useState<{ image?: string | null; video?: string | null }>({});
   const fileRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLInputElement | null>(null);
+
+  // modal state
+  const [showMessages, setShowMessages] = useState(false);
 
   // helpers
   const makePost = () => {
@@ -126,13 +130,37 @@ export default function CommunityPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6 space-y-6">
-      
       {/* ✅ Sub-header with just the message icon */}
       <div className="flex justify-end pb-2 border-b border-gray-200 dark:border-gray-700">
-        <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+        <button
+          onClick={() => setShowMessages(true)}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        >
           <ChatBubbleOvalLeftEllipsisIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
         </button>
       </div>
+
+      {/* ✅ Messages Modal */}
+      {showMessages && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-80 p-6 relative">
+            {/* Close button */}
+            <button
+              onClick={() => setShowMessages(false)}
+              className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+            </button>
+
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
+              Direct Messages
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Direct messages coming soon 🚀
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ✅ Composer Card */}
       <ComposerCard
