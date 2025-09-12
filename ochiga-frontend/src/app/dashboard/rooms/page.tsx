@@ -8,8 +8,9 @@ import {
   MdAcUnit,
   MdVideocam,
 } from "react-icons/md";
+import { FaPlus } from "react-icons/fa6";
 
-const rooms = [
+const initialRooms = [
   "All",
   "Favourites",
   "Living Room",
@@ -68,6 +69,7 @@ const devices = [
 ];
 
 export default function RoomsDevices() {
+  const [rooms, setRooms] = useState(initialRooms);
   const [activeRoom, setActiveRoom] = useState("All");
   const [deviceStates, setDeviceStates] = useState(
     devices.reduce((acc, d) => ({ ...acc, [d.id]: d.status }), {})
@@ -95,6 +97,13 @@ export default function RoomsDevices() {
     }));
   };
 
+  const handleAddRoom = () => {
+    const newRoom = prompt("Enter the name of the new room:");
+    if (newRoom && !rooms.includes(newRoom)) {
+      setRooms([...rooms, newRoom]);
+    }
+  };
+
   return (
     <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8">
       <div className="w-full rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -119,6 +128,14 @@ export default function RoomsDevices() {
               {room}
             </button>
           ))}
+
+          {/* Add Room Button */}
+          <button
+            onClick={handleAddRoom}
+            className="flex items-center justify-center px-3 py-2 rounded-xl bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 transition"
+          >
+            <FaPlus className="text-sm" />
+          </button>
         </div>
 
         {/* Devices Grid */}
