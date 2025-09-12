@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   MegaphoneIcon,
   WrenchScrewdriverIcon,
@@ -14,9 +15,7 @@ import {
   MoonIcon,
   UserIcon,
   Cog6ToothIcon,
-  ShieldCheckIcon,
   ArrowLeftOnRectangleIcon,
-  ClockIcon,
 } from "@heroicons/react/24/outline";
 
 export default function TopBar() {
@@ -25,8 +24,9 @@ export default function TopBar() {
   const [darkMode, setDarkMode] = useState(false);
 
   const toggleTheme = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle("dark");
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    document.documentElement.classList.toggle("dark", newMode);
   };
 
   return (
@@ -97,33 +97,48 @@ export default function TopBar() {
 
               {profileOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 py-2">
-                  <a href="/profile" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <UserIcon className="h-4 w-4 mr-2" /> My Profile
-                  </a>
-                  <a href="/settings" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <Cog6ToothIcon className="h-4 w-4 mr-2" /> Settings
-                  </a>
-                  <button
-                    onClick={toggleTheme}
-                    className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  <Link
+                    href="/dashboard/profile"
+                    className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
-                    {darkMode ? (
-                      <>
-                        <SunIcon className="h-4 w-4 mr-2" /> Light Mode
-                      </>
-                    ) : (
-                      <>
-                        <MoonIcon className="h-4 w-4 mr-2" /> Dark Mode
-                      </>
-                    )}
-                  </button>
-                  <a href="/security" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <ShieldCheckIcon className="h-4 w-4 mr-2" /> Security
-                  </a>
-                  <a href="/activity" className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <ClockIcon className="h-4 w-4 mr-2" /> My Activity
-                  </a>
-                  <a href="/logout" className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <UserIcon className="h-4 w-4 mr-2" /> My Profile
+                  </Link>
+
+                  <Link
+                    href="/dashboard/settings"
+                    className="flex items-center px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    <Cog6ToothIcon className="h-4 w-4 mr-2" /> Settings
+                  </Link>
+
+                  {/* Dark Mode Toggle Switch */}
+                  <div className="flex items-center justify-between px-4 py-2 text-sm">
+                    <span className="flex items-center gap-2">
+                      {darkMode ? (
+                        <MoonIcon className="h-4 w-4" />
+                      ) : (
+                        <SunIcon className="h-4 w-4" />
+                      )}
+                      {darkMode ? "Dark Mode" : "Light Mode"}
+                    </span>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={darkMode}
+                        onChange={toggleTheme}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 dark:peer-focus:ring-blue-400 rounded-full peer dark:bg-gray-700 peer-checked:bg-blue-600 relative">
+                        <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-4"></span>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Logout */}
+                  <a
+                    href="/logout"
+                    className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
                     <ArrowLeftOnRectangleIcon className="h-4 w-4 mr-2" /> Logout
                   </a>
                 </div>
