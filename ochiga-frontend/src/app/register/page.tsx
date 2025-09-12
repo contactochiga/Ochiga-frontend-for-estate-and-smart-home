@@ -1,92 +1,78 @@
 // src/app/register/page.tsx
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token"); // grab inviteToken from the URL
+  const router = useRouter();
+  const inviteToken = searchParams.get("token");
 
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    if (!inviteToken) {
+      setMessage("Invalid or missing invite token.");
+    }
+  }, [inviteToken]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      setMessage("Passwords do not match");
-      return;
-    }
+    if (!inviteToken) return;
 
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await fetch("http://localhost:3000/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inviteToken: token, password }),
+        body: JSON.stringify({ inviteToken, password }),
       });
 
       const data = await res.json();
-      if (res.ok) {
-        setMessage("Registration successful! You can now log in.");
+      if (data.success) {
+        setMessage("✅ Registration successful! Redirecting...");
+        setTimeout(() => router.push("/login"), 2000);
       } else {
-        setMessage(data.message || "Something went wrong");
+        setMessage(`❌ ${data.message}`);
       }
     } catch (err) {
-      setMessage("Network error");
+      console.error(err);
+      setMessage("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!token) {
-    return <div className="p-6 text-red-500">Invalid or missing invite link.</div>;
-  }
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-md rounded bg-white p-6 shadow"
-      >
-        <h2 className="mb-4 text-xl font-bold">Complete Your Registration</h2>
-
-        <div className="mb-4">
-          <label className="mb-1 block text-sm font-medium">New Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full rounded border px-3 py-2"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="mb-1 block text-sm font-medium">Confirm Password</label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-            className="w-full rounded border px-3 py-2"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          {loading ? "Registering..." : "Register"}
-        </button>
-
-        {message && (
-          <p className="mt-3 text-center text-sm text-gray-700">{message}</p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md bg-white rounded-lg shadow p-6">
+        <h2 className="text-2xl font-bold mb-4 text-center">Complete Registration</h2>
+        {inviteToken ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="password"
+              placeholder="Set your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-2 border rounded-md focus:ring focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+            >
+              {loading ? "Registering..." : "Register"}
+            </button>
+          </form>
+        ) : (
+          <p className="text-red-500 text-center">{message}</p>
         )}
-      </form>
+        {message && <p className="mt-4 text-center text-sm">{message}</p>}
+      </div>
     </div>
   );
 }
