@@ -9,7 +9,15 @@ import {
   MdVideocam,
 } from "react-icons/md";
 
-const rooms = ["All", "Favourites", "Living Room", "Kitchen", "Bedroom", "Office", "Outdoor"];
+const rooms = [
+  "All",
+  "Favourites",
+  "Living Room",
+  "Kitchen",
+  "Bedroom",
+  "Office",
+  "Outdoor",
+];
 
 const devices = [
   {
@@ -76,18 +84,22 @@ export default function RoomsDevices() {
   const toggleDevice = (id: number) => {
     setDeviceStates((prev) => ({
       ...prev,
-      [id]: prev[id] === "On" ? "Off" : prev[id] === "Off" ? "On" : prev[id] === "Locked" ? "Unlocked" : "Locked",
+      [id]:
+        prev[id] === "On"
+          ? "Off"
+          : prev[id] === "Off"
+          ? "On"
+          : prev[id] === "Locked"
+          ? "Unlocked"
+          : "Locked",
     }));
   };
 
   return (
     <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8">
-      <div
-        className="w-full rounded-2xl bg-white/10 dark:bg-[#1f1f1f]/80 
-                   shadow-xl backdrop-blur-md border border-gray-700/40 p-6"
-      >
+      <div className="w-full rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 p-6">
         {/* Header */}
-        <h2 className="text-xl font-bold mb-4 text-white dark:text-white/90">
+        <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
           Rooms & Devices
         </h2>
 
@@ -101,7 +113,7 @@ export default function RoomsDevices() {
                 ${
                   activeRoom === room
                     ? "bg-blue-600 text-white shadow-md shadow-blue-500/40"
-                    : "bg-white/10 dark:bg-gray-800 text-gray-400 hover:text-white hover:bg-white/20"
+                    : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
                 }`}
             >
               {room}
@@ -116,13 +128,14 @@ export default function RoomsDevices() {
               key={device.id}
               onClick={() => setSelectedDevice(device)}
               className={`rounded-2xl p-4 flex flex-col justify-between cursor-pointer
-                bg-white/10 dark:bg-[#2a2a2a]/80 
-                backdrop-blur-md shadow-lg border 
+                bg-gray-50 dark:bg-gray-800 
+                shadow-md border 
                 transition-transform duration-300 ease-out hover:scale-[1.05] active:scale-[0.98]
                 ${
-                  deviceStates[device.id] === "On" || deviceStates[device.id] === "Unlocked"
+                  deviceStates[device.id] === "On" ||
+                  deviceStates[device.id] === "Unlocked"
                     ? "border-blue-400/40 shadow-blue-500/30"
-                    : "border-gray-700/40"
+                    : "border-gray-300 dark:border-gray-700"
                 }`}
             >
               {/* Top row */}
@@ -130,9 +143,10 @@ export default function RoomsDevices() {
                 <div
                   className={`w-12 h-12 flex items-center justify-center rounded-xl 
                     ${
-                      deviceStates[device.id] === "On" || deviceStates[device.id] === "Unlocked"
+                      deviceStates[device.id] === "On" ||
+                      deviceStates[device.id] === "Unlocked"
                         ? "bg-blue-500/20 text-blue-400 shadow-inner shadow-blue-500/30"
-                        : "bg-gray-200/30 dark:bg-gray-800/70 text-gray-500"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-500"
                     }`}
                 >
                   {device.icon}
@@ -140,9 +154,10 @@ export default function RoomsDevices() {
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-medium tracking-wide border
                     ${
-                      deviceStates[device.id] === "On" || deviceStates[device.id] === "Unlocked"
-                        ? "bg-blue-500/20 text-blue-400 border-blue-400/40"
-                        : "bg-gray-300/20 dark:bg-gray-700/40 text-gray-400 border-gray-500/30"
+                      deviceStates[device.id] === "On" ||
+                      deviceStates[device.id] === "Unlocked"
+                        ? "bg-blue-500/20 text-blue-500 border-blue-400/40"
+                        : "bg-gray-300 dark:bg-gray-700 text-gray-500 border-gray-400 dark:border-gray-600"
                     }`}
                 >
                   {deviceStates[device.id]}
@@ -151,8 +166,12 @@ export default function RoomsDevices() {
 
               {/* Bottom row */}
               <div>
-                <h3 className="font-semibold text-white/90">{device.name}</h3>
-                <p className="text-xs text-gray-400">{device.location}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {device.name}
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  {device.location}
+                </p>
               </div>
             </div>
           ))}
@@ -165,25 +184,26 @@ export default function RoomsDevices() {
           <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {selectedDevice.name} Control
               </h3>
               <button
                 onClick={() => setSelectedDevice(null)}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
                 ✕
               </button>
             </div>
 
             {/* Dynamic Remote Controls */}
-            <div className="flex flex-col items-center justify-center gap-6 py-6 text-gray-700 dark:text-gray-300">
+            <div className="flex flex-col items-center justify-center gap-6 py-6 text-gray-800 dark:text-gray-200">
               {selectedDevice.icon}
               <p className="text-sm">
                 Current Status:{" "}
                 <span
                   className={`font-semibold ${
-                    deviceStates[selectedDevice.id] === "On" || deviceStates[selectedDevice.id] === "Unlocked"
+                    deviceStates[selectedDevice.id] === "On" ||
+                    deviceStates[selectedDevice.id] === "Unlocked"
                       ? "text-green-500"
                       : "text-red-500"
                   }`}
@@ -196,7 +216,7 @@ export default function RoomsDevices() {
               {selectedDevice.type === "light" && (
                 <button
                   onClick={() => toggleDevice(selectedDevice.id)}
-                  className="px-6 py-3 rounded-xl bg-yellow-400/90 text-gray-900 font-semibold hover:bg-yellow-500"
+                  className="px-6 py-3 rounded-xl bg-yellow-400 text-gray-900 font-semibold hover:bg-yellow-500"
                 >
                   Toggle Light
                 </button>
@@ -205,17 +225,23 @@ export default function RoomsDevices() {
               {selectedDevice.type === "door" && (
                 <button
                   onClick={() => toggleDevice(selectedDevice.id)}
-                  className="px-6 py-3 rounded-xl bg-blue-500/90 text-white font-semibold hover:bg-blue-600"
+                  className="px-6 py-3 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600"
                 >
-                  {deviceStates[selectedDevice.id] === "Locked" ? "Unlock Door" : "Lock Door"}
+                  {deviceStates[selectedDevice.id] === "Locked"
+                    ? "Unlock Door"
+                    : "Lock Door"}
                 </button>
               )}
 
               {selectedDevice.type === "ac" && (
                 <div className="flex items-center gap-3">
-                  <button className="px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-800">-</button>
+                  <button className="px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                    -
+                  </button>
                   <span className="text-lg font-bold">22°C</span>
-                  <button className="px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-800">+</button>
+                  <button className="px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-700">
+                    +
+                  </button>
                 </div>
               )}
 
@@ -224,7 +250,7 @@ export default function RoomsDevices() {
                   {["⏮", "⏯", "⏭"].map((btn) => (
                     <button
                       key={btn}
-                      className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700"
+                      className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
                     >
                       {btn}
                     </button>
@@ -233,8 +259,10 @@ export default function RoomsDevices() {
               )}
 
               {selectedDevice.type === "cctv" && (
-                <div className="w-full h-40 rounded-lg bg-gray-200 dark:bg-gray-800 flex items-center justify-center">
-                  <p className="text-sm text-gray-500">🔴 Live Camera Feed</p>
+                <div className="w-full h-40 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    🔴 Live Camera Feed
+                  </p>
                 </div>
               )}
             </div>
