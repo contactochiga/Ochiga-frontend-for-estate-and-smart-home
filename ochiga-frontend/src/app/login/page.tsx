@@ -1,7 +1,9 @@
+// src/app/login/page.tsx
 "use client";
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { saveToken } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,12 +25,12 @@ export default function LoginPage() {
 
       const data = await res.json();
 
-      if (res.ok && data.access_token) {
-        // Save token for authenticated requests
-        localStorage.setItem("token", data.access_token);
+      if (res.ok && data.token) {
+        // ✅ Save token consistently
+        saveToken(data.token);
         setMessage("✅ Login successful! Redirecting...");
 
-        // Redirect based on role
+        // ✅ Redirect based on role
         if (data.user.role === "manager") {
           router.push("/manager-dashboard");
         } else {
