@@ -1,96 +1,80 @@
+// src/app/register/page.tsx
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "../../context/authContext";
+import React, { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 
-export default function AuthPage() {
-  const [role, setRole] = useState<"resident" | "manager">("resident");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
+export default function RegisterPage() {
+  const searchParams = useSearchParams();
   const router = useRouter();
-  const { login } = useAuth();
+  const inviteToken = searchParams.get("token");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (!inviteToken) {
+      setMessage("Invalid or missing invite token.");
+    }
+  }, [inviteToken]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    if (!inviteToken) return;
 
-    if (password === "1234") {
-      if (role === "resident") {
-        login("fake-resident-token", "resident");
-        router.push("/dashboard");
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:3000/auth/register-resident", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteToken, password }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMessage("✅ Registration successful! Redirecting...");
+        setTimeout(() => router.push("/login"), 2000);
       } else {
-        login("fake-manager-token", "manager");
-        router.push("/manager-dashboard");
+        setMessage(`❌ ${data.message}`);
       }
-    } else {
-      setError("Invalid credentials. Use any email + password: 1234");
+    } catch (err) {
+      console.error(err);
+      setMessage("Something went wrong. Try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <main
-      className="flex items-center justify-center h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/bg.jpg')" }}
-    >
-      <div className="bg-white/80 backdrop-blur-md p-8 rounded-xl shadow-xl w-full max-w-md">
-        {/* Role Toggle */}
-        <div className="flex justify-center mb-4">
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-l-md ${
-              role === "resident" ? "bg-[#800000] text-white" : "bg-gray-200"
-            }`}
-            onClick={() => setRole("resident")}
-          >
-            Resident
-          </button>
-          <button
-            type="button"
-            className={`px-4 py-2 rounded-r-md ${
-              role === "manager" ? "bg-[#800000] text-white" : "bg-gray-200"
-            }`}
-            onClick={() => setRole("manager")}
-          >
-            Manager
-          </button>
-        </div>
-
-        {/* Title */}
-        <h1 className="text-2xl font-bold text-center text-[#800000] mb-6">
-          Login as {role}
-        </h1>
-
-        {error && <p className="text-red-600 text-sm mb-3">{error}</p>}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <input
-            type="email"
-            placeholder="Email Address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="p-2 border rounded w-full"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password (use 1234)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="p-2 border rounded w-full"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-[#800000] text-white py-2 rounded hover:bg-red-900"
-          >
-            Login
-          </button>
-        </form>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md bg-white rounded-lg shadow p-6">
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Complete Registration
+        </h2>
+        {inviteToken ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="password"
+              placeholder="Set your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-4 py-2 border rounded-md focus:ring focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+            >
+              {loading ? "Registering..." : "Register"}
+            </button>
+          </form>
+        ) : (
+          <p className="text-red-500 text-center">{message}</p>
+        )}
+        {message && <p className="mt-4 text-center text-sm">{message}</p>}
       </div>
-    </main>
+    </div>
   );
 }
