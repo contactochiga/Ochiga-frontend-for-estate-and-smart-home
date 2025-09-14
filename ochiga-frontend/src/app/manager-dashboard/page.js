@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ProtectedRoute from "../../components/ProtectedRoute";
+import Link from "next/link";
 
 export default function ManagerDashboardPage() {
   const [activeTab, setActiveTab] = useState("payments");
@@ -15,7 +16,19 @@ export default function ManagerDashboardPage() {
       case "requests":
         return <div className="p-4">📋 Service Requests</div>;
       case "residents":
-        return <div className="p-4">👥 Residents List</div>;
+        return (
+          <div className="p-4 space-y-4">
+            👥 Residents List
+            <div>
+              <Link
+                href="/manager-dashboard/register-resident"
+                className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                ➕ Register New Resident
+              </Link>
+            </div>
+          </div>
+        );
       default:
         return <div className="p-4">Select a tab</div>;
     }
