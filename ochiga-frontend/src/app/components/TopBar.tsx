@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "../context/authContext"; // ✅ use auth
+import { useAuth } from "../../context/authContext";
 import { useRouter } from "next/navigation"; // ✅ for redirect
 import {
   MegaphoneIcon,
