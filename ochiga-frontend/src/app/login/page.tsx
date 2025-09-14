@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveToken } from "@/lib/auth";
+import { saveToken } from "../../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
