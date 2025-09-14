@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuth } from "../context/authContext"; // ✅ use auth
+import { useRouter } from "next/navigation"; // ✅ for redirect
 import {
   MegaphoneIcon,
   WrenchScrewdriverIcon,
@@ -23,10 +25,18 @@ export default function TopBar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
+  const { logout } = useAuth(); // ✅ get logout from context
+  const router = useRouter();
+
   const toggleTheme = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
     document.documentElement.classList.toggle("dark", newMode);
+  };
+
+  const handleLogout = () => {
+    logout();              // clear auth state
+    router.push("/login"); // redirect to login
   };
 
   return (
@@ -111,7 +121,7 @@ export default function TopBar() {
                     <Cog6ToothIcon className="h-4 w-4 mr-2" /> Settings
                   </Link>
 
-                  {/* Dark Mode Toggle Switch */}
+                  {/* Dark Mode Toggle */}
                   <div className="flex items-center justify-between px-4 py-2 text-sm">
                     <span className="flex items-center gap-2">
                       {darkMode ? (
@@ -134,13 +144,13 @@ export default function TopBar() {
                     </label>
                   </div>
 
-                  {/* Logout */}
-                  <a
-                    href="/logout"
-                    className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  {/* ✅ Logout Button */}
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <ArrowLeftOnRectangleIcon className="h-4 w-4 mr-2" /> Logout
-                  </a>
+                  </button>
                 </div>
               )}
             </div>
