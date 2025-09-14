@@ -9,12 +9,34 @@ export default function ManagerLoginPage() {
   const [password, setPassword] = useState("");
   const { login } = useAuth();
   const router = useRouter();
+  const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // ✅ Hardcoded manager login (replace with API later)
-    login({ email, role: "manager" }, "fake-manager-token");
-    router.push("/manager-dashboard");
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+
+      const data = await res.json();
+
+      // ✅ Save manager auth
+      login(data.user, data.token);
+
+      // Redirect
+      router.push("/manager-dashboard");
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -47,6 +69,7 @@ export default function ManagerLoginPage() {
             Login
           </button>
         </form>
+        {error && <p className="text-red-600 text-center mt-3">{error}</p>}
         <p className="text-sm text-center mt-4">
           Don’t have an account?{" "}
           <a href="/manager-register" className="text-green-600 font-medium">
