@@ -1,11 +1,11 @@
 // src/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-const SECRET = process.env.JWT_SECRET || "supersecret"; // same as backend
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "supersecret");
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const { pathname } = req.nextUrl;
 
@@ -19,13 +19,13 @@ export function middleware(req: NextRequest) {
   }
 
   try {
-    const decoded: any = jwt.verify(token, SECRET);
+    const { payload } = await jwtVerify(token, SECRET);
 
     // Role-based routes
-    if (pathname.startsWith("/manager-dashboard") && decoded.role !== "manager") {
+    if (pathname.startsWith("/manager-dashboard") && payload.role !== "manager") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
-    if (pathname.startsWith("/dashboard") && decoded.role !== "resident") {
+    if (pathname.startsWith("/dashboard") && payload.role !== "resident") {
       return NextResponse.redirect(new URL("/manager-dashboard", req.url));
     }
   } catch (err) {
@@ -37,5 +37,10 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/manager-dashboard/:path*", "/login", "/auth/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/manager-dashboard/:path*",
+    "/login",
+    "/auth/:path*",
+  ],
 };
