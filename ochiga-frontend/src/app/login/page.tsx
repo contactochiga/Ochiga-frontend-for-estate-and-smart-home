@@ -15,6 +15,15 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [view, setView] = useState<"login" | "signup" | "forgot">("login");
 
+  // ✅ Safe JSON helper
+  const safeJson = async (res: Response) => {
+    try {
+      return await res.json();
+    } catch {
+      return {};
+    }
+  };
+
   // ✅ Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +36,7 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
 
       if (res.ok && data.token) {
         saveToken(data.token);
@@ -44,7 +53,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error(err);
-      setMessage("Something went wrong. Try again.");
+      setMessage("❌ Cannot connect to server.");
     } finally {
       setLoading(false);
     }
@@ -62,7 +71,7 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password, role: "manager" }),
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
 
       if (res.ok && data.token) {
         saveToken(data.token);
@@ -73,7 +82,7 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error(err);
-      setMessage("Something went wrong during signup.");
+      setMessage("❌ Cannot connect to server.");
     } finally {
       setLoading(false);
     }
@@ -91,7 +100,7 @@ export default function LoginPage() {
         body: JSON.stringify({ email, role }),
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
 
       if (res.ok) {
         setMessage("📩 Reset link sent to your email.");
@@ -100,16 +109,123 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error(err);
-      setMessage("Something went wrong.");
+      setMessage("❌ Cannot connect to server.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    // 🚀 Your UI stays exactly the same as before
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
-      {/* ...rest of your JSX */}
+      <div className="w-full max-w-md bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h1 className="text-2xl font-bold mb-6 text-center">
+          {view === "login" && "Login"}
+          {view === "signup" && "Manager Signup"}
+          {view === "forgot" && "Forgot Password"}
+        </h1>
+
+        {message && (
+          <p className="mb-4 text-center text-sm text-red-400">{message}</p>
+        )}
+
+        {view === "login" && (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full p-3 rounded bg-gray-700 text-white"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              className="w-full p-3 rounded bg-gray-700 text-white"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 p-3 rounded font-bold"
+            >
+              {loading ? "Loading..." : "Login"}
+            </button>
+            <div className="flex justify-between text-sm">
+              <button type="button" onClick={() => setView("forgot")}>
+                Forgot Password?
+              </button>
+              <button type="button" onClick={() => setView("signup")}>
+                Manager Signup
+              </button>
+            </div>
+          </form>
+        )}
+
+        {view === "signup" && (
+          <form onSubmit={handleSignup} className="space-y-4">
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full p-3 rounded bg-gray-700 text-white"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              className="w-full p-3 rounded bg-gray-700 text-white"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-600 hover:bg-green-700 p-3 rounded font-bold"
+            >
+              {loading ? "Loading..." : "Signup"}
+            </button>
+            <button
+              type="button"
+              className="text-sm"
+              onClick={() => setView("login")}
+            >
+              Back to Login
+            </button>
+          </form>
+        )}
+
+        {view === "forgot" && (
+          <form onSubmit={handleForgot} className="space-y-4">
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full p-3 rounded bg-gray-700 text-white"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 p-3 rounded font-bold"
+            >
+              {loading ? "Sending..." : "Send Reset Link"}
+            </button>
+            <button
+              type="button"
+              className="text-sm"
+              onClick={() => setView("login")}
+            >
+              Back to Login
+            </button>
+          </form>
+        )}
+      </div>
     </div>
   );
 }
