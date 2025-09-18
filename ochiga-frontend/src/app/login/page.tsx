@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [role, setRole] = useState<"manager" | "resident">("resident");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [view, setView] = useState<"login" | "signup" | "forgot">("login"); // 👈 control which form to show
+  const [view, setView] = useState<"login" | "signup" | "forgot">("login");
 
   // ✅ Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -30,7 +30,10 @@ export default function LoginPage() {
       if (res.ok && data.token) {
         saveToken(data.token);
         setMessage("✅ Login successful! Redirecting...");
+
+        // Use backend role if available, else fallback to toggle
         const userRole = data.user?.role || role;
+
         if (userRole === "manager") {
           router.push("/manager-dashboard");
         } else {
@@ -60,8 +63,10 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
+
       if (res.ok && data.token) {
-        saveToken(data.token, "manager");
+        saveToken(data.token);
+        setMessage("✅ Account created! Redirecting...");
         router.push("/manager-dashboard");
       } else {
         setMessage(`❌ ${data.message || "Signup failed"}`);
@@ -87,6 +92,7 @@ export default function LoginPage() {
       });
 
       const data = await res.json();
+
       if (res.ok) {
         setMessage("📩 Reset link sent to your email.");
       } else {
