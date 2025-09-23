@@ -1,16 +1,15 @@
-// src/app/dashboard/page.tsx
+// src/app/dashboard/manager/page.tsx
 "use client";
 
 import { useState } from "react";
-import ProtectedRoute from "../../components/ProtectedRoute";
-import WalletCard from "../components/WalletCard";
-import UtilitiesCard from "../components/UtilitiesCard";
-import DeviceCards from "../components/DeviceCards";
-import VisitorsCard from "../components/VisitorsCard";
-import CommunityCard from "../components/CommunityCard";
+import ProtectedRoute from "../../../components/ProtectedRoute";
+import WalletCard from "../../components/WalletCard";
+import UtilitiesCard from "../../components/UtilitiesCard";
+import DeviceCards from "../../components/DeviceCards";
+import VisitorsCard from "../../components/VisitorsCard";
+import CommunityCard from "../../components/CommunityCard";
 
-export default function ResidentDashboardPage() {
-  // modal state
+export default function ManagerDashboardPage() {
   const [modal, setModal] = useState<{
     open: boolean;
     title: string;
@@ -22,30 +21,29 @@ export default function ResidentDashboardPage() {
   };
 
   return (
-    <ProtectedRoute role="resident">
-      {/* ✅ Full-page wrapper (no horizontal scroll) */}
+    <ProtectedRoute role="manager">
       <div className="min-h-screen overflow-x-hidden bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
         
-        {/* ✅ Full-width header */}
+        {/* ✅ Header */}
         <header className="w-full bg-white dark:bg-gray-800 shadow-md">
           <div className="px-4 md:px-8 flex items-center justify-between h-16">
-            <h1 className="text-xl font-semibold">Resident Dashboard</h1>
-            <div>🔔 Profile</div>
+            <h1 className="text-xl font-semibold">Manager Dashboard</h1>
+            <div>⚙️ Profile</div>
           </div>
         </header>
 
-        {/* ✅ Main grid (no side gaps on mobile) */}
+        {/* ✅ Main Grid */}
         <main className="px-0 sm:px-4 md:px-8 py-4 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-  {/* Wallet always full width */}
-  <div className="col-span-1 md:col-span-2">
-    <WalletCard />
-  </div>
+          {/* Manager’s view could have analytics + estate-wide tools */}
+          <div className="col-span-1 md:col-span-2">
+            <WalletCard />
+          </div>
 
-  <UtilitiesCard />
-  <DeviceCards />
-  <VisitorsCard />
-  <CommunityCard />
-</main>
+          <UtilitiesCard />
+          <DeviceCards />
+          <VisitorsCard />
+          <CommunityCard />
+        </main>
 
         {/* ✅ Notification Modal */}
         {modal.open && (

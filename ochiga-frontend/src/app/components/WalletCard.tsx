@@ -10,11 +10,9 @@ import {
   DevicePhoneMobileIcon,
   ArrowUpRightIcon,
   ClipboardDocumentIcon,
-  ArrowDownTrayIcon,
-  ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 
-export default function WalletPage() {
+export default function WalletCardModern() {
   const [walletBalance] = useState(500000);
   const [showBalance, setShowBalance] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -27,7 +25,7 @@ export default function WalletPage() {
     { name: "Pay with OPay", icon: ArrowUpRightIcon },
   ];
 
-  // Fake account details (replace with backend data later)
+  // Fake account details (replace with dynamic backend later)
   const accountNumber = "1234567890";
   const bankName = "Ochiga Microfinance Bank";
 
@@ -37,41 +35,26 @@ export default function WalletPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Fake transactions (replace with API later)
-  const transactions = [
-    {
-      id: 1,
-      type: "credit",
-      title: "Wallet Funding",
-      amount: 200000,
-      date: "Sep 5, 2025",
-    },
-    {
-      id: 2,
-      type: "debit",
-      title: "Electricity Bill",
-      amount: 15000,
-      date: "Sep 4, 2025",
-    },
-    {
-      id: 3,
-      type: "debit",
-      title: "Internet Subscription",
-      amount: 25000,
-      date: "Sep 1, 2025",
-    },
-  ];
-
   return (
-    <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8 space-y-6">
-      {/* Virtual ATM Card */}
-      <div className="rounded-2xl p-6 text-white shadow-xl bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-800 relative overflow-hidden">
-        {/* Card Header */}
-        <div className="flex justify-between items-center">
-          <p className="text-xs uppercase opacity-80">Wallet Balance</p>
+    <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8">
+      {/* Wallet Balance Card */}
+      <div
+        className="rounded-2xl p-6 text-white shadow-xl 
+                   bg-gradient-to-r from-indigo-600 to-purple-600 
+                   dark:from-indigo-700 dark:to-purple-800 
+                   flex flex-row justify-between items-center"
+      >
+        {/* Left Section: Balance + Eye */}
+        <div className="flex items-center gap-3">
+          <div>
+            <p className="text-xs uppercase opacity-80">Wallet Balance</p>
+            <h2 className="text-2xl font-bold tracking-wide">
+              {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
+            </h2>
+          </div>
           <button
             onClick={() => setShowBalance(!showBalance)}
-            className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition"
+            className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition flex items-center justify-center"
           >
             {showBalance ? (
               <EyeIcon className="h-5 w-5" />
@@ -81,69 +64,16 @@ export default function WalletPage() {
           </button>
         </div>
 
-        {/* Balance */}
-        <h2 className="text-3xl font-bold tracking-wide mt-2">
-          {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
-        </h2>
-
-        {/* Card Footer */}
-        <div className="mt-6 flex justify-between items-center text-xs opacity-80">
-          <span>{bankName}</span>
-          <span>{accountNumber}</span>
-        </div>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-4">
+        {/* Right Section: Fund Wallet */}
         <button
           onClick={() => setShowModal(true)}
-          className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition"
+          className="bg-white text-indigo-600 dark:text-indigo-700 
+                     px-3 py-2 rounded-lg font-semibold text-sm flex items-center gap-1 
+                     whitespace-nowrap shadow hover:bg-gray-100 transition"
         >
-          <BanknotesIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-          <span className="mt-2 text-sm font-medium">Fund</span>
+          <BanknotesIcon className="h-5 w-5" />
+          Fund Wallet
         </button>
-        <button className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition">
-          <ArrowDownTrayIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
-          <span className="mt-2 text-sm font-medium">Withdraw</span>
-        </button>
-        <button className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition">
-          <ArrowUpTrayIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          <span className="mt-2 text-sm font-medium">Transfer</span>
-        </button>
-      </div>
-
-      {/* Transaction History */}
-      <div className="bg-gray-100 dark:bg-gray-900 rounded-2xl p-6 shadow-xl">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-4">
-          Transaction History
-        </h3>
-        <div className="space-y-4">
-          {transactions.map((tx) => (
-            <div
-              key={tx.id}
-              className="flex justify-between items-center p-3 rounded-xl bg-white dark:bg-gray-800 shadow-sm"
-            >
-              <div>
-                <p className="font-medium text-gray-800 dark:text-gray-100">
-                  {tx.title}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {tx.date}
-                </p>
-              </div>
-              <span
-                className={`font-semibold ${
-                  tx.type === "credit"
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
-              >
-                {tx.type === "credit" ? "+" : "-"}₦
-                {tx.amount.toLocaleString()}
-              </span>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Bottom Sheet Modal */}
@@ -163,7 +93,7 @@ export default function WalletPage() {
               </button>
             </div>
 
-            {/* Bank Transfer Section */}
+            {/* Bank Transfer Special Section */}
             <div className="p-4 mb-4 rounded-xl border border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 Bank Transfer
