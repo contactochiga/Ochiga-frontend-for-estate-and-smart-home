@@ -1,7 +1,7 @@
 // src/middleware.ts
+import { jwtVerify } from "jose";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
 
 const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "supersecret");
 
@@ -9,7 +9,6 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
   const { pathname } = req.nextUrl;
 
-  // Public routes
   if (pathname.startsWith("/login") || pathname.startsWith("/auth")) {
     return NextResponse.next();
   }
@@ -19,9 +18,9 @@ export async function middleware(req: NextRequest) {
   }
 
   try {
+    // ✅ jose v6 requires async secret (Uint8Array is fine)
     const { payload } = await jwtVerify(token, SECRET);
 
-    // Role-based routes
     if (pathname.startsWith("/manager-dashboard") && payload.role !== "manager") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
@@ -37,10 +36,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/manager-dashboard/:path*",
-    "/login",
-    "/auth/:path*",
-  ],
+  matcher: ["/dashboard/:path*", "/manager-dashboard/:path*", "/login", "/auth/:path*"],
 };
