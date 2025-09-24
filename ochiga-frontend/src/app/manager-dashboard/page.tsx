@@ -2,7 +2,7 @@
 
 import {
   UsersIcon,
-  CurrencyNairaIcon,
+  CurrencyDollarIcon,   // ✅ valid alternative
   WrenchScrewdriverIcon,
   MegaphoneIcon,
 } from "@heroicons/react/24/outline";
