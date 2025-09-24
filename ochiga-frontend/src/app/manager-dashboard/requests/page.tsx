@@ -50,7 +50,15 @@ const getStatusColor = (status: string) => {
 };
 
 export default function RequestsPage() {
-  const [requests] = useState<Request[]>(sampleRequests);
+  const [requests, setRequests] = useState<Request[]>(sampleRequests);
+
+  const updateStatus = (id: number, newStatus: Request["status"]) => {
+    setRequests((prev) =>
+      prev.map((req) =>
+        req.id === id ? { ...req, status: newStatus } : req
+      )
+    );
+  };
 
   return (
     <div className="p-6">
@@ -86,14 +94,24 @@ export default function RequestsPage() {
                 {req.status}
               </span>
             </div>
-            <div className="flex gap-2 mt-4">
-              <button className="flex-1 bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200">
-                Approve
-              </button>
-              <button className="flex-1 bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200">
-                Reject
-              </button>
-            </div>
+
+            {/* Action Buttons */}
+            {req.status === "Pending" || req.status === "In Progress" ? (
+              <div className="flex gap-2 mt-4">
+                <button
+                  className="flex-1 bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200"
+                  onClick={() => updateStatus(req.id, "Completed")}
+                >
+                  Approve
+                </button>
+                <button
+                  className="flex-1 bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200"
+                  onClick={() => updateStatus(req.id, "Rejected")}
+                >
+                  Reject
+                </button>
+              </div>
+            ) : null}
           </div>
         ))}
       </div>
