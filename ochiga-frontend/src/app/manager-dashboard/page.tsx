@@ -1,6 +1,11 @@
 "use client";
 
-import { UserIcon, HomeIcon, QrCodeIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
+import {
+  UserIcon,
+  HomeIcon,
+  QrCodeIcon,
+  CurrencyDollarIcon,
+} from "@heroicons/react/24/outline";
 
 interface HouseCardProps {
   houseId: string;
@@ -13,7 +18,7 @@ interface HouseCardProps {
     phone: string;
     avatar?: string;
   };
-  balance: number;
+  balance?: number; // ✅ made optional, sometimes missing
   lastPayment?: string;
   qrCodeUrl?: string;
 }
@@ -24,7 +29,7 @@ export default function HouseCard({
   block,
   status,
   resident,
-  balance,
+  balance = 0, // ✅ default value (prevents crash)
   lastPayment,
   qrCodeUrl,
 }: HouseCardProps) {
@@ -33,7 +38,9 @@ export default function HouseCard({
       {/* Top Section */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white">House {houseId}</h2>
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+            House {houseId}
+          </h2>
           <p className="text-sm text-gray-500">
             {type} • {block}
           </p>
@@ -62,7 +69,9 @@ export default function HouseCard({
             <UserIcon className="w-12 h-12 p-2 rounded-full bg-gray-100 text-gray-600" />
           )}
           <div>
-            <p className="font-medium text-gray-900 dark:text-white">{resident.name}</p>
+            <p className="font-medium text-gray-900 dark:text-white">
+              {resident.name}
+            </p>
             <p className="text-xs text-gray-500">{resident.email}</p>
             <p className="text-xs text-gray-500">{resident.phone}</p>
           </div>
@@ -81,7 +90,7 @@ export default function HouseCard({
           <div>
             <p className="text-sm text-gray-500">Outstanding Balance</p>
             <p className="font-bold text-lg text-gray-900 dark:text-white">
-              ₦{balance.toLocaleString()}
+              ₦{Number(balance || 0).toLocaleString()} {/* ✅ Safe conversion */}
             </p>
           </div>
         </div>
