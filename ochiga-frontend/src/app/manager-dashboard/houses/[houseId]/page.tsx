@@ -1,74 +1,65 @@
 "use client";
 
-import HouseCard from "../components/HouseCard";
+import { useParams } from "next/navigation";
 
-export default function HousesPage() {
-  const houses = [
-    {
-      houseNumber: "1A",
+export default function HouseDetailsPage() {
+  const { houseId } = useParams();
+
+  // Mock data (later replace with API)
+  const houseData: Record<string, any> = {
+    "1A": {
       owner: "John Doe",
-      status: "Paid",
-      balance: 0,
       phoneNumber: "0803-123-4567",
       email: "john@example.com",
       rentStatus: "Paid",
       serviceChargeStatus: "Paid",
       electricityMeter: "E12345678",
       waterMeter: "W98765432",
+      balance: 0,
     },
-    {
-      houseNumber: "2B",
+    "2B": {
       owner: "Jane Smith",
-      status: "Unpaid",
-      balance: 75000,
       phoneNumber: "0812-987-6543",
       email: "jane@example.com",
       rentStatus: "Unpaid",
       serviceChargeStatus: "Paid",
       electricityMeter: "E87654321",
       waterMeter: "W12345678",
+      balance: 75000,
     },
-    {
-      houseNumber: "3C",
+    "3C": {
       owner: "Chika Obi",
-      status: "Pending",
-      balance: 25000,
       phoneNumber: "0701-234-5678",
       email: "chika@example.com",
       rentStatus: "Pending",
       serviceChargeStatus: "Unpaid",
       electricityMeter: "E55566677",
       waterMeter: "W33344455",
+      balance: 25000,
     },
-  ];
+  };
+
+  const house = houseData[houseId as string];
+
+  if (!house) {
+    return <p className="p-6 text-red-500">House not found</p>;
+  }
 
   return (
-    <div className="p-6">
-      {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Houses</h1>
-        <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-          + Add House
-        </button>
-      </div>
+    <div className="p-6 space-y-4">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        House {houseId}
+      </h1>
 
-      {/* House grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {houses.map((house, idx) => (
-          <HouseCard
-            key={idx}
-            houseNumber={house.houseNumber}
-            owner={house.owner}
-            status={house.status as "Paid" | "Unpaid" | "Pending"}
-            balance={house.balance}
-            phoneNumber={house.phoneNumber}
-            email={house.email}
-            rentStatus={house.rentStatus as "Paid" | "Unpaid" | "Pending"}
-            serviceChargeStatus={house.serviceChargeStatus as "Paid" | "Unpaid" | "Pending"}
-            electricityMeter={house.electricityMeter}
-            waterMeter={house.waterMeter}
-          />
-        ))}
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+        <p><span className="font-medium">Owner:</span> {house.owner}</p>
+        <p><span className="font-medium">Phone:</span> {house.phoneNumber}</p>
+        <p><span className="font-medium">Email:</span> {house.email}</p>
+        <p><span className="font-medium">Rent:</span> {house.rentStatus}</p>
+        <p><span className="font-medium">Service Charge:</span> {house.serviceChargeStatus}</p>
+        <p><span className="font-medium">Electricity Meter:</span> {house.electricityMeter}</p>
+        <p><span className="font-medium">Water Meter:</span> {house.waterMeter}</p>
+        <p><span className="font-medium">Outstanding Balance:</span> ₦{house.balance.toLocaleString()}</p>
       </div>
     </div>
   );
