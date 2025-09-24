@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusCircle, Edit } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import HouseCard from "../components/HouseCard";
 
 export default function HousesPage() {
@@ -48,14 +48,9 @@ export default function HousesPage() {
       {/* Header section */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Houses</h1>
-        <div className="flex space-x-3">
-          <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-            <PlusCircle size={16} /> Add House
-          </button>
-          <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition">
-            <Edit size={16} /> Edit Details
-          </button>
-        </div>
+        <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+          <PlusCircle size={16} /> Add House
+        </button>
       </div>
 
       {/* Houses grid */}
