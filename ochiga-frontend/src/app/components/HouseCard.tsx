@@ -5,6 +5,9 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   CurrencyDollarIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/outline";
 
 interface HouseCardProps {
@@ -18,7 +21,6 @@ interface HouseCardProps {
   waterMeter?: string;
   rentStatus?: "Paid" | "Unpaid" | "Pending";
   serviceChargeStatus?: "Paid" | "Unpaid" | "Pending";
-  onMessage?: (owner: string) => void; // callback for DM
 }
 
 export default function HouseCard({
@@ -32,7 +34,6 @@ export default function HouseCard({
   waterMeter,
   rentStatus,
   serviceChargeStatus,
-  onMessage,
 }: HouseCardProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -92,38 +93,17 @@ export default function HouseCard({
       {expanded && (
         <div className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
           <p>
-            <span className="font-medium">Phone:</span>{" "}
-            {phoneNumber ? (
-              <a
-                href={`tel:${phoneNumber}`}
-                className="text-blue-600 hover:underline"
-              >
-                {phoneNumber}
-              </a>
-            ) : (
-              "—"
-            )}
+            <span className="font-medium">Phone:</span> {phoneNumber ?? "—"}
           </p>
           <p>
-            <span className="font-medium">Email:</span>{" "}
-            {email ? (
-              <a
-                href={`mailto:${email}`}
-                className="text-blue-600 hover:underline"
-              >
-                {email}
-              </a>
-            ) : (
-              "—"
-            )}
+            <span className="font-medium">Email:</span> {email ?? "—"}
           </p>
           <p>
             <span className="font-medium">Service Charge:</span>{" "}
             {serviceChargeStatus ?? "N/A"}
           </p>
           <p>
-            <span className="font-medium">Rent:</span>{" "}
-            {rentStatus ?? "N/A"}
+            <span className="font-medium">Rent:</span> {rentStatus ?? "N/A"}
           </p>
           <p>
             <span className="font-medium">Electricity Meter:</span>{" "}
@@ -134,35 +114,34 @@ export default function HouseCard({
             {waterMeter ?? "—"}
           </p>
 
-          {/* Quick Actions */}
-          {(phoneNumber || email || onMessage) && (
-            <div className="flex space-x-3 pt-3">
-              {phoneNumber && (
-                <a
-                  href={`tel:${phoneNumber}`}
-                  className="px-3 py-1 rounded bg-green-100 text-green-700 text-xs font-medium hover:bg-green-200"
-                >
-                  Call
-                </a>
-              )}
-              {email && (
-                <a
-                  href={`mailto:${email}`}
-                  className="px-3 py-1 rounded bg-blue-100 text-blue-700 text-xs font-medium hover:bg-blue-200"
-                >
-                  Email
-                </a>
-              )}
-              {onMessage && (
-                <button
-                  onClick={() => onMessage(owner)}
-                  className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200"
-                >
-                  Message
-                </button>
-              )}
-            </div>
-          )}
+          {/* Action Buttons */}
+          <div className="flex space-x-2 pt-3">
+            {phoneNumber && (
+              <a
+                href={`tel:${phoneNumber}`}
+                className="flex items-center px-3 py-1.5 bg-green-100 text-green-700 text-xs rounded-md hover:bg-green-200"
+              >
+                <PhoneIcon className="w-4 h-4 mr-1" />
+                Call
+              </a>
+            )}
+            {email && (
+              <a
+                href={`mailto:${email}`}
+                className="flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-md hover:bg-blue-200"
+              >
+                <EnvelopeIcon className="w-4 h-4 mr-1" />
+                Email
+              </a>
+            )}
+            <button
+              className="flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+              onClick={() => alert(`Edit house ${houseNumber}`)}
+            >
+              <PencilSquareIcon className="w-4 h-4 mr-1" />
+              Edit
+            </button>
+          </div>
         </div>
       )}
     </div>
