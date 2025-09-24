@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import HouseCard from "../../components/HouseCard";
+import { PlusIcon } from "@heroicons/react/24/solid";
 
 export default function HousesPage() {
   const houses = [
@@ -45,12 +46,27 @@ export default function HousesPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-        Houses
-      </h1>
+      {/* Header with Add House button */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Houses
+        </h1>
+        <Link
+          href="/manager-dashboard/houses/add"
+          className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+        >
+          <PlusIcon className="w-4 h-4" />
+          Add House
+        </Link>
+      </div>
+
+      {/* Houses grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {houses.map((house, idx) => (
-          <Link key={idx} href={`/manager-dashboard/houses/${house.houseNumber}`}>
+          <Link
+            key={idx}
+            href={`/manager-dashboard/houses/${house.houseNumber}`}
+          >
             <HouseCard
               houseNumber={house.houseNumber}
               owner={house.owner}
@@ -59,7 +75,9 @@ export default function HousesPage() {
               phoneNumber={house.phoneNumber}
               email={house.email}
               rentStatus={house.rentStatus as "Paid" | "Unpaid" | "Pending"}
-              serviceChargeStatus={house.serviceChargeStatus as "Paid" | "Unpaid" | "Pending"}
+              serviceChargeStatus={
+                house.serviceChargeStatus as "Paid" | "Unpaid" | "Pending"
+              }
               electricityMeter={house.electricityMeter}
               waterMeter={house.waterMeter}
             />
