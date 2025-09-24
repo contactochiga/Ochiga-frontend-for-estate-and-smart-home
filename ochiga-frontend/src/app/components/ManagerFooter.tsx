@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   HomeIcon,
   BuildingOfficeIcon,
@@ -8,11 +8,20 @@ import {
   CreditCardIcon,
   GlobeAltIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function ManagerFooter() {
-  const [activeTab, setActiveTab] = useState("dashboard");
   const router = useRouter();
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState("dashboard");
+
+  useEffect(() => {
+    if (pathname.includes("/houses")) setActiveTab("houses");
+    else if (pathname.includes("/requests")) setActiveTab("requests");
+    else if (pathname.includes("/finance")) setActiveTab("finance");
+    else if (pathname.includes("/community")) setActiveTab("community");
+    else setActiveTab("dashboard");
+  }, [pathname]);
 
   const handleTabChange = (tab: string, path: string) => {
     setActiveTab(tab);
@@ -20,7 +29,7 @@ export default function ManagerFooter() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-800 border-t shadow flex justify-around text-xs">
+    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-800 border-t shadow flex justify-around text-xs z-50">
       <button
         className={`flex flex-col items-center p-2 ${
           activeTab === "dashboard"
@@ -75,9 +84,7 @@ export default function ManagerFooter() {
             ? "text-green-600 font-bold"
             : "text-gray-600 dark:text-gray-300"
         }`}
-        onClick={() =>
-          handleTabChange("community", "/manager-dashboard/community")
-        }
+        onClick={() => handleTabChange("community", "/manager-dashboard/community")}
       >
         <GlobeAltIcon className="w-5 h-5 mb-1" />
         Community
