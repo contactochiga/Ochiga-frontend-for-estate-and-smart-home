@@ -47,17 +47,17 @@ export default function HousesPage() {
     <div className="p-6 space-y-6">
       {/* Sub-header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
           Houses
         </h1>
-        <div className="flex space-x-3">
-          <button className="flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700">
-            <PlusIcon className="w-5 h-5 mr-1" />
-            Add House
+        <div className="flex space-x-2">
+          <button className="flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 text-xs font-medium rounded-md hover:bg-blue-50">
+            <PlusIcon className="w-4 h-4 mr-1" />
+            Add
           </button>
-          <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
-            <PencilSquareIcon className="w-5 h-5 mr-1" />
-            Edit Details
+          <button className="flex items-center px-3 py-1.5 border border-gray-400 text-gray-600 text-xs font-medium rounded-md hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+            <PencilSquareIcon className="w-4 h-4 mr-1" />
+            Edit
           </button>
         </div>
       </div>
