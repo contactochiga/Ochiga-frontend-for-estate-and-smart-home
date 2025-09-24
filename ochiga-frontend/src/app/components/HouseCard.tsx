@@ -18,6 +18,7 @@ interface HouseCardProps {
   waterMeter?: string;
   rentStatus?: "Paid" | "Unpaid" | "Pending";
   serviceChargeStatus?: "Paid" | "Unpaid" | "Pending";
+  onMessage?: (owner: string) => void; // callback for DM
 }
 
 export default function HouseCard({
@@ -31,6 +32,7 @@ export default function HouseCard({
   waterMeter,
   rentStatus,
   serviceChargeStatus,
+  onMessage,
 }: HouseCardProps) {
   const [expanded, setExpanded] = useState(false);
 
@@ -91,11 +93,29 @@ export default function HouseCard({
         <div className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
           <p>
             <span className="font-medium">Phone:</span>{" "}
-            {phoneNumber ?? "—"}
+            {phoneNumber ? (
+              <a
+                href={`tel:${phoneNumber}`}
+                className="text-blue-600 hover:underline"
+              >
+                {phoneNumber}
+              </a>
+            ) : (
+              "—"
+            )}
           </p>
           <p>
             <span className="font-medium">Email:</span>{" "}
-            {email ?? "—"}
+            {email ? (
+              <a
+                href={`mailto:${email}`}
+                className="text-blue-600 hover:underline"
+              >
+                {email}
+              </a>
+            ) : (
+              "—"
+            )}
           </p>
           <p>
             <span className="font-medium">Service Charge:</span>{" "}
@@ -113,6 +133,36 @@ export default function HouseCard({
             <span className="font-medium">Water Meter:</span>{" "}
             {waterMeter ?? "—"}
           </p>
+
+          {/* Quick Actions */}
+          {(phoneNumber || email || onMessage) && (
+            <div className="flex space-x-3 pt-3">
+              {phoneNumber && (
+                <a
+                  href={`tel:${phoneNumber}`}
+                  className="px-3 py-1 rounded bg-green-100 text-green-700 text-xs font-medium hover:bg-green-200"
+                >
+                  Call
+                </a>
+              )}
+              {email && (
+                <a
+                  href={`mailto:${email}`}
+                  className="px-3 py-1 rounded bg-blue-100 text-blue-700 text-xs font-medium hover:bg-blue-200"
+                >
+                  Email
+                </a>
+              )}
+              {onMessage && (
+                <button
+                  onClick={() => onMessage(owner)}
+                  className="px-3 py-1 rounded bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200"
+                >
+                  Message
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
