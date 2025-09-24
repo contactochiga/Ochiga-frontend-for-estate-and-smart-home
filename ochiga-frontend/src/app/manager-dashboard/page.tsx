@@ -1,6 +1,5 @@
 "use client";
 
-import { PlusCircle } from "lucide-react";
 import HouseCard from "../components/HouseCard";
 
 export default function HousesPage() {
@@ -45,15 +44,15 @@ export default function HousesPage() {
 
   return (
     <div className="p-6">
-      {/* Header section */}
+      {/* Page header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Houses</h1>
-        <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
-          <PlusCircle size={16} /> Add House
+        <button className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+          + Add House
         </button>
       </div>
 
-      {/* Houses grid */}
+      {/* House grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {houses.map((house, idx) => (
           <HouseCard
