@@ -4,9 +4,42 @@ import HouseCard from "../components/HouseCard";
 
 export default function HousesPage() {
   const houses = [
-    { houseNumber: "1A", owner: "John Doe", status: "Paid", balance: 0 },
-    { houseNumber: "2B", owner: "Jane Smith", status: "Unpaid", balance: 75000 },
-    { houseNumber: "3C", owner: "Chika Obi", status: "Pending", balance: 25000 },
+    {
+      houseNumber: "1A",
+      owner: "John Doe",
+      status: "Paid",
+      balance: 0,
+      phoneNumber: "0803-123-4567",
+      email: "john@example.com",
+      rentStatus: "Paid",
+      serviceChargeStatus: "Paid",
+      electricityMeter: "E12345678",
+      waterMeter: "W98765432",
+    },
+    {
+      houseNumber: "2B",
+      owner: "Jane Smith",
+      status: "Unpaid",
+      balance: 75000,
+      phoneNumber: "0812-987-6543",
+      email: "jane@example.com",
+      rentStatus: "Unpaid",
+      serviceChargeStatus: "Paid",
+      electricityMeter: "E87654321",
+      waterMeter: "W12345678",
+    },
+    {
+      houseNumber: "3C",
+      owner: "Chika Obi",
+      status: "Pending",
+      balance: 25000,
+      phoneNumber: "0701-234-5678",
+      email: "chika@example.com",
+      rentStatus: "Pending",
+      serviceChargeStatus: "Unpaid",
+      electricityMeter: "E55566677",
+      waterMeter: "W33344455",
+    },
   ];
 
   return (
@@ -18,6 +51,12 @@ export default function HousesPage() {
           owner={house.owner}
           status={house.status as "Paid" | "Unpaid" | "Pending"}
           balance={house.balance}
+          phoneNumber={house.phoneNumber}
+          email={house.email}
+          rentStatus={house.rentStatus as "Paid" | "Unpaid" | "Pending"}
+          serviceChargeStatus={house.serviceChargeStatus as "Paid" | "Unpaid" | "Pending"}
+          electricityMeter={house.electricityMeter}
+          waterMeter={house.waterMeter}
         />
       ))}
     </div>
