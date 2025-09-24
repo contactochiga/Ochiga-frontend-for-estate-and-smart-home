@@ -18,7 +18,7 @@ import {
   WrenchScrewdriverIcon,
   MegaphoneIcon,
 } from "@heroicons/react/24/outline";
-import { CurrencyNairaIcon } from "@/components/icons/CurrencyNairaIcon"; // custom icon
+import { CurrencyNairaIcon } from "@/app/components/icons/CurrencyNairaIcon"; // custom icon
 
 ChartJS.register(
   CategoryScale,
