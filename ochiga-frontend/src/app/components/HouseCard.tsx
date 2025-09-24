@@ -1,26 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CurrencyDollarIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  PencilSquareIcon,
-} from "@heroicons/react/24/outline";
+import { PencilIcon, PhoneIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
 
 interface HouseCardProps {
   houseNumber: string;
   owner: string;
   status: "Paid" | "Unpaid" | "Pending";
   balance: number;
-  phoneNumber?: string;
-  email?: string;
-  electricityMeter?: string;
-  waterMeter?: string;
-  rentStatus?: "Paid" | "Unpaid" | "Pending";
-  serviceChargeStatus?: "Paid" | "Unpaid" | "Pending";
+  phoneNumber: string;
+  email: string;
+  rentStatus: "Paid" | "Unpaid" | "Pending";
+  serviceChargeStatus: "Paid" | "Unpaid" | "Pending";
+  electricityMeter: string;
+  waterMeter: string;
 }
 
 export default function HouseCard({
@@ -30,120 +23,85 @@ export default function HouseCard({
   balance,
   phoneNumber,
   email,
-  electricityMeter,
-  waterMeter,
   rentStatus,
   serviceChargeStatus,
+  electricityMeter,
+  waterMeter,
 }: HouseCardProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  const statusColors = {
+    Paid: "bg-green-100 text-green-800",
+    Unpaid: "bg-red-100 text-red-800",
+    Pending: "bg-yellow-100 text-yellow-800",
+  };
 
   return (
-    <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 w-full max-w-sm">
-      {/* Top Section */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            House {houseNumber}
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-300">
-            Owner: {owner}
-          </p>
-        </div>
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-medium ${
-            status === "Paid"
-              ? "bg-green-100 text-green-700"
-              : status === "Unpaid"
-              ? "bg-red-100 text-red-700"
-              : "bg-yellow-100 text-yellow-700"
-          }`}
-        >
+    <div className="bg-white rounded-lg shadow p-4 relative">
+      {/* Edit button top-right */}
+      <button
+        className="absolute top-3 right-3 p-1 rounded hover:bg-gray-100"
+        aria-label="Edit"
+      >
+        <PencilIcon className="h-4 w-4 text-gray-600" />
+      </button>
+
+      {/* Title + status */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">House {houseNumber}</h2>
+        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColors[status]}`}>
           {status}
         </span>
       </div>
+      <p className="text-gray-500 text-sm">Owner: {owner}</p>
 
       {/* Balance */}
-      <div className="mt-4 flex items-center justify-between">
-        <span className="flex items-center space-x-2">
-          <CurrencyDollarIcon className="w-5 h-5 text-green-600" />
-          <p className="text-sm text-gray-500">Outstanding</p>
+      <div className="mt-2 flex items-center justify-between text-sm">
+        <span className="flex items-center text-gray-600">
+          💰 Outstanding
         </span>
-        <span className="text-lg font-bold text-gray-900 dark:text-white">
-          ₦{balance?.toLocaleString() ?? "0"}
-        </span>
+        <span className="font-semibold">₦{balance.toLocaleString()}</span>
       </div>
 
-      {/* Expand/Collapse */}
+      {/* Toggle details */}
       <button
-        className="mt-4 text-blue-600 flex items-center text-sm"
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => setShowDetails(!showDetails)}
+        className="text-blue-600 text-sm mt-2"
       >
-        {expanded ? (
-          <>
-            Hide Details <ChevronUpIcon className="w-4 h-4 ml-1" />
-          </>
-        ) : (
-          <>
-            See More <ChevronDownIcon className="w-4 h-4 ml-1" />
-          </>
-        )}
+        {showDetails ? "Hide Details ▲" : "Show Details ▼"}
       </button>
 
-      {/* Expanded Section */}
-      {expanded && (
-        <div className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+      {/* Expanded details */}
+      {showDetails && (
+        <div className="mt-3 text-sm text-gray-700 space-y-1">
           <p>
-            <span className="font-medium">Phone:</span> {phoneNumber ?? "—"}
+            Phone: <a href={`tel:${phoneNumber}`} className="text-blue-600">{phoneNumber}</a>
           </p>
           <p>
-            <span className="font-medium">Email:</span> {email ?? "—"}
+            Email: <a href={`mailto:${email}`} className="text-blue-600">{email}</a>
           </p>
-          <p>
-            <span className="font-medium">Service Charge:</span>{" "}
-            {serviceChargeStatus ?? "N/A"}
-          </p>
-          <p>
-            <span className="font-medium">Rent:</span> {rentStatus ?? "N/A"}
-          </p>
-          <p>
-            <span className="font-medium">Electricity Meter:</span>{" "}
-            {electricityMeter ?? "—"}
-          </p>
-          <p>
-            <span className="font-medium">Water Meter:</span>{" "}
-            {waterMeter ?? "—"}
-          </p>
-
-          {/* Action Buttons */}
-          <div className="flex space-x-2 pt-3">
-            {phoneNumber && (
-              <a
-                href={`tel:${phoneNumber}`}
-                className="flex items-center px-3 py-1.5 bg-green-100 text-green-700 text-xs rounded-md hover:bg-green-200"
-              >
-                <PhoneIcon className="w-4 h-4 mr-1" />
-                Call
-              </a>
-            )}
-            {email && (
-              <a
-                href={`mailto:${email}`}
-                className="flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-md hover:bg-blue-200"
-              >
-                <EnvelopeIcon className="w-4 h-4 mr-1" />
-                Email
-              </a>
-            )}
-            <button
-              className="flex items-center px-3 py-1.5 bg-gray-100 text-gray-700 text-xs rounded-md hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-              onClick={() => alert(`Edit house ${houseNumber}`)}
-            >
-              <PencilSquareIcon className="w-4 h-4 mr-1" />
-              Edit
-            </button>
-          </div>
+          <p>Service Charge: {serviceChargeStatus}</p>
+          <p>Rent: {rentStatus}</p>
+          <p>Electricity Meter: {electricityMeter}</p>
+          <p>Water Meter: {waterMeter}</p>
         </div>
       )}
+
+      {/* Actions */}
+      <div className="mt-3 flex gap-2">
+        <a
+          href={`tel:${phoneNumber}`}
+          className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded text-sm hover:bg-green-200"
+        >
+          <PhoneIcon className="h-4 w-4" /> Call
+        </a>
+        <a
+          href={`mailto:${email}`}
+          className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
+        >
+          <EnvelopeIcon className="h-4 w-4" /> Email
+        </a>
+      </div>
     </div>
   );
 }
