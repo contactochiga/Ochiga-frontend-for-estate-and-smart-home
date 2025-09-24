@@ -96,11 +96,11 @@ export default function RequestsPage() {
             </div>
 
             {/* Action Buttons */}
-            {req.status === "Pending" || req.status === "In Progress" ? (
+            {req.status === "Pending" && (
               <div className="flex gap-2 mt-4">
                 <button
                   className="flex-1 bg-green-100 text-green-700 px-3 py-1 rounded text-sm hover:bg-green-200"
-                  onClick={() => updateStatus(req.id, "Completed")}
+                  onClick={() => updateStatus(req.id, "In Progress")}
                 >
                   Approve
                 </button>
@@ -111,7 +111,18 @@ export default function RequestsPage() {
                   Reject
                 </button>
               </div>
-            ) : null}
+            )}
+
+            {req.status === "In Progress" && (
+              <div className="flex gap-2 mt-4">
+                <button
+                  className="flex-1 bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700"
+                  onClick={() => updateStatus(req.id, "Completed")}
+                >
+                  Mark Completed
+                </button>
+              </div>
+            )}
           </div>
         ))}
       </div>
