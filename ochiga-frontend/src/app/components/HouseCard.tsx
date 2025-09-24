@@ -12,6 +12,8 @@ interface HouseCardProps {
   owner: string;
   status: "Paid" | "Unpaid" | "Pending";
   balance: number;
+  phoneNumber?: string;
+  email?: string;
   electricityMeter?: string;
   waterMeter?: string;
   rentStatus?: "Paid" | "Unpaid" | "Pending";
@@ -23,6 +25,8 @@ export default function HouseCard({
   owner,
   status,
   balance,
+  phoneNumber,
+  email,
   electricityMeter,
   waterMeter,
   rentStatus,
@@ -62,7 +66,7 @@ export default function HouseCard({
           <p className="text-sm text-gray-500">Outstanding</p>
         </span>
         <span className="text-lg font-bold text-gray-900 dark:text-white">
-          ₦{balance.toLocaleString()}
+          ₦{balance?.toLocaleString() ?? "0"}
         </span>
       </div>
 
@@ -85,6 +89,14 @@ export default function HouseCard({
       {/* Expanded Section */}
       {expanded && (
         <div className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-300">
+          <p>
+            <span className="font-medium">Phone:</span>{" "}
+            {phoneNumber ?? "—"}
+          </p>
+          <p>
+            <span className="font-medium">Email:</span>{" "}
+            {email ?? "—"}
+          </p>
           <p>
             <span className="font-medium">Service Charge:</span>{" "}
             {serviceChargeStatus ?? "N/A"}
