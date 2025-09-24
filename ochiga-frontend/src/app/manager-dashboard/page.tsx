@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { PlusCircle, Edit } from "lucide-react";
 import HouseCard from "../components/HouseCard";
 
 export default function HousesPage() {
@@ -44,25 +44,21 @@ export default function HousesPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Sub-header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-          Houses
-        </h1>
-        <div className="flex space-x-2">
-          <button className="flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 text-xs font-medium rounded-md hover:bg-blue-50">
-            <PlusIcon className="w-4 h-4 mr-1" />
-            Add
+    <div className="p-6">
+      {/* Header section */}
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold">Houses</h1>
+        <div className="flex space-x-3">
+          <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+            <PlusCircle size={16} /> Add House
           </button>
-          <button className="flex items-center px-3 py-1.5 border border-gray-400 text-gray-600 text-xs font-medium rounded-md hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-            <PencilSquareIcon className="w-4 h-4 mr-1" />
-            Edit
+          <button className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-600 text-white rounded-md hover:bg-gray-700 transition">
+            <Edit size={16} /> Edit Details
           </button>
         </div>
       </div>
 
-      {/* Grid of Houses */}
+      {/* Houses grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {houses.map((house, idx) => (
           <HouseCard
