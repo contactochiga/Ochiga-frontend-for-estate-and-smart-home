@@ -33,18 +33,6 @@ const initialPosts: FeedPost[] = [
     content: "Community party scheduled for 13th Sept at the sports arena 🎉",
     createdAt: "2025-09-25",
   },
-  {
-    id: 4,
-    author: "Resident - Amaka",
-    content: "Can we get a cleaner assigned to Block D’s lobby more frequently?",
-    createdAt: "2025-09-26",
-  },
-  {
-    id: 5,
-    author: "Estate Admin",
-    content: "Security patrol schedule updated. Check the portal for details.",
-    createdAt: "2025-09-27",
-  },
 ];
 
 export default function CommunityFeedCard() {
@@ -62,13 +50,13 @@ export default function CommunityFeedCard() {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 shadow rounded-xl p-4">
+    <div className="rounded-xl shadow-lg p-6 bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Community Feed
-        </h2>
-        <span className="text-sm text-gray-500">{posts.length} updates</span>
+        <h2 className="text-lg font-semibold">Community Feed</h2>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {posts.length} updates
+        </span>
       </div>
 
       {/* Posts */}
@@ -76,36 +64,32 @@ export default function CommunityFeedCard() {
         {visiblePosts.map((post) => (
           <div
             key={post.id}
-            className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+            className="p-3 rounded-lg bg-gray-50 dark:bg-black/40"
           >
             <div className="flex justify-between items-center">
-              <h3 className="font-medium text-gray-800 dark:text-gray-200">
-                {post.author}
-              </h3>
-              <span className="text-xs text-gray-500">
+              <h3 className="font-medium">{post.author}</h3>
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {new Date(post.createdAt).toLocaleDateString("en-GB")}
               </span>
             </div>
-            <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
-              {post.content}
-            </p>
+            <p className="mt-1 text-sm">{post.content}</p>
 
             {/* Actions */}
-            <div className="flex space-x-4 mt-2 text-sm text-gray-500">
-              <button className="flex items-center space-x-1 hover:text-blue-600">
+            <div className="flex space-x-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <button className="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
                 <ChatBubbleLeftIcon className="h-4 w-4" />
                 <span>Comment</span>
               </button>
               <button
                 onClick={() => handleShare(post)}
-                className="flex items-center space-x-1 hover:text-green-600"
+                className="flex items-center space-x-1 hover:text-green-600 dark:hover:text-green-400"
               >
                 <ShareIcon className="h-4 w-4" />
                 <span>Share</span>
               </button>
               <button
                 onClick={() => handleDelete(post.id)}
-                className="flex items-center space-x-1 hover:text-red-600"
+                className="flex items-center space-x-1 hover:text-red-600 dark:hover:text-red-400"
               >
                 <TrashIcon className="h-4 w-4" />
                 <span>Delete</span>
@@ -115,11 +99,11 @@ export default function CommunityFeedCard() {
         ))}
       </div>
 
-      {/* Toggle Button */}
+      {/* Toggle */}
       <div className="mt-4">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-sm text-red-700 dark:text-red-400 font-medium hover:underline"
+          className="text-sm text-rose-700 dark:text-rose-400 font-medium hover:underline"
         >
           {expanded ? "↑ Collapse" : "← View More"}
         </button>
