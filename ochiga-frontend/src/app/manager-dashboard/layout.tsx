@@ -1,3 +1,4 @@
+// src/app/manager-dashboard/layout.tsx
 "use client";
 
 import ManagerHeader from "../components/ManagerHeader";
@@ -9,12 +10,14 @@ export default function ManagerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900">
       {/* Header */}
       <ManagerHeader />
 
       {/* Main Content */}
-      <main className="flex-1 pt-20 pb-20 px-4">{children}</main>
+      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {children}
+      </main>
 
       {/* Footer */}
       <ManagerFooter />
