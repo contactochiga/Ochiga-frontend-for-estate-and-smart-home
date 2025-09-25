@@ -32,7 +32,7 @@ export default function ManagerHeader() {
     { name: "Announcements", href: "/manager-dashboard/announcements", icon: MegaphoneIcon },
     { name: "Complaints", href: "/manager-dashboard/complaints", icon: ExclamationTriangleIcon },
     { name: "Devices", href: "/manager-dashboard/devices", icon: Cog6ToothIcon },
-    { name: "Support / Help", href: "/manager-dashboard/support", icon: LifebuoyIcon },
+    { name: "Support / Help", href: "/manager-dashboard/help", icon: LifebuoyIcon }, // ✅ fixed path
   ];
 
   return (
@@ -76,10 +76,16 @@ export default function ManagerHeader() {
       {/* Profile Dropdown */}
       {profileOpen && (
         <div className="absolute top-14 right-4 z-50 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-2">
-          <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200">
+          <button
+            onClick={() => router.push("/manager-dashboard/profile")}
+            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+          >
             My Profile
           </button>
-          <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200">
+          <button
+            onClick={() => router.push("/manager-dashboard/settings")}
+            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+          >
             Settings
           </button>
           <button className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">
