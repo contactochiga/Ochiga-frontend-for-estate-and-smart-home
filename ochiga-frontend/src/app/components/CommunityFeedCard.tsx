@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ChatBubbleLeftIcon, ShareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import {
+  ChatBubbleLeftIcon,
+  ShareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 
 interface FeedPost {
   id: number;
@@ -45,7 +49,9 @@ const initialPosts: FeedPost[] = [
 
 export default function CommunityFeedCard() {
   const [posts, setPosts] = useState(initialPosts);
-  const [visibleCount, setVisibleCount] = useState(3);
+  const [expanded, setExpanded] = useState(false);
+
+  const visiblePosts = expanded ? posts : posts.slice(0, 3);
 
   const handleDelete = (id: number) => {
     setPosts((prev) => prev.filter((post) => post.id !== id));
@@ -67,7 +73,7 @@ export default function CommunityFeedCard() {
 
       {/* Posts */}
       <div className="space-y-4">
-        {posts.slice(0, visibleCount).map((post) => (
+        {visiblePosts.map((post) => (
           <div
             key={post.id}
             className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
@@ -109,17 +115,15 @@ export default function CommunityFeedCard() {
         ))}
       </div>
 
-      {/* View More Button */}
-      {visibleCount < posts.length && (
-        <div className="mt-4">
-          <button
-            onClick={() => setVisibleCount(posts.length)}
-            className="text-sm text-red-700 dark:text-red-400 font-medium hover:underline"
-          >
-            ← View More
-          </button>
-        </div>
-      )}
+      {/* Toggle Button */}
+      <div className="mt-4">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-sm text-red-700 dark:text-red-400 font-medium hover:underline"
+        >
+          {expanded ? "↑ Collapse" : "← View More"}
+        </button>
+      </div>
     </div>
   );
 }
