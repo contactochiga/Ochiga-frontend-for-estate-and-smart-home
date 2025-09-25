@@ -29,10 +29,23 @@ const initialPosts: FeedPost[] = [
     content: "Community party scheduled for 13th Sept at the sports arena 🎉",
     createdAt: "2025-09-25",
   },
+  {
+    id: 4,
+    author: "Resident - Amaka",
+    content: "Can we get a cleaner assigned to Block D’s lobby more frequently?",
+    createdAt: "2025-09-26",
+  },
+  {
+    id: 5,
+    author: "Estate Admin",
+    content: "Security patrol schedule updated. Check the portal for details.",
+    createdAt: "2025-09-27",
+  },
 ];
 
 export default function CommunityFeedCard() {
   const [posts, setPosts] = useState(initialPosts);
+  const [visibleCount, setVisibleCount] = useState(3);
 
   const handleDelete = (id: number) => {
     setPosts((prev) => prev.filter((post) => post.id !== id));
@@ -49,14 +62,12 @@ export default function CommunityFeedCard() {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Community Feed
         </h2>
-        <span className="text-sm text-gray-500">
-          {posts.length} updates
-        </span>
+        <span className="text-sm text-gray-500">{posts.length} updates</span>
       </div>
 
       {/* Posts */}
       <div className="space-y-4">
-        {posts.map((post) => (
+        {posts.slice(0, visibleCount).map((post) => (
           <div
             key={post.id}
             className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
@@ -97,6 +108,18 @@ export default function CommunityFeedCard() {
           </div>
         ))}
       </div>
+
+      {/* View More Button */}
+      {visibleCount < posts.length && (
+        <div className="mt-4">
+          <button
+            onClick={() => setVisibleCount(posts.length)}
+            className="text-sm text-red-700 dark:text-red-400 font-medium hover:underline"
+          >
+            ← View More
+          </button>
+        </div>
+      )}
     </div>
   );
 }
