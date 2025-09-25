@@ -9,11 +9,23 @@ import {
   BellIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 
 export default function ManagerHeader() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const router = useRouter();
+
+  const menuItems = [
+    { name: "Residents", href: "/manager-dashboard/residents" },
+    { name: "Staff", href: "/manager-dashboard/staff" },
+    { name: "Reports", href: "/manager-dashboard/reports" },
+    { name: "Announcements", href: "/manager-dashboard/announcements" },
+    { name: "Complaints", href: "/manager-dashboard/complaints" },
+    { name: "Settings", href: "/manager-dashboard/settings" },
+    { name: "Support / Help", href: "/manager-dashboard/support" },
+  ];
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 flex flex-col bg-white dark:bg-gray-800 shadow">
@@ -84,17 +96,25 @@ export default function ManagerHeader() {
           <div className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-50 p-4">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-green-600 dark:text-green-400">
-                Estate Menu
+                Management Tools
               </h2>
               <button onClick={() => setSidebarOpen(false)}>
                 <XMarkIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
               </button>
             </div>
             <ul className="space-y-4 text-gray-700 dark:text-gray-200">
-              <li className="cursor-pointer hover:text-green-600">Houses</li>
-              <li className="cursor-pointer hover:text-green-600">Requests</li>
-              <li className="cursor-pointer hover:text-green-600">Finance</li>
-              <li className="cursor-pointer hover:text-green-600">Community</li>
+              {menuItems.map((item) => (
+                <li
+                  key={item.name}
+                  className="cursor-pointer hover:text-green-600"
+                  onClick={() => {
+                    setSidebarOpen(false);
+                    router.push(item.href);
+                  }}
+                >
+                  {item.name}
+                </li>
+              ))}
             </ul>
           </div>
         </>
