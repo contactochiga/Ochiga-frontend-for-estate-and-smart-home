@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -14,14 +15,15 @@ import {
   MegaphoneIcon,
   ExclamationTriangleIcon,
   LifebuoyIcon,
+  Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
 
 export default function ManagerHeader() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   const menuItems = [
     { name: "Residents", href: "/manager-dashboard/residents", icon: UsersIcon },
@@ -29,6 +31,7 @@ export default function ManagerHeader() {
     { name: "Reports", href: "/manager-dashboard/reports", icon: ChartBarIcon },
     { name: "Announcements", href: "/manager-dashboard/announcements", icon: MegaphoneIcon },
     { name: "Complaints", href: "/manager-dashboard/complaints", icon: ExclamationTriangleIcon },
+    { name: "Devices", href: "/manager-dashboard/devices", icon: Cog6ToothIcon },
     { name: "Support / Help", href: "/manager-dashboard/support", icon: LifebuoyIcon },
   ];
 
@@ -47,21 +50,19 @@ export default function ManagerHeader() {
 
         {/* Right: Icons */}
         <div className="flex items-center space-x-4">
-          {/* Search toggle */}
           <button onClick={() => setSearchOpen(!searchOpen)}>
             <MagnifyingGlassIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
           <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           <BellIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
 
-          {/* Profile dropdown toggle */}
           <button onClick={() => setProfileOpen(!profileOpen)}>
             <UserCircleIcon className="w-7 h-7 text-gray-700 dark:text-gray-200" />
           </button>
         </div>
       </div>
 
-      {/* Slide-down search bar */}
+      {/* Slide-down search */}
       {searchOpen && (
         <div className="px-4 pb-3">
           <input
@@ -75,10 +76,10 @@ export default function ManagerHeader() {
       {/* Profile Dropdown */}
       {profileOpen && (
         <div className="absolute top-14 right-4 z-50 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-2">
-          <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+          <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200">
             My Profile
           </button>
-          <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+          <button className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200">
             Settings
           </button>
           <button className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -105,19 +106,26 @@ export default function ManagerHeader() {
               </button>
             </div>
             <ul className="space-y-4 text-gray-700 dark:text-gray-200">
-              {menuItems.map((item) => (
-                <li
-                  key={item.name}
-                  className="flex items-center space-x-3 cursor-pointer hover:text-green-600"
-                  onClick={() => {
-                    setSidebarOpen(false);
-                    router.push(item.href);
-                  }}
-                >
-                  <item.icon className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </li>
-              ))}
+              {menuItems.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <li
+                    key={item.name}
+                    className={`flex items-center space-x-3 cursor-pointer p-2 rounded-md ${
+                      isActive
+                        ? "bg-green-100 text-green-600 dark:bg-green-700 dark:text-white"
+                        : "hover:text-green-600"
+                    }`}
+                    onClick={() => {
+                      setSidebarOpen(false);
+                      router.push(item.href);
+                    }}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span>{item.name}</span>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </>
