@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import ManagerHeaderCard from "../../components/ManagerHeaderCard";
-import EstateStatsCard from "../../components/EstateStatsCard";
-import CommunityFeedCard from "../../components/CommunityFeedCard";
-import TasksCard from "../../components/TasksCard";
+import ManagerHeaderCard from "../components/ManagerHeaderCard";
+import EstateStatsCard from "../components/EstateStatsCard";
+import CommunityFeedCard from "../components/CommunityFeedCard";
+import TasksCard from "../components/TasksCard";
 
 export default function ManagerDashboardPage() {
   return (
