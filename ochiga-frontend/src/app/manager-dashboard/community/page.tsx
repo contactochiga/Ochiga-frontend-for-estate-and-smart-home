@@ -15,7 +15,7 @@ import {
   PinnedPostCard,
   GroupsCard,
   FeedPostCard,
-} from "../../../dashboard/community/components"; // ✅ reuse resident components
+} from "./components"; 
 
 import { Post, Group } from "../../../types";
 
