@@ -9,17 +9,20 @@ export default function HomePage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
       <h1 className="text-2xl font-bold mb-8">Welcome to Ochiga</h1>
       <div className="space-y-4 w-full max-w-sm">
+        {/* Manager button */}
         <button
           onClick={() => router.push("/manager-dashboard")}
-          className="w-full bg-maroon-600 hover:bg-maroon-700 text-white py-3 px-4 rounded-lg font-semibold"
+          className="w-full bg-gradient-to-r from-maroon-700 to-black text-white py-3 px-4 rounded-lg font-semibold shadow"
         >
-          Manager
+          Manager Dashboard
         </button>
+
+        {/* Resident button */}
         <button
           onClick={() => router.push("/dashboard")}
-          className="w-full bg-gray-900 hover:bg-black text-white py-3 px-4 rounded-lg font-semibold"
+          className="w-full bg-gray-900 hover:bg-black text-white py-3 px-4 rounded-lg font-semibold shadow"
         >
-          Resident
+          Resident Dashboard
         </button>
       </div>
     </div>
