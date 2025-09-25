@@ -10,7 +10,7 @@ export default function ManagerLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900">
+    <div className="flex flex-col min-h-screen bg-gray-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-black dark:to-gray-800">
       {/* Header */}
       <ManagerHeader />
 
