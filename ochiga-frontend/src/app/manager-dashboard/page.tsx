@@ -9,10 +9,10 @@ export default function EstateHeader() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white rounded-2xl p-6 shadow-lg">
+    <div className="bg-gradient-to-r from-[#800000] via-black to-[#1a0000] text-white rounded-2xl p-6 shadow-xl">
       {/* Greeting */}
       <p className="text-sm opacity-80">Good afternoon,</p>
-      <h2 className="text-lg font-semibold mt-1">Manager John</h2>
+      <h2 className="text-lg font-medium mt-1">Manager John</h2>
 
       {/* Estate Info */}
       <h1 className="text-2xl font-bold mt-4 tracking-tight">Ochiga Estate</h1>
