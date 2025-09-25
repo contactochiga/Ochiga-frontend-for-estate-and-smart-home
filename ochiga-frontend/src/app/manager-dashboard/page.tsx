@@ -1,16 +1,24 @@
 "use client";
 
+import React from "react";
 import ManagerHeaderCard from "../../components/ManagerHeaderCard";
 import EstateStatsCard from "../../components/EstateStatsCard";
 import CommunityFeedCard from "../../components/CommunityFeedCard";
-import CommunityFeedCard from "../../components/CommunityFeedCard";
+import TasksCard from "../../components/TasksCard";
 
 export default function ManagerDashboardPage() {
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 space-y-6">
+      {/* Header */}
       <ManagerHeaderCard />
+
+      {/* Estate Stats */}
       <EstateStatsCard />
+
+      {/* Community Feed */}
       <CommunityFeedCard />
+
+      {/* Tasks */}
       <TasksCard />
     </div>
   );
