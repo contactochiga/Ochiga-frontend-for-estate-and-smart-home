@@ -10,8 +10,6 @@ import {
   DevicePhoneMobileIcon,
   ArrowUpRightIcon,
   ClipboardDocumentIcon,
-  ArrowDownTrayIcon,
-  ArrowUpTrayIcon,
 } from "@heroicons/react/24/outline";
 
 export default function WalletPage() {
@@ -44,14 +42,21 @@ export default function WalletPage() {
 
   return (
     <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8 space-y-6">
+      {/* Page Title */}
+      <h1 className="text-lg font-bold text-gray-900 dark:text-white text-right px-6">
+        Wallet
+      </h1>
+
       {/* Virtual Wallet Card */}
-      <div className="rounded-2xl p-6 text-white shadow-xl bg-gradient-to-r from-[#800000] to-black relative overflow-hidden">
+      <div className="rounded-2xl p-6 text-gray-900 dark:text-white shadow-xl 
+        bg-white dark:bg-gradient-to-r dark:from-black dark:to-[#800000] relative overflow-hidden">
+        
         {/* Card Header */}
-        <div className="flex justify-between items-center">
-          <p className="text-xs uppercase opacity-80">Wallet Balance</p>
+        <div className="flex justify-between items-center flex-row-reverse">
+          <p className="text-xs uppercase opacity-70">Wallet Balance</p>
           <button
             onClick={() => setShowBalance(!showBalance)}
-            className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition"
+            className="bg-gray-200 dark:bg-white/20 p-2 rounded-lg hover:opacity-80 transition"
           >
             {showBalance ? (
               <EyeIcon className="h-5 w-5" />
@@ -62,48 +67,36 @@ export default function WalletPage() {
         </div>
 
         {/* Balance */}
-        <h2 className="text-3xl font-bold tracking-wide mt-2">
+        <h2 className="text-3xl font-bold tracking-wide mt-2 text-right">
           {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
         </h2>
-
-        {/* Card Footer */}
-        <div className="mt-6 flex justify-between items-center text-xs opacity-80">
-          <span>{bankName}</span>
-          <span>{accountNumber}</span>
-        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Quick Action → Only Fund */}
+      <div className="grid grid-cols-1 gap-4 px-2">
         <button
           onClick={() => setShowModal(true)}
-          className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition"
+          className="flex flex-col items-center p-6 rounded-xl 
+            bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition"
         >
-          <BanknotesIcon className="h-6 w-6 text-[#800000]" />
-          <span className="mt-2 text-sm font-medium">Fund</span>
-        </button>
-        <button className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition">
-          <ArrowDownTrayIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
-          <span className="mt-2 text-sm font-medium">Withdraw</span>
-        </button>
-        <button className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition">
-          <ArrowUpTrayIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          <span className="mt-2 text-sm font-medium">Transfer</span>
+          <BanknotesIcon className="h-7 w-7 text-[#800000]" />
+          <span className="mt-2 text-sm font-medium">Fund Wallet</span>
         </button>
       </div>
 
       {/* Transaction History */}
       <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-700">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4">
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4 text-right">
           Transaction History
         </h3>
         <div className="space-y-4">
           {transactions.map((tx) => (
             <div
               key={tx.id}
-              className="flex justify-between items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
+              className="flex justify-between items-center p-3 rounded-xl 
+                bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
             >
-              <div>
+              <div className="text-right">
                 <p className="font-medium text-gray-900 dark:text-gray-100">{tx.title}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{tx.date}</p>
               </div>
@@ -147,13 +140,14 @@ export default function WalletPage() {
                 Send to the account below and your wallet will be credited instantly.
               </p>
               <div className="flex items-center justify-between mt-3">
-                <div>
+                <div className="text-left">
                   <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{bankName}</p>
                   <p className="text-lg font-bold tracking-wide text-[#800000]">{accountNumber}</p>
                 </div>
                 <button
                   onClick={copyToClipboard}
-                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-gradient-to-r from-[#800000] to-black text-white text-sm font-medium shadow hover:opacity-90"
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg 
+                    bg-gradient-to-r from-[#800000] to-black text-white text-sm font-medium shadow hover:opacity-90"
                 >
                   <ClipboardDocumentIcon className="h-5 w-5" />
                   {copied ? "Copied" : "Copy"}
@@ -168,7 +162,9 @@ export default function WalletPage() {
                 return (
                   <button
                     key={idx}
-                    className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-[#800000]/10 dark:hover:bg-gray-800 transition"
+                    className="flex items-center gap-3 p-4 rounded-xl border 
+                      border-gray-200 dark:border-gray-700 hover:bg-[#800000]/10 
+                      dark:hover:bg-gray-800 transition"
                   >
                     <Icon className="h-6 w-6 text-[#800000]" />
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
