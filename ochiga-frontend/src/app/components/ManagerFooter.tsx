@@ -43,7 +43,7 @@ export default function ManagerFooter() {
           key={id}
           className={`flex flex-col items-center flex-1 py-2 transition-colors duration-200 ${
             activeTab === id
-              ? "text-green-600 font-semibold"
+              ? "text-[#800000] font-semibold" // maroon active
               : "text-gray-500 dark:text-gray-400"
           } hover:text-[#800000]`} // maroon hover
           onClick={() => handleTabChange(id, path)}
