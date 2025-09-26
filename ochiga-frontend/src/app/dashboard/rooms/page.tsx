@@ -8,6 +8,7 @@ import {
   MdDoorFront,
   MdAcUnit,
   MdVideocam,
+  MdAdd,
 } from "react-icons/md";
 
 const rooms = [
@@ -96,8 +97,16 @@ export default function RoomsPage() {
     }));
   };
 
+  const handleAddRoom = () => {
+    alert("Add Room clicked (hook to modal/form later)");
+  };
+
+  const handleAddDevice = () => {
+    alert("Add Device clicked (hook to modal/form later)");
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-black text-gray-900 dark:text-white p-6 pb-24 space-y-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-black text-gray-900 dark:text-white p-6 pb-24 space-y-6 relative">
       {/* Page Header */}
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
         Rooms & Devices
@@ -122,6 +131,13 @@ export default function RoomsPage() {
             {room}
           </button>
         ))}
+        {/* Add Room Button */}
+        <button
+          onClick={handleAddRoom}
+          className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all border-2 border-dashed border-gray-400 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 flex items-center gap-1"
+        >
+          <MdAdd className="text-lg" /> Add Room
+        </button>
       </div>
 
       {/* Devices Grid */}
@@ -178,6 +194,14 @@ export default function RoomsPage() {
           </div>
         ))}
       </div>
+
+      {/* Floating Add Device Button */}
+      <button
+        onClick={handleAddDevice}
+        className="fixed bottom-20 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[#800000] to-black text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform z-50"
+      >
+        <MdAdd className="text-2xl" />
+      </button>
 
       {/* Device Control Modal */}
       {selectedDevice && (
