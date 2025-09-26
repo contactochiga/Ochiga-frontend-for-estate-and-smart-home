@@ -51,9 +51,9 @@ export default function UtilitiesCard() {
       {/* Utilities Outer Card */}
       <div className="w-full animate-slideUp">
         <div
-          className="rounded-xl p-5 shadow-md 
-                     bg-gradient-to-r from-[#800000] to-[#a00000]
-                     text-white"
+          className="rounded-md p-5 shadow-md
+                     bg-white dark:bg-gradient-to-r dark:from-[#800000] dark:to-black
+                     text-gray-900 dark:text-white"
         >
           {/* Header */}
           <h2 className="text-sm font-semibold mb-4">Utilities</h2>
@@ -67,7 +67,7 @@ export default function UtilitiesCard() {
                   key={util.name}
                   onClick={() => setActiveUtility(util.name)}
                   className="flex flex-col items-center justify-center 
-                             bg-white dark:bg-gray-900 rounded-lg 
+                             bg-gray-50 dark:bg-gray-900 rounded-md 
                              shadow hover:shadow-md hover:scale-[1.05] 
                              transition-transform duration-200
                              aspect-square p-2"
@@ -86,7 +86,7 @@ export default function UtilitiesCard() {
       {/* Bottom Sheet Modal */}
       {activeUtility && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40">
-          <div className="bg-white dark:bg-gray-900 rounded-t-2xl w-full max-w-md p-5 animate-slideUp shadow-xl">
+          <div className="bg-white dark:bg-gray-900 rounded-t-md w-full max-w-md p-5 animate-slideUp shadow-xl">
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-3">
               <h2 className="text-base font-semibold text-gray-900 dark:text-white">
@@ -94,7 +94,7 @@ export default function UtilitiesCard() {
               </h2>
               <button
                 onClick={() => setActiveUtility(null)}
-                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
@@ -108,7 +108,7 @@ export default function UtilitiesCard() {
                   type={field.type}
                   placeholder={field.placeholder}
                   className="w-full border rounded-md px-3 py-2 text-sm 
-                             dark:bg-gray-800 dark:text-white"
+                             bg-gray-50 dark:bg-gray-800 dark:text-white"
                 />
               ))}
 
