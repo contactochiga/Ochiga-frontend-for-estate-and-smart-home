@@ -1,63 +1,57 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
   HomeIcon,
   Squares2X2Icon,
-  BuildingOffice2Icon,
-  DevicePhoneMobileIcon,
-  Cog6ToothIcon,
+  WalletIcon,
+  UsersIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import { useRouter, usePathname } from "next/navigation";
 
-export default function Footer() {
+export default function ResidentFooter() {
+  const router = useRouter();
   const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState("dashboard");
 
-  const navItems = [
-    { name: "Home", href: "/", icon: HomeIcon },
-    { name: "Rooms", href: "/rooms", icon: Squares2X2Icon },
-    { name: "Estate", href: "/estate", icon: BuildingOffice2Icon },
-    { name: "Devices", href: "/devices", icon: DevicePhoneMobileIcon },
-    { name: "Settings", href: "/settings", icon: Cog6ToothIcon },
+  useEffect(() => {
+    if (pathname.includes("/rooms")) setActiveTab("rooms");
+    else if (pathname.includes("/wallet")) setActiveTab("wallet");
+    else if (pathname.includes("/visitors")) setActiveTab("visitors");
+    else if (pathname.includes("/community")) setActiveTab("community");
+    else setActiveTab("dashboard");
+  }, [pathname]);
+
+  const handleTabChange = (tab: string, path: string) => {
+    setActiveTab(tab);
+    router.push(path);
+  };
+
+  const tabs = [
+    { id: "dashboard", label: "Home", icon: HomeIcon, path: "/dashboard" },
+    { id: "rooms", label: "Rooms", icon: Squares2X2Icon, path: "/dashboard/rooms" },
+    { id: "wallet", label: "Wallet", icon: WalletIcon, path: "/dashboard/wallet" },
+    { id: "visitors", label: "Visitors", icon: UsersIcon, path: "/dashboard/visitors" },
+    { id: "community", label: "Community", icon: UserGroupIcon, path: "/dashboard/community" },
   ];
 
   return (
-    <footer
-      className="w-full
-        bg-white dark:bg-gray-800
-        border-t border-gray-200 dark:border-gray-700 shadow-lg
-        max-w-md mx-auto px-4
-        flex justify-around items-center rounded-t-2xl
-        h-14 pb-[env(safe-area-inset-bottom)]"
-    >
-      {navItems.map((item) => {
-        const active = pathname === item.href;
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.name}
-            href={item.href}
-            className="flex flex-col items-center justify-center"
-          >
-            <Icon
-              className={`h-6 w-6 ${
-                active
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-500 dark:text-gray-400"
-              }`}
-            />
-            <span
-              className={`text-[10px] mt-1 ${
-                active
-                  ? "text-blue-600 dark:text-blue-400 font-medium"
-                  : "text-gray-500 dark:text-gray-400"
-              }`}
-            >
-              {item.name}
-            </span>
-          </Link>
-        );
-      })}
-    </footer>
+    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-md flex justify-between px-2 py-1 z-50">
+      {tabs.map(({ id, label, icon: Icon, path }) => (
+        <button
+          key={id}
+          className={`flex flex-col items-center flex-1 py-2 transition-colors duration-200 ${
+            activeTab === id
+              ? "text-[#800000] font-semibold" // ✅ maroon active
+              : "text-gray-500 dark:text-gray-400"
+          } hover:text-[#800000]`} // ✅ maroon hover
+          onClick={() => handleTabChange(id, path)}
+        >
+          <Icon className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">{label}</span>
+        </button>
+      ))}
+    </nav>
   );
 }
