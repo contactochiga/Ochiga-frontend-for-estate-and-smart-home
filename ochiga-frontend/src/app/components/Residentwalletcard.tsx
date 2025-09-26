@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -10,10 +10,12 @@ import {
   DevicePhoneMobileIcon,
   ArrowUpRightIcon,
   ClipboardDocumentIcon,
+  CheckIcon,
 } from "@heroicons/react/24/outline";
 
 export default function ResidentWalletCard() {
   const [walletBalance] = useState(500000);
+  const [animatedBalance, setAnimatedBalance] = useState(0);
   const [showBalance, setShowBalance] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -27,6 +29,25 @@ export default function ResidentWalletCard() {
 
   const accountNumber = "1234567890";
   const bankName = "Ochiga Microfinance Bank";
+
+  // Animate balance on load
+  useEffect(() => {
+    let start = 0;
+    const duration = 800;
+    const step = walletBalance / (duration / 16);
+
+    const interval = setInterval(() => {
+      start += step;
+      if (start >= walletBalance) {
+        setAnimatedBalance(walletBalance);
+        clearInterval(interval);
+      } else {
+        setAnimatedBalance(Math.floor(start));
+      }
+    }, 16);
+
+    return () => clearInterval(interval);
+  }, [walletBalance]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(accountNumber);
@@ -49,7 +70,9 @@ export default function ResidentWalletCard() {
               Wallet Balance
             </p>
             <h2 className="text-lg sm:text-xl font-bold">
-              {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
+              {showBalance
+                ? `₦${animatedBalance.toLocaleString()}`
+                : "••••••"}
             </h2>
           </div>
           <button
@@ -79,7 +102,8 @@ export default function ResidentWalletCard() {
       {/* Bottom Sheet Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-2xl p-5 shadow-xl animate-slideUp">
+          <div className="backdrop-blur-md bg-white/90 dark:bg-gray-900/90 
+                          w-full max-w-md rounded-t-2xl p-5 shadow-xl animate-slideUp">
             {/* Header */}
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-base font-semibold text-gray-900 dark:text-white">
@@ -114,10 +138,33 @@ export default function ResidentWalletCard() {
                   onClick={copyToClipboard}
                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#800000] text-white text-xs font-medium shadow hover:bg-[#a00000]"
                 >
-                  <ClipboardDocumentIcon className="h-4 w-4" />
-                  {copied ? "Copied" : "Copy"}
+                  {copied ? (
+                    <>
+                      <CheckIcon className="h-4 w-4" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <ClipboardDocumentIcon className="h-4 w-4" />
+                      Copy
+                    </>
+                  )}
                 </button>
               </div>
+            </div>
+
+            {/* Quick Fund Shortcuts */}
+            <div className="flex gap-2 mb-4">
+              {[1000, 5000, 10000].map((amt) => (
+                <button
+                  key={amt}
+                  className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
+                             text-sm font-medium text-gray-700 dark:text-gray-200 
+                             hover:bg-red-50 dark:hover:bg-gray-800 transition"
+                >
+                  ₦{amt.toLocaleString()}
+                </button>
+              ))}
             </div>
 
             {/* Other Methods */}
