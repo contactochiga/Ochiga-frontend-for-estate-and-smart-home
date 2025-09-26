@@ -7,10 +7,9 @@ import {
   ShareIcon,
   UserCircleIcon,
   PaperAirplaneIcon,
-  EllipsisHorizontalIcon,
   PencilIcon,
   TrashIcon,
-  PinIcon,
+  BookmarkIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 import type { Post } from "../types";
@@ -50,7 +49,7 @@ export default function PostCard({
 
   return (
     <article
-      className={`p-4 rounded-xl shadow border ${
+      className={`p-4 rounded-xl shadow border transition-colors ${
         variant === "pinned"
           ? "bg-gradient-to-r from-slate-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-yellow-300"
           : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
@@ -97,7 +96,7 @@ export default function PostCard({
                   className="hover:text-yellow-600"
                   title="Pin/Unpin"
                 >
-                  <PinIcon className="h-5 w-5" />
+                  <BookmarkIcon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => onToggleComments?.(post.id)}
@@ -193,7 +192,7 @@ export default function PostCard({
               />
               <button
                 onClick={handleComment}
-                className="p-2 rounded-lg bg-indigo-600 text-white"
+                className="p-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
               >
                 <PaperAirplaneIcon className="h-4 w-4 transform rotate-45" />
               </button>
