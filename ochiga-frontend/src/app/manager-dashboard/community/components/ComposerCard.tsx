@@ -59,48 +59,47 @@ export default function ComposerCard({
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-start mt-4">
-        <div className="flex items-center space-x-3 text-gray-600 dark:text-gray-400">
-          <button
-            onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium"
-          >
-            <PhotoIcon className="h-5 w-5" /> <span>Photo</span>
-          </button>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={fileRef}
-            onChange={(e) => handleFileUpload(e, "image")}
-          />
+      <div className="flex flex-wrap items-center gap-3 mt-4 text-gray-600 dark:text-gray-400">
+        {/* Media + Poll Options */}
+        <button
+          onClick={() => fileRef.current?.click()}
+          className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium"
+        >
+          <PhotoIcon className="h-5 w-5" /> <span>Photo</span>
+        </button>
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          ref={fileRef}
+          onChange={(e) => handleFileUpload(e, "image")}
+        />
 
-          <button
-            onClick={() => videoRef.current?.click()}
-            className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium"
-          >
-            <VideoCameraIcon className="h-5 w-5" /> <span>Video</span>
-          </button>
-          <input
-            type="file"
-            accept="video/*"
-            className="hidden"
-            ref={videoRef}
-            onChange={(e) => handleFileUpload(e, "video")}
-          />
+        <button
+          onClick={() => videoRef.current?.click()}
+          className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium"
+        >
+          <VideoCameraIcon className="h-5 w-5" /> <span>Video</span>
+        </button>
+        <input
+          type="file"
+          accept="video/*"
+          className="hidden"
+          ref={videoRef}
+          onChange={(e) => handleFileUpload(e, "video")}
+        />
 
-          <button className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium">
-            <ChartBarIcon className="h-5 w-5" /> <span>Poll</span>
-          </button>
+        <button className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium">
+          <ChartBarIcon className="h-5 w-5" /> <span>Poll</span>
+        </button>
 
-          {/* Post CTA now sits with them */}
-          <button
-            onClick={makePost}
-            className="ml-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-lg shadow hover:opacity-95 transition font-medium"
-          >
-            Post
-          </button>
-        </div>
+        {/* Post CTA aligned bottom-left with them */}
+        <button
+          onClick={makePost}
+          className="ml-auto bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-lg shadow hover:opacity-95 transition font-medium"
+        >
+          Post
+        </button>
       </div>
     </div>
   );
