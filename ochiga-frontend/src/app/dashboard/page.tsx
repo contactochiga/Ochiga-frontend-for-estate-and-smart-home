@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
 "use client";
 
-import ResidentHeader from "@/app/components/ResidentHeader";
+import ResidentHeader from "../components/ResidentHeader";
 
 export default function DashboardPage() {
   return (
