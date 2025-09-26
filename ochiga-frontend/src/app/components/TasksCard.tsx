@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 
 type Task = {
   id: number;
@@ -15,10 +15,17 @@ const mockTasks: Task[] = [
 ];
 
 export default function TasksCard() {
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+
+  const handleClick = (task: Task) => {
+    setSelectedTask(task);
+    alert(`Clicked task: ${task.title}`);
+  };
+
   return (
     <div className="rounded-xl shadow-lg p-6 bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white transition hover:shadow-xl">
       {/* Header */}
-      <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
+      <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700/50 pb-2 mb-4">
         <h2 className="text-lg font-semibold">Tasks & Requests</h2>
         <button className="text-sm font-medium text-rose-700 dark:text-rose-400 hover:underline">
           View All
@@ -30,7 +37,8 @@ export default function TasksCard() {
         {mockTasks.map((task) => (
           <li
             key={task.id}
-            className="flex justify-between items-center bg-gray-50 dark:bg-black/40 rounded-lg p-3"
+            onClick={() => handleClick(task)}
+            className="flex justify-between items-center bg-gray-50 dark:bg-black/30 rounded-lg p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-black/50 transition"
           >
             <span className="text-sm font-medium">{task.title}</span>
             <span
