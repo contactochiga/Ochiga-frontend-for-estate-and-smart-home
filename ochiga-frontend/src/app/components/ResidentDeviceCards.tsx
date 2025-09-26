@@ -96,7 +96,7 @@ export default function RoomsDevices() {
   };
 
   return (
-    <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8">
+    <div className="w-full">
       <div className="w-full rounded-2xl bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 p-6">
         {/* Header */}
         <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
@@ -112,7 +112,7 @@ export default function RoomsDevices() {
               className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-all duration-300
                 ${
                   activeRoom === room
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/40"
+                    ? "bg-gradient-to-r from-[#800000] to-black text-white shadow-md"
                     : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
                 }`}
             >
@@ -133,7 +133,7 @@ export default function RoomsDevices() {
                 ${
                   deviceStates[device.id] === "On" ||
                   deviceStates[device.id] === "Unlocked"
-                    ? "border-blue-400/40 shadow-blue-500/30"
+                    ? "border-[#800000]/50 shadow-[0_0_10px_rgba(128,0,0,0.3)]"
                     : "border-gray-200 dark:border-gray-700"
                 }`}
             >
@@ -144,7 +144,7 @@ export default function RoomsDevices() {
                     ${
                       deviceStates[device.id] === "On" ||
                       deviceStates[device.id] === "Unlocked"
-                        ? "bg-blue-500/20 text-blue-400 shadow-inner shadow-blue-500/30"
+                        ? "bg-gradient-to-br from-[#800000] to-black text-white shadow-inner"
                         : "bg-gray-100 dark:bg-gray-700 text-gray-500"
                     }`}
                 >
@@ -155,7 +155,7 @@ export default function RoomsDevices() {
                     ${
                       deviceStates[device.id] === "On" ||
                       deviceStates[device.id] === "Unlocked"
-                        ? "bg-blue-500/20 text-blue-500 border-blue-400/40"
+                        ? "bg-[#800000]/20 text-[#800000] border-[#800000]/40"
                         : "bg-gray-200 dark:bg-gray-700 text-gray-500 border-gray-300 dark:border-gray-600"
                     }`}
                 >
@@ -215,7 +215,7 @@ export default function RoomsDevices() {
               {selectedDevice.type === "light" && (
                 <button
                   onClick={() => toggleDevice(selectedDevice.id)}
-                  className="px-6 py-3 rounded-xl bg-yellow-400 text-gray-900 font-semibold hover:bg-yellow-500"
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-semibold hover:opacity-90"
                 >
                   Toggle Light
                 </button>
@@ -224,7 +224,7 @@ export default function RoomsDevices() {
               {selectedDevice.type === "door" && (
                 <button
                   onClick={() => toggleDevice(selectedDevice.id)}
-                  className="px-6 py-3 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600"
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-semibold hover:opacity-90"
                 >
                   {deviceStates[selectedDevice.id] === "Locked"
                     ? "Unlock Door"
