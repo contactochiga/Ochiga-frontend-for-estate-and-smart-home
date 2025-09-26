@@ -177,10 +177,10 @@ export default function RoomsDevices() {
         </div>
       </div>
 
-      {/* Centered Modal Panel */}
+      {/* Centered Modal Panel with Animation */}
       {selectedDevice && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -267,6 +267,34 @@ export default function RoomsDevices() {
           </div>
         </div>
       )}
+
+      {/* Animation Styles */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes scaleUp {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.25s ease-out;
+        }
+        .animate-scaleUp {
+          animation: scaleUp 0.25s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
