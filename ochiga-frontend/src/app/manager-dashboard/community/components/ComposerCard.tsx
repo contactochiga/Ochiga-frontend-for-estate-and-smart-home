@@ -60,6 +60,14 @@ export default function ComposerCard({
 
       {/* Actions */}
       <div className="flex flex-wrap items-center gap-3 mt-4 text-gray-600 dark:text-gray-400">
+        {/* Post CTA first (left aligned) */}
+        <button
+          onClick={makePost}
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-lg shadow hover:opacity-95 transition font-medium"
+        >
+          Post
+        </button>
+
         {/* Media + Poll Options */}
         <button
           onClick={() => fileRef.current?.click()}
@@ -91,14 +99,6 @@ export default function ComposerCard({
 
         <button className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium">
           <ChartBarIcon className="h-5 w-5" /> <span>Poll</span>
-        </button>
-
-        {/* Post CTA aligned bottom-left with them */}
-        <button
-          onClick={makePost}
-          className="ml-auto bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-lg shadow hover:opacity-95 transition font-medium"
-        >
-          Post
         </button>
       </div>
     </div>
