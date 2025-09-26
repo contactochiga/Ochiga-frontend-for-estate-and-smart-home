@@ -6,6 +6,7 @@ import ResidentWalletCard from "../components/Residentwalletcard";
 import ResidentUtilitiesCard from "../components/ResidentUtilitiesCard";
 import ResidentDeviceCards from "../components/ResidentDeviceCards";
 import ResidentVisitorCard from "../components/ResidentVisitorCard";
+import ResidentCommunityCard from "../components/ResidentCommunityCard"; // ✅ added
 
 export default function DashboardPage() {
   return (
@@ -29,6 +30,9 @@ export default function DashboardPage() {
 
       {/* ✅ Resident Visitor Card */}
       <ResidentVisitorCard />
+
+      {/* ✅ Resident Community Card */}
+      <ResidentCommunityCard />
     </div>
   );
 }
