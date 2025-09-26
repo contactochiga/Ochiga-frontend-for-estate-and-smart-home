@@ -16,28 +16,30 @@ const mockTasks: Task[] = [
 
 export default function TasksCard() {
   return (
-    <div className="rounded-xl shadow-lg p-6 bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white">
-      <div className="flex justify-between items-center mb-4">
+    <div className="rounded-xl shadow-lg p-6 bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white transition hover:shadow-xl">
+      {/* Header */}
+      <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
         <h2 className="text-lg font-semibold">Tasks & Requests</h2>
-        <button className="text-sm text-rose-600 dark:text-rose-400 hover:underline">
+        <button className="text-sm font-medium text-rose-700 dark:text-rose-400 hover:underline">
           View All
         </button>
       </div>
 
+      {/* Tasks List */}
       <ul className="space-y-3">
         {mockTasks.map((task) => (
           <li
             key={task.id}
-            className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 last:border-none pb-2"
+            className="flex justify-between items-center bg-gray-50 dark:bg-black/40 rounded-lg p-3"
           >
-            <span className="text-sm">{task.title}</span>
+            <span className="text-sm font-medium">{task.title}</span>
             <span
-              className={`text-xs px-2 py-1 rounded-full ${
+              className={`text-xs px-2.5 py-1 rounded-full font-medium ${
                 task.status === "Pending"
-                  ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300"
+                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300"
                   : task.status === "In Progress"
-                  ? "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300"
-                  : "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300"
+                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                  : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
               }`}
             >
               {task.status}
