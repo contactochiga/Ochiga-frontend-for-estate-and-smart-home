@@ -8,11 +8,9 @@ import {
   MdDoorFront,
   MdAcUnit,
   MdVideocam,
-  MdBolt,
 } from "react-icons/md";
-import { FaPlus, FaChevronDown } from "react-icons/fa6";
 
-const initialRooms = [
+const rooms = [
   "All",
   "Favourites",
   "Living Room",
@@ -28,7 +26,7 @@ const devices = [
     name: "Light",
     location: "Living Room",
     status: "On",
-    icon: <MdLightbulbOutline className="text-yellow-400 text-2xl" />,
+    icon: <MdLightbulbOutline className="text-yellow-400 text-xl" />,
     type: "light",
     favourite: true,
   },
@@ -37,7 +35,7 @@ const devices = [
     name: "CCTV",
     location: "Outdoor",
     status: "Off",
-    icon: <MdVideocam className="text-red-500 text-2xl" />,
+    icon: <MdVideocam className="text-red-500 text-xl" />,
     type: "cctv",
     favourite: true,
   },
@@ -46,7 +44,7 @@ const devices = [
     name: "TV",
     location: "Living Room",
     status: "Off",
-    icon: <MdTv className="text-blue-400 text-2xl" />,
+    icon: <MdTv className="text-blue-400 text-xl" />,
     type: "tv",
     favourite: false,
   },
@@ -55,7 +53,7 @@ const devices = [
     name: "Door Lock",
     location: "Main Door",
     status: "Locked",
-    icon: <MdDoorFront className="text-blue-500 text-2xl" />,
+    icon: <MdDoorFront className="text-blue-500 text-xl" />,
     type: "door",
     favourite: false,
   },
@@ -64,22 +62,18 @@ const devices = [
     name: "AC",
     location: "Bedroom",
     status: "On",
-    icon: <MdAcUnit className="text-cyan-400 text-2xl" />,
+    icon: <MdAcUnit className="text-cyan-400 text-xl" />,
     type: "ac",
     favourite: true,
   },
 ];
 
-const scenes = ["Morning Mode", "Evening Mode", "Away Mode", "Movie Mode"];
-
-export default function RoomsDevices() {
-  const [rooms, setRooms] = useState(initialRooms);
+export default function RoomsPage() {
   const [activeRoom, setActiveRoom] = useState("All");
-  const [activeScene, setActiveScene] = useState("Evening Mode");
-  const [showSceneDropdown, setShowSceneDropdown] = useState(false);
   const [deviceStates, setDeviceStates] = useState(
     devices.reduce((acc, d) => ({ ...acc, [d.id]: d.status }), {})
   );
+  const [selectedDevice, setSelectedDevice] = useState<any>(null);
 
   const filteredDevices =
     activeRoom === "All"
@@ -88,163 +82,220 @@ export default function RoomsDevices() {
       ? devices.filter((d) => d.favourite)
       : devices.filter((d) => d.location === activeRoom);
 
-  const handleAddRoom = () => {
-    const newRoom = prompt("Enter the name of the new room:");
-    if (newRoom && !rooms.includes(newRoom)) {
-      setRooms([...rooms, newRoom]);
-    }
-  };
-
-  const handleAddDevice = () => {
-    alert("🚀 Add Device flow will be here!");
+  const toggleDevice = (id: number) => {
+    setDeviceStates((prev) => ({
+      ...prev,
+      [id]:
+        prev[id] === "On"
+          ? "Off"
+          : prev[id] === "Off"
+          ? "On"
+          : prev[id] === "Locked"
+          ? "Unlocked"
+          : "Locked",
+    }));
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-black px-4 py-8">
-      <div className="w-full rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 p-6">
-        {/* 🔹 Header */}
-        <div className="flex items-center justify-between mb-6 relative">
-          {/* Left - Title & Scene */}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Smart Rooms & Devices
-            </h2>
+    <div className="min-h-screen bg-gray-100 dark:bg-black text-gray-900 dark:text-white p-6 pb-24 space-y-6">
+      {/* Page Header */}
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        Rooms & Devices
+      </h1>
+      <p className="text-sm text-gray-600 dark:text-gray-400">
+        Manage your rooms and control connected devices in real-time.
+      </p>
 
-            {/* Active Scene Dropdown */}
-            <div className="relative inline-block">
-              <button
-                onClick={() => setShowSceneDropdown(!showSceneDropdown)}
-                className="flex items-center gap-2 mt-2 px-3 py-1.5 rounded-lg text-sm font-medium 
-                  bg-gradient-to-r from-[#800000]/10 to-black/10 dark:from-[#800000]/20 dark:to-black/20 
-                  text-gray-700 dark:text-gray-200 hover:opacity-90 transition"
+      {/* Scrollable Rooms Tabs */}
+      <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+        {rooms.map((room) => (
+          <button
+            key={room}
+            onClick={() => setActiveRoom(room)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all
+              ${
+                activeRoom === room
+                  ? "bg-gradient-to-r from-[#800000] to-black text-white shadow-md"
+                  : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
+              }`}
+          >
+            {room}
+          </button>
+        ))}
+      </div>
+
+      {/* Devices Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {filteredDevices.map((device) => (
+          <div
+            key={device.id}
+            onClick={() => setSelectedDevice(device)}
+            className={`rounded-xl p-4 flex flex-col justify-between cursor-pointer
+              bg-white dark:bg-gray-900 
+              shadow-sm border transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]
+              ${
+                deviceStates[device.id] === "On" ||
+                deviceStates[device.id] === "Unlocked"
+                  ? "border-[#800000]/60 shadow-[0_0_6px_rgba(128,0,0,0.3)]"
+                  : "border-gray-200 dark:border-gray-700"
+              }`}
+          >
+            {/* Top row */}
+            <div className="flex items-center justify-between mb-3">
+              <div
+                className={`w-12 h-12 flex items-center justify-center rounded-xl 
+                  ${
+                    deviceStates[device.id] === "On" ||
+                    deviceStates[device.id] === "Unlocked"
+                      ? "bg-gradient-to-br from-[#800000] to-black text-white shadow-inner"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-500"
+                  }`}
               >
-                {activeScene}
-                <FaChevronDown className="text-xs opacity-70" />
-              </button>
+                {device.icon}
+              </div>
+              <span
+                className={`px-3 py-1 rounded-full text-[11px] font-medium border
+                  ${
+                    deviceStates[device.id] === "On" ||
+                    deviceStates[device.id] === "Unlocked"
+                      ? "bg-[#800000]/20 text-[#800000] border-[#800000]/40"
+                      : "bg-gray-200 dark:bg-gray-700 text-gray-500 border-gray-300 dark:border-gray-600"
+                  }`}
+              >
+                {deviceStates[device.id]}
+              </span>
+            </div>
 
-              {showSceneDropdown && (
-                <div className="absolute left-0 mt-2 w-44 rounded-lg shadow-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-20">
-                  {scenes.map((scene) => (
+            {/* Bottom row */}
+            <div>
+              <h3 className="font-semibold text-sm text-gray-900 dark:text-white">
+                {device.name}
+              </h3>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {device.location}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Device Control Modal */}
+      {selectedDevice && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {selectedDevice.name} Control
+              </h3>
+              <button
+                onClick={() => setSelectedDevice(null)}
+                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Device-specific controls */}
+            <div className="flex flex-col items-center gap-5 py-4 text-gray-800 dark:text-gray-200">
+              {selectedDevice.icon}
+              <p className="text-sm">
+                Current Status:{" "}
+                <span
+                  className={`font-semibold ${
+                    deviceStates[selectedDevice.id] === "On" ||
+                    deviceStates[selectedDevice.id] === "Unlocked"
+                      ? "text-green-500"
+                      : "text-red-500"
+                  }`}
+                >
+                  {deviceStates[selectedDevice.id]}
+                </span>
+              </p>
+
+              {selectedDevice.type === "light" && (
+                <button
+                  onClick={() => toggleDevice(selectedDevice.id)}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-semibold hover:opacity-90"
+                >
+                  Toggle Light
+                </button>
+              )}
+
+              {selectedDevice.type === "door" && (
+                <button
+                  onClick={() => toggleDevice(selectedDevice.id)}
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-semibold hover:opacity-90"
+                >
+                  {deviceStates[selectedDevice.id] === "Locked"
+                    ? "Unlock Door"
+                    : "Lock Door"}
+                </button>
+              )}
+
+              {selectedDevice.type === "ac" && (
+                <div className="flex items-center gap-3">
+                  <button className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700">
+                    -
+                  </button>
+                  <span className="text-base font-bold">22°C</span>
+                  <button className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700">
+                    +
+                  </button>
+                </div>
+              )}
+
+              {selectedDevice.type === "tv" && (
+                <div className="grid grid-cols-3 gap-2">
+                  {["⏮", "⏯", "⏭"].map((btn) => (
                     <button
-                      key={scene}
-                      onClick={() => {
-                        setActiveScene(scene);
-                        setShowSceneDropdown(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 text-sm rounded-lg transition 
-                        ${
-                          activeScene === scene
-                            ? "bg-gradient-to-r from-[#800000] to-black text-white"
-                            : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
-                        }`}
+                      key={btn}
+                      className="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
                     >
-                      {scene}
+                      {btn}
                     </button>
                   ))}
                 </div>
               )}
-            </div>
 
-            {/* Device Count */}
-            <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-2">
-              <MdBolt className="text-yellow-400" /> {devices.length} devices
-              connected · {Object.values(deviceStates).filter(
-                (s) => s === "On"
-              ).length}{" "}
-              active
-            </p>
-          </div>
-
-          {/* Right - Add Device Button */}
-          <button
-            onClick={handleAddDevice}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white text-sm font-medium shadow hover:opacity-90 transition"
-          >
-            <FaPlus className="text-xs" /> Add Device
-          </button>
-        </div>
-
-        {/* 🔹 Rooms Tabs */}
-        <div className="flex space-x-3 overflow-x-auto scrollbar-hide mb-6 pb-1">
-          {rooms.map((room) => (
-            <button
-              key={room}
-              onClick={() => setActiveRoom(room)}
-              className={`px-4 py-2 rounded-xl whitespace-nowrap text-sm font-medium transition-all duration-300
-                ${
-                  activeRoom === room
-                    ? "bg-gradient-to-r from-[#800000] to-black text-white shadow-md"
-                    : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
-                }`}
-            >
-              {room}
-            </button>
-          ))}
-
-          {/* Add Room */}
-          <button
-            onClick={handleAddRoom}
-            className="flex items-center justify-center px-3 py-2 rounded-xl bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-600 transition"
-          >
-            <FaPlus className="text-sm" />
-          </button>
-        </div>
-
-        {/* 🔹 Devices Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredDevices.map((device) => (
-            <div
-              key={device.id}
-              className={`rounded-2xl p-4 flex flex-col justify-between cursor-pointer
-                bg-gray-50 dark:bg-gray-800 
-                shadow-md border transition-transform duration-300 ease-out 
-                hover:scale-[1.05] active:scale-[0.98]
-                ${
-                  deviceStates[device.id] === "On" ||
-                  deviceStates[device.id] === "Unlocked"
-                    ? "border-[#800000]/40 shadow-[#800000]/30"
-                    : "border-gray-300 dark:border-gray-700"
-                }`}
-            >
-              {/* Top row */}
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className={`w-12 h-12 flex items-center justify-center rounded-xl 
-                    ${
-                      deviceStates[device.id] === "On" ||
-                      deviceStates[device.id] === "Unlocked"
-                        ? "bg-[#800000]/20 text-[#800000] shadow-inner shadow-[#800000]/30"
-                        : "bg-gray-200 dark:bg-gray-700 text-gray-500"
-                    }`}
-                >
-                  {device.icon}
+              {selectedDevice.type === "cctv" && (
+                <div className="w-full h-36 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    🔴 Live Camera Feed
+                  </p>
                 </div>
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium tracking-wide border
-                    ${
-                      deviceStates[device.id] === "On" ||
-                      deviceStates[device.id] === "Unlocked"
-                        ? "bg-[#800000]/20 text-[#800000] border-[#800000]/40"
-                        : "bg-gray-300 dark:bg-gray-700 text-gray-500 border-gray-400 dark:border-gray-600"
-                    }`}
-                >
-                  {deviceStates[device.id]}
-                </span>
-              </div>
-
-              {/* Bottom row */}
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">
-                  {device.name}
-                </h3>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  {device.location}
-                </p>
-              </div>
+              )}
             </div>
-          ))}
+          </div>
         </div>
-      </div>
-    </main>
+      )}
+
+      {/* Animations */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes scaleUp {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.25s ease-out;
+        }
+        .animate-scaleUp {
+          animation: scaleUp 0.25s ease-out;
+        }
+      `}</style>
+    </div>
   );
 }
