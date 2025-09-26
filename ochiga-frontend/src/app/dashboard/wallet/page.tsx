@@ -47,40 +47,34 @@ export default function WalletPage() {
         Wallet
       </h1>
 
-      {/* Virtual Wallet Card */}
+      {/* Wallet Balance Card */}
       <div className="rounded-2xl p-6 text-gray-900 dark:text-white shadow-xl 
         bg-white dark:bg-gradient-to-r dark:from-black dark:to-[#800000]">
         
-        {/* Card Header */}
+        {/* Header */}
         <div className="flex justify-between items-center">
           <p className="text-xs uppercase opacity-70">Wallet Balance</p>
           <button
             onClick={() => setShowBalance(!showBalance)}
             className="bg-gray-200 dark:bg-white/20 p-2 rounded-lg hover:opacity-80 transition"
           >
-            {showBalance ? (
-              <EyeIcon className="h-5 w-5" />
-            ) : (
-              <EyeSlashIcon className="h-5 w-5" />
-            )}
+            {showBalance ? <EyeIcon className="h-5 w-5" /> : <EyeSlashIcon className="h-5 w-5" />}
           </button>
         </div>
 
         {/* Balance */}
-        <h2 className="text-3xl font-bold tracking-wide mt-3">
+        <h2 className="text-3xl font-bold tracking-wide mt-3 mb-4">
           {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
         </h2>
-      </div>
 
-      {/* Quick Action → Only Fund */}
-      <div>
+        {/* Fund Wallet button INSIDE the same card */}
         <button
           onClick={() => setShowModal(true)}
-          className="w-full flex flex-col items-center p-6 rounded-xl 
-            bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl 
+            bg-gradient-to-r from-[#800000] to-black text-white font-medium shadow-md hover:opacity-90 transition"
         >
-          <BanknotesIcon className="h-7 w-7 text-[#800000]" />
-          <span className="mt-2 text-sm font-medium">Fund Wallet</span>
+          <BanknotesIcon className="h-6 w-6" />
+          Fund Wallet
         </button>
       </div>
 
@@ -114,7 +108,7 @@ export default function WalletPage() {
         </div>
       </div>
 
-      {/* Bottom Sheet Modal */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
           <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-2xl p-6 shadow-2xl animate-slideUp">
@@ -131,11 +125,9 @@ export default function WalletPage() {
               </button>
             </div>
 
-            {/* Bank Transfer Section */}
+            {/* Bank Transfer */}
             <div className="p-4 mb-4 rounded-xl border border-[#800000] bg-[#800000]/10 dark:bg-[#800000]/20">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                Bank Transfer
-              </p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">Bank Transfer</p>
               <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                 Send to the account below and your wallet will be credited instantly.
               </p>
