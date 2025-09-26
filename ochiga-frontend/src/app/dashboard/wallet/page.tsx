@@ -1,72 +1,186 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  BanknotesIcon,
+  CreditCardIcon,
+  BuildingLibraryIcon,
+  DevicePhoneMobileIcon,
+  ArrowUpRightIcon,
+  ClipboardDocumentIcon,
+  ArrowDownTrayIcon,
+  ArrowUpTrayIcon,
+} from "@heroicons/react/24/outline";
 
 export default function WalletPage() {
-  const [balance] = useState(25000); // dummy balance
+  const [walletBalance] = useState(500000);
+  const [showBalance, setShowBalance] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const paymentMethods = [
+    { name: "Pay with Card", icon: CreditCardIcon },
+    { name: "Pay with Bank", icon: BuildingLibraryIcon },
+    { name: "Pay with USSD", icon: DevicePhoneMobileIcon },
+    { name: "Pay with OPay", icon: ArrowUpRightIcon },
+  ];
+
+  const accountNumber = "1234567890";
+  const bankName = "Ochiga Microfinance Bank";
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(accountNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const transactions = [
-    { id: 1, date: "2025-08-20", desc: "Service Bill Payment", amount: -5000, status: "Success" },
-    { id: 2, date: "2025-08-18", desc: "Wallet Top-up", amount: 10000, status: "Success" },
-    { id: 3, date: "2025-08-15", desc: "Community Dues", amount: -2000, status: "Pending" },
+    { id: 1, type: "credit", title: "Wallet Funding", amount: 200000, date: "Sep 5, 2025" },
+    { id: 2, type: "debit", title: "Electricity Bill", amount: 15000, date: "Sep 4, 2025" },
+    { id: 3, type: "debit", title: "Internet Subscription", amount: 25000, date: "Sep 1, 2025" },
   ];
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-        Wallet
-      </h1>
-
-      {/* Balance Card */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow mb-6">
-        <h2 className="text-gray-500 dark:text-gray-400 text-sm">Available Balance</h2>
-        <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-          ₦{balance.toLocaleString()}
-        </p>
-
-        <div className="mt-4 flex gap-3">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            Fund Wallet
+    <div className="w-screen -mx-4 sm:-mx-6 md:-mx-8 space-y-6">
+      {/* Virtual Wallet Card */}
+      <div className="rounded-2xl p-6 text-white shadow-xl bg-gradient-to-r from-[#800000] to-black relative overflow-hidden">
+        {/* Card Header */}
+        <div className="flex justify-between items-center">
+          <p className="text-xs uppercase opacity-80">Wallet Balance</p>
+          <button
+            onClick={() => setShowBalance(!showBalance)}
+            className="bg-white/20 p-2 rounded-lg hover:bg-white/30 transition"
+          >
+            {showBalance ? (
+              <EyeIcon className="h-5 w-5" />
+            ) : (
+              <EyeSlashIcon className="h-5 w-5" />
+            )}
           </button>
+        </div>
 
-          {/* 🔗 Route to Utilities (Pay Bills) */}
-          <Link href="/dashboard/utilities">
-            <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-              Pay Bills
-            </button>
-          </Link>
+        {/* Balance */}
+        <h2 className="text-3xl font-bold tracking-wide mt-2">
+          {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
+        </h2>
+
+        {/* Card Footer */}
+        <div className="mt-6 flex justify-between items-center text-xs opacity-80">
+          <span>{bankName}</span>
+          <span>{accountNumber}</span>
         </div>
       </div>
 
-      {/* Transactions */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          Recent Transactions
-        </h3>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-3 gap-4">
+        <button
+          onClick={() => setShowModal(true)}
+          className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition"
+        >
+          <BanknotesIcon className="h-6 w-6 text-[#800000]" />
+          <span className="mt-2 text-sm font-medium">Fund</span>
+        </button>
+        <button className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition">
+          <ArrowDownTrayIcon className="h-6 w-6 text-green-600 dark:text-green-400" />
+          <span className="mt-2 text-sm font-medium">Withdraw</span>
+        </button>
+        <button className="flex flex-col items-center p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:shadow-lg transition">
+          <ArrowUpTrayIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <span className="mt-2 text-sm font-medium">Transfer</span>
+        </button>
+      </div>
 
-        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+      {/* Transaction History */}
+      <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 shadow-xl border border-gray-200 dark:border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-4">
+          Transaction History
+        </h3>
+        <div className="space-y-4">
           {transactions.map((tx) => (
-            <div key={tx.id} className="flex justify-between items-center py-3">
+            <div
+              key={tx.id}
+              className="flex justify-between items-center p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
+            >
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {tx.desc}
-                </p>
+                <p className="font-medium text-gray-900 dark:text-gray-100">{tx.title}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">{tx.date}</p>
               </div>
-              <div className="text-right">
-                <p
-                  className={`text-sm font-semibold ${
-                    tx.amount < 0 ? "text-red-600" : "text-green-600"
-                  }`}
-                >
-                  {tx.amount < 0 ? "-" : "+"}₦{Math.abs(tx.amount).toLocaleString()}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{tx.status}</p>
-              </div>
+              <span
+                className={`font-semibold ${
+                  tx.type === "credit"
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-red-600 dark:text-red-400"
+                }`}
+              >
+                {tx.type === "credit" ? "+" : "-"}₦{tx.amount.toLocaleString()}
+              </span>
             </div>
           ))}
         </div>
       </div>
-    </main>
+
+      {/* Bottom Sheet Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
+          <div className="bg-white dark:bg-gray-900 w-full max-w-md rounded-t-2xl p-6 shadow-2xl animate-slideUp">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Choose Payment Method
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Bank Transfer Section */}
+            <div className="p-4 mb-4 rounded-xl border border-[#800000] bg-[#800000]/10 dark:bg-[#800000]/20">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                Bank Transfer
+              </p>
+              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                Send to the account below and your wallet will be credited instantly.
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{bankName}</p>
+                  <p className="text-lg font-bold tracking-wide text-[#800000]">{accountNumber}</p>
+                </div>
+                <button
+                  onClick={copyToClipboard}
+                  className="flex items-center gap-1 px-3 py-2 rounded-lg bg-gradient-to-r from-[#800000] to-black text-white text-sm font-medium shadow hover:opacity-90"
+                >
+                  <ClipboardDocumentIcon className="h-5 w-5" />
+                  {copied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            </div>
+
+            {/* Other Methods */}
+            <div className="grid gap-3">
+              {paymentMethods.map((method, idx) => {
+                const Icon = method.icon;
+                return (
+                  <button
+                    key={idx}
+                    className="flex items-center gap-3 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-[#800000]/10 dark:hover:bg-gray-800 transition"
+                  >
+                    <Icon className="h-6 w-6 text-[#800000]" />
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      {method.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
