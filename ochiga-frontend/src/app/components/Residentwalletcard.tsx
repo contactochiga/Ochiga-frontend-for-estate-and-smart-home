@@ -59,17 +59,17 @@ export default function ResidentWalletCard() {
     <div className="w-full">
       {/* Wallet Balance Card */}
       <div
-        className="rounded-xl p-5 text-white shadow-md 
-                   bg-gradient-to-r from-[#800000] to-[#a00000] 
-                   flex flex-row justify-between items-center"
+        className="rounded-xl p-5 shadow-md 
+                   bg-white dark:bg-gradient-to-r dark:from-[#800000] dark:to-[#a00000] 
+                   flex flex-row justify-between items-center border border-gray-200 dark:border-none"
       >
         {/* Left Section */}
         <div className="flex items-center gap-2">
           <div>
-            <p className="text-[10px] uppercase opacity-80 tracking-wide">
+            <p className="text-[10px] uppercase opacity-80 tracking-wide text-gray-500 dark:text-gray-200">
               Wallet Balance
             </p>
-            <h2 className="text-lg sm:text-xl font-bold">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               {showBalance
                 ? `₦${animatedBalance.toLocaleString()}`
                 : "••••••"}
@@ -77,12 +77,14 @@ export default function ResidentWalletCard() {
           </div>
           <button
             onClick={() => setShowBalance(!showBalance)}
-            className="bg-white/20 p-1.5 rounded-md hover:bg-white/30 transition flex items-center justify-center"
+            className="bg-gray-100 dark:bg-white/20 p-1.5 rounded-md 
+                       hover:bg-gray-200 dark:hover:bg-white/30 
+                       transition flex items-center justify-center"
           >
             {showBalance ? (
-              <EyeIcon className="h-4 w-4" />
+              <EyeIcon className="h-4 w-4 text-gray-700 dark:text-white" />
             ) : (
-              <EyeSlashIcon className="h-4 w-4" />
+              <EyeSlashIcon className="h-4 w-4 text-gray-700 dark:text-white" />
             )}
           </button>
         </div>
@@ -90,9 +92,9 @@ export default function ResidentWalletCard() {
         {/* Right Section: Fund Wallet */}
         <button
           onClick={() => setShowModal(true)}
-          className="bg-white text-[#800000] px-3 py-1.5 rounded-md 
+          className="bg-[#800000] text-white px-3 py-1.5 rounded-md 
                      font-medium text-xs flex items-center gap-1 
-                     whitespace-nowrap shadow-sm hover:bg-gray-100 transition"
+                     whitespace-nowrap shadow-sm hover:bg-[#a00000] transition"
         >
           <BanknotesIcon className="h-4 w-4" />
           Fund
