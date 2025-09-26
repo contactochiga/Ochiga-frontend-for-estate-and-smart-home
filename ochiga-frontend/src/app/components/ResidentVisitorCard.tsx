@@ -44,7 +44,7 @@ export default function ResidentVisitorCard() {
             <div className="flex items-center gap-3 text-left">
               <div
                 className="w-10 h-10 flex items-center justify-center rounded-full 
-                bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
+                bg-gradient-to-br from-[#800000] to-black text-white"
               >
                 <UserIcon className="h-5 w-5" />
               </div>
@@ -66,7 +66,7 @@ export default function ResidentVisitorCard() {
       <button
         onClick={() => router.push("/dashboard/visitors")}
         className="w-full flex items-center justify-center gap-2 py-4 mt-6 rounded-xl 
-        bg-gradient-to-r from-indigo-600 to-purple-600 
+        bg-gradient-to-r from-[#800000] to-black 
         text-white font-medium shadow-lg hover:opacity-90 transition"
       >
         <QrCodeIcon className="h-5 w-5" />
