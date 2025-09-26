@@ -74,7 +74,8 @@ export default function ManagerHeader() {
           <button onClick={() => setSidebarOpen(true)}>
             <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
-          <h1 className="text-lg font-bold text-green-600 dark:text-green-400">
+          {/* Ochiga brand in black */}
+          <h1 className="text-lg font-bold text-black dark:text-white">
             Ochiga
           </h1>
         </div>
@@ -91,7 +92,7 @@ export default function ManagerHeader() {
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#800000]"
                 />
               </div>
             )}
@@ -113,7 +114,7 @@ export default function ManagerHeader() {
                   onClick={() => router.push("/manager-dashboard/profile")}
                   className={`flex items-center space-x-2 w-full text-left px-4 py-2 text-sm ${
                     pathname === "/manager-dashboard/profile"
-                      ? "bg-green-100 text-green-600 dark:bg-green-700 dark:text-white"
+                      ? "bg-[#800000]/10 text-[#800000] dark:bg-[#800000] dark:text-white"
                       : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                   }`}
                 >
@@ -124,14 +125,18 @@ export default function ManagerHeader() {
                   onClick={() => router.push("/manager-dashboard/settings")}
                   className={`flex items-center space-x-2 w-full text-left px-4 py-2 text-sm ${
                     pathname === "/manager-dashboard/settings"
-                      ? "bg-green-100 text-green-600 dark:bg-green-700 dark:text-white"
+                      ? "bg-[#800000]/10 text-[#800000] dark:bg-[#800000] dark:text-white"
                       : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                   }`}
                 >
                   <Cog6ToothIcon className="w-5 h-5" />
                   <span>Settings</span>
                 </button>
-                <button className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700">
+                {/* Logout → back to root "/" */}
+                <button
+                  onClick={() => router.push("/")}
+                  className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
                   <XMarkIcon className="w-5 h-5" />
                   <span>Logout</span>
                 </button>
@@ -151,7 +156,7 @@ export default function ManagerHeader() {
 
           <div className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-50 p-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-green-600 dark:text-green-400">
+              <h2 className="text-lg font-bold text-[#800000] dark:text-[#ffcccc]">
                 Management Tools
               </h2>
               <button onClick={() => setSidebarOpen(false)}>
@@ -166,8 +171,8 @@ export default function ManagerHeader() {
                     key={item.name}
                     className={`flex items-center space-x-3 cursor-pointer p-2 rounded-md ${
                       isActive
-                        ? "bg-green-100 text-green-600 dark:bg-green-700 dark:text-white"
-                        : "hover:text-green-600"
+                        ? "bg-[#800000]/10 text-[#800000] dark:bg-[#800000] dark:text-white"
+                        : "hover:text-[#800000]"
                     }`}
                     onClick={() => {
                       setSidebarOpen(false);
