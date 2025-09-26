@@ -7,12 +7,19 @@ import { PlusIcon } from "@heroicons/react/24/solid";
 export default function RoomsPage() {
   const [showAddRoom, setShowAddRoom] = useState(false);
   const [showAddDevice, setShowAddDevice] = useState(false);
-
-  const rooms = [
+  const [roomName, setRoomName] = useState("");
+  const [rooms, setRooms] = useState([
     { name: "Living Room", devices: 4 },
     { name: "Bedroom", devices: 2 },
     { name: "Kitchen", devices: 3 },
-  ];
+  ]);
+
+  const handleAddRoom = () => {
+    if (!roomName.trim()) return; // ignore empty names
+    setRooms([...rooms, { name: roomName.trim(), devices: 0 }]);
+    setRoomName("");
+    setShowAddRoom(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 p-6">
@@ -68,17 +75,22 @@ export default function RoomsPage() {
             <input
               type="text"
               placeholder="Room name"
+              value={roomName}
+              onChange={(e) => setRoomName(e.target.value)}
               className="w-full px-4 py-2 mb-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white"
             />
             <div className="flex justify-end gap-3">
               <button
-                onClick={() => setShowAddRoom(false)}
+                onClick={() => {
+                  setRoomName("");
+                  setShowAddRoom(false);
+                }}
                 className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
               >
                 Cancel
               </button>
               <button
-                onClick={() => setShowAddRoom(false)}
+                onClick={handleAddRoom}
                 className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#800000] to-black text-white font-semibold"
               >
                 Add
@@ -88,7 +100,7 @@ export default function RoomsPage() {
         </div>
       )}
 
-      {/* Add Device Modal (Industry-Standard UI) */}
+      {/* Add Device Modal (Wi-Fi, Bluetooth, Manual) */}
       {showAddDevice && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
           <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
@@ -158,6 +170,34 @@ export default function RoomsPage() {
           </div>
         </div>
       )}
+
+      {/* Animations */}
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        @keyframes scaleUp {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.25s ease-out;
+        }
+        .animate-scaleUp {
+          animation: scaleUp 0.25s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
