@@ -19,7 +19,7 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
-import { Bar, Line, Doughnut } from "react-chartjs-2";
+import { Line, Doughnut } from "react-chartjs-2";
 import React from "react";
 
 ChartJS.register(
@@ -34,6 +34,16 @@ ChartJS.register(
   ArcElement
 );
 
+// === Date Formatter (Fixes Hydration) ===
+const formatDate = (dateString: string) => {
+  if (!dateString) return "";
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(dateString));
+};
+
 export default function FinancePage() {
   // === Demo Data ===
   const revenueTrend = {
@@ -42,8 +52,10 @@ export default function FinancePage() {
       {
         label: "Revenue (₦)",
         data: [450000, 600000, 550000, 700000, 800000, 750000],
-        borderColor: "#4f46e5",
-        backgroundColor: "rgba(79, 70, 229, 0.2)",
+        borderColor: "#2563eb",
+        backgroundColor: "rgba(37, 99, 235, 0.1)",
+        pointBackgroundColor: "#2563eb",
+        pointBorderWidth: 2,
         tension: 0.4,
         fill: true,
       },
@@ -55,7 +67,8 @@ export default function FinancePage() {
     datasets: [
       {
         data: [200000, 120000, 80000, 100000],
-        backgroundColor: ["#4f46e5", "#16a34a", "#f59e0b", "#dc2626"],
+        backgroundColor: ["#2563eb", "#16a34a", "#f59e0b", "#dc2626"],
+        borderWidth: 2,
       },
     ],
   };
@@ -98,13 +111,11 @@ export default function FinancePage() {
   ];
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-6 space-y-10">
       {/* === Header === */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Finance Overview
-        </h1>
-        <button className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg shadow hover:opacity-90 transition">
+        <h1 className="text-2xl font-bold">Finance Overview</h1>
+        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-sm transition">
           <PlusIcon className="w-5 h-5 mr-2" />
           New Invoice
         </button>
@@ -116,37 +127,37 @@ export default function FinancePage() {
           {
             label: "Total Revenue (MTD)",
             value: "₦750,000",
-            icon: <BanknotesIcon className="w-10 h-10 text-green-500" />,
+            Icon: BanknotesIcon,
+            color: "text-green-500",
           },
           {
             label: "Outstanding Balances",
             value: "₦120,000",
-            icon: <ExclamationCircleIcon className="w-10 h-10 text-red-500" />,
+            Icon: ExclamationCircleIcon,
+            color: "text-red-500",
           },
           {
             label: "Pending Payments",
             value: "₦50,000",
-            icon: <DocumentTextIcon className="w-10 h-10 text-yellow-500" />,
+            Icon: DocumentTextIcon,
+            color: "text-yellow-500",
           },
           {
             label: "Collections Rate",
             value: "85%",
-            icon: <ArrowTrendingUpIcon className="w-10 h-10 text-indigo-500" />,
+            Icon: ArrowTrendingUpIcon,
+            color: "text-blue-500",
           },
-        ].map((card, idx) => (
+        ].map((card, i) => (
           <div
-            key={idx}
-            className="p-5 rounded-xl shadow bg-white dark:bg-gradient-to-br dark:from-[#1a1a1a] dark:to-gray-900 flex items-center justify-between transition hover:shadow-lg"
+            key={i}
+            className="p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl flex items-center justify-between hover:shadow-md transition"
           >
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {card.label}
-              </p>
-              <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                {card.value}
-              </p>
+              <p className="text-sm text-gray-500">{card.label}</p>
+              <p className="text-xl font-semibold">{card.value}</p>
             </div>
-            {card.icon}
+            <card.Icon className={`w-10 h-10 ${card.color}`} />
           </div>
         ))}
       </div>
@@ -154,39 +165,43 @@ export default function FinancePage() {
       {/* === Analytics Section === */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Trend */}
-        <div className="p-5 rounded-xl shadow bg-white dark:bg-gradient-to-br dark:from-[#1a1a1a] dark:to-gray-900 col-span-2">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-            Revenue Trend
-          </h2>
-          <Line data={revenueTrend} />
+        <div className="p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl col-span-2">
+          <h2 className="text-lg font-semibold mb-4">Revenue Trend</h2>
+          <Line
+            data={revenueTrend}
+            options={{
+              plugins: { legend: { display: false } },
+              scales: { y: { ticks: { callback: (v) => `₦${v}` } } },
+            }}
+          />
         </div>
 
         {/* Collections Rate */}
-        <div className="p-5 rounded-xl shadow bg-white dark:bg-gradient-to-br dark:from-[#1a1a1a] dark:to-gray-900">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-            Collections Rate
-          </h2>
-          <Doughnut data={collectionsRate} />
+        <div className="p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl">
+          <h2 className="text-lg font-semibold mb-4">Collections Rate</h2>
+          <Doughnut
+            data={collectionsRate}
+            options={{ plugins: { legend: { position: "bottom" } } }}
+          />
         </div>
 
         {/* Expenses Breakdown */}
-        <div className="p-5 rounded-xl shadow bg-white dark:bg-gradient-to-br dark:from-[#1a1a1a] dark:to-gray-900">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-            Expenses Breakdown
-          </h2>
-          <Doughnut data={expensesBreakdown} />
+        <div className="p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl">
+          <h2 className="text-lg font-semibold mb-4">Expenses Breakdown</h2>
+          <Doughnut
+            data={expensesBreakdown}
+            options={{ plugins: { legend: { position: "bottom" } } }}
+          />
         </div>
       </div>
 
       {/* === Transactions Table === */}
-      <div className="p-5 rounded-xl shadow bg-white dark:bg-gradient-to-br dark:from-[#1a1a1a] dark:to-gray-900">
-        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-          Recent Transactions
-        </h2>
+      <div className="p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl">
+        <h2 className="text-lg font-semibold mb-4">Recent Transactions</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm text-left border-separate border-spacing-y-2">
             <thead>
-              <tr className="text-gray-600 dark:text-gray-400 uppercase text-xs">
+              <tr className="text-gray-600 uppercase text-xs">
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Resident</th>
                 <th className="px-4 py-2">Type</th>
@@ -201,37 +216,25 @@ export default function FinancePage() {
                   key={t.id}
                   className="bg-gray-50 dark:bg-gray-800/40 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition"
                 >
-                  <td className="px-4 py-2 text-gray-700 dark:text-gray-300">
-                    {new Intl.DateTimeFormat("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    }).format(new Date(t.date))}
-                  </td>
-                  <td className="px-4 py-2 text-gray-900 dark:text-gray-100 font-medium">
-                    {t.resident}
-                  </td>
-                  <td className="px-4 py-2 text-gray-700 dark:text-gray-300">
-                    {t.type}
-                  </td>
-                  <td className="px-4 py-2 font-semibold text-gray-900 dark:text-gray-100">
-                    ₦{t.amount.toLocaleString()}
-                  </td>
+                  <td className="px-4 py-2">{formatDate(t.date)}</td>
+                  <td className="px-4 py-2">{t.resident}</td>
+                  <td className="px-4 py-2">{t.type}</td>
+                  <td className="px-4 py-2">₦{t.amount.toLocaleString()}</td>
                   <td className="px-4 py-2">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
                         t.status === "Paid"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300"
+                          ? "bg-green-100 text-green-700"
                           : t.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300"
-                          : "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : "bg-red-100 text-red-700"
                       }`}
                     >
                       {t.status}
                     </span>
                   </td>
                   <td className="px-4 py-2">
-                    <button className="text-indigo-600 dark:text-indigo-400 hover:underline text-sm">
+                    <button className="text-blue-600 hover:underline">
                       View Receipt
                     </button>
                   </td>
@@ -243,23 +246,21 @@ export default function FinancePage() {
       </div>
 
       {/* === Debt Management === */}
-      <div className="p-5 rounded-xl shadow bg-white dark:bg-gradient-to-br dark:from-[#1a1a1a] dark:to-gray-900">
-        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-          Debt Management
-        </h2>
-        <ul className="space-y-2">
+      <div className="p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl">
+        <h2 className="text-lg font-semibold mb-4">Debt Management</h2>
+        <ul className="space-y-3">
           {[
-            { resident: "Jane Smith (Apt 3C)", amount: "₦50,000 outstanding" },
-            { resident: "David Lee (Apt 2A)", amount: "₦15,000 overdue" },
-          ].map((d, idx) => (
+            { name: "Jane Smith (Apt 3C)", amount: "₦50,000 outstanding" },
+            { name: "David Lee (Apt 2A)", amount: "₦15,000 overdue" },
+          ].map((debtor, i) => (
             <li
-              key={idx}
-              className="flex justify-between items-center bg-red-50 dark:bg-red-900/20 p-3 rounded-lg"
+              key={i}
+              className="flex justify-between items-center bg-red-50 dark:bg-red-900/30 p-4 rounded-lg"
             >
-              <span className="text-gray-800 dark:text-gray-200">
-                {d.resident} – {d.amount}
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                {debtor.name} – {debtor.amount}
               </span>
-              <button className="px-3 py-1 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-md text-sm shadow hover:opacity-90 transition">
+              <button className="px-4 py-1.5 bg-red-600 text-white rounded-full text-sm hover:bg-red-700 transition">
                 Send Reminder
               </button>
             </li>
