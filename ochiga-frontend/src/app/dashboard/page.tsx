@@ -4,6 +4,7 @@
 import ResidentHeader from "../components/ResidentHeader";
 import ResidentWalletCard from "../components/Residentwalletcard";
 import ResidentUtilitiesCard from "../components/ResidentUtilitiesCard";
+import ResidentDeviceCards from "../components/ResidentDeviceCards";
 
 export default function DashboardPage() {
   return (
@@ -21,6 +22,9 @@ export default function DashboardPage() {
 
       {/* ✅ Resident Utilities Card */}
       <ResidentUtilitiesCard />
+
+      {/* ✅ Resident Device Cards */}
+      <ResidentDeviceCards />
     </div>
   );
 }
