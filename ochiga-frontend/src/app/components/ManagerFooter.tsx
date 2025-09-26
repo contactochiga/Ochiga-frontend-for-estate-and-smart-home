@@ -28,67 +28,30 @@ export default function ManagerFooter() {
     router.push(path);
   };
 
+  const tabs = [
+    { id: "dashboard", label: "Dashboard", icon: HomeIcon, path: "/manager-dashboard" },
+    { id: "houses", label: "Houses", icon: BuildingOfficeIcon, path: "/manager-dashboard/houses" },
+    { id: "requests", label: "Requests", icon: ClipboardDocumentListIcon, path: "/manager-dashboard/requests" },
+    { id: "finance", label: "Finance", icon: CreditCardIcon, path: "/manager-dashboard/finance" },
+    { id: "community", label: "Community", icon: GlobeAltIcon, path: "/manager-dashboard/community" },
+  ];
+
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-800 border-t shadow flex justify-around text-xs z-50">
-      <button
-        className={`flex flex-col items-center p-2 ${
-          activeTab === "dashboard"
-            ? "text-green-600 font-bold"
-            : "text-gray-600 dark:text-gray-300"
-        }`}
-        onClick={() => handleTabChange("dashboard", "/manager-dashboard")}
-      >
-        <HomeIcon className="w-5 h-5 mb-1" />
-        Dashboard
-      </button>
-
-      <button
-        className={`flex flex-col items-center p-2 ${
-          activeTab === "houses"
-            ? "text-green-600 font-bold"
-            : "text-gray-600 dark:text-gray-300"
-        }`}
-        onClick={() => handleTabChange("houses", "/manager-dashboard/houses")}
-      >
-        <BuildingOfficeIcon className="w-5 h-5 mb-1" />
-        Houses
-      </button>
-
-      <button
-        className={`flex flex-col items-center p-2 ${
-          activeTab === "requests"
-            ? "text-green-600 font-bold"
-            : "text-gray-600 dark:text-gray-300"
-        }`}
-        onClick={() => handleTabChange("requests", "/manager-dashboard/requests")}
-      >
-        <ClipboardDocumentListIcon className="w-5 h-5 mb-1" />
-        Requests
-      </button>
-
-      <button
-        className={`flex flex-col items-center p-2 ${
-          activeTab === "finance"
-            ? "text-green-600 font-bold"
-            : "text-gray-600 dark:text-gray-300"
-        }`}
-        onClick={() => handleTabChange("finance", "/manager-dashboard/finance")}
-      >
-        <CreditCardIcon className="w-5 h-5 mb-1" />
-        Finance
-      </button>
-
-      <button
-        className={`flex flex-col items-center p-2 ${
-          activeTab === "community"
-            ? "text-green-600 font-bold"
-            : "text-gray-600 dark:text-gray-300"
-        }`}
-        onClick={() => handleTabChange("community", "/manager-dashboard/community")}
-      >
-        <GlobeAltIcon className="w-5 h-5 mb-1" />
-        Community
-      </button>
+    <nav className="fixed bottom-0 left-0 w-full bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-md flex justify-between px-2 py-1 z-50">
+      {tabs.map(({ id, label, icon: Icon, path }) => (
+        <button
+          key={id}
+          className={`flex flex-col items-center flex-1 py-2 transition-colors duration-200 ${
+            activeTab === id
+              ? "text-green-600 font-semibold"
+              : "text-gray-500 dark:text-gray-400"
+          } hover:text-[#800000]`} // maroon hover
+          onClick={() => handleTabChange(id, path)}
+        >
+          <Icon className="w-5 h-5 mb-0.5" />
+          <span className="text-[10px]">{label}</span>
+        </button>
+      ))}
     </nav>
   );
 }
