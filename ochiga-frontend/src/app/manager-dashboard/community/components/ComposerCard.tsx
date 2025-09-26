@@ -60,15 +60,7 @@ export default function ComposerCard({
 
       {/* Actions */}
       <div className="flex flex-wrap items-center gap-3 mt-4 text-gray-600 dark:text-gray-400">
-        {/* Post CTA first (left aligned) */}
-        <button
-          onClick={makePost}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2 rounded-lg shadow hover:opacity-95 transition font-medium"
-        >
-          Post
-        </button>
-
-        {/* Media + Poll Options */}
+        {/* Photo */}
         <button
           onClick={() => fileRef.current?.click()}
           className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium"
@@ -83,6 +75,7 @@ export default function ComposerCard({
           onChange={(e) => handleFileUpload(e, "image")}
         />
 
+        {/* Video */}
         <button
           onClick={() => videoRef.current?.click()}
           className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium"
@@ -97,8 +90,19 @@ export default function ComposerCard({
           onChange={(e) => handleFileUpload(e, "video")}
         />
 
+        {/* Poll (moved up) */}
         <button className="flex items-center gap-1 px-3 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800/60 transition text-sm font-medium">
           <ChartBarIcon className="h-5 w-5" /> <span>Poll</span>
+        </button>
+      </div>
+
+      {/* Post button on its own row */}
+      <div className="mt-3">
+        <button
+          onClick={makePost}
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg shadow hover:opacity-95 transition font-medium"
+        >
+          Post
         </button>
       </div>
     </div>
