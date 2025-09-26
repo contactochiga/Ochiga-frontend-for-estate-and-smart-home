@@ -1,7 +1,16 @@
+// src/app/dashboard/visitors/page.tsx
 "use client";
 
 import { useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
+import {
+  UserIcon,
+  ClipboardDocumentIcon,
+  QrCodeIcon,
+  PaperAirplaneIcon,
+  ClockIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
 
 interface Visitor {
   id: number;
@@ -38,9 +47,11 @@ export default function VisitorsPage() {
     time: "",
   });
 
+  const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null);
+
   const addVisitor = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVisitor.name || !newVisitor.purpose) return;
+    if (!newVisitor.name || !newVisitor.purpose || !newVisitor.time) return;
 
     const newCode = Math.random().toString().slice(2, 8);
 
@@ -51,7 +62,7 @@ export default function VisitorsPage() {
       code: newCode,
     };
 
-    setVisitors([...visitors, newEntry]);
+    setVisitors([newEntry, ...visitors]);
     setNewVisitor({ name: "", purpose: "", time: "" });
   };
 
@@ -67,62 +78,85 @@ export default function VisitorsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-        Visitors
-      </h1>
+    <main className="min-h-screen bg-gray-50 dark:bg-black px-4 py-8">
+      {/* Header */}
+      <header className="mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+          Visitor Management
+        </h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Manage, track, and invite visitors seamlessly.
+        </p>
+      </header>
 
       {/* Add Visitor Form */}
       <form
         onSubmit={addVisitor}
-        className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow mb-6 grid gap-4 sm:grid-cols-3"
+        className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg mb-10 border border-gray-100 dark:border-gray-800"
       >
-        <input
-          type="text"
-          placeholder="Visitor Name"
-          value={newVisitor.name}
-          onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
-          className="p-2 rounded border dark:bg-gray-700 dark:border-gray-600"
-        />
-        <input
-          type="text"
-          placeholder="Purpose (e.g. Electrician)"
-          value={newVisitor.purpose}
-          onChange={(e) =>
-            setNewVisitor({ ...newVisitor, purpose: e.target.value })
-          }
-          className="p-2 rounded border dark:bg-gray-700 dark:border-gray-600"
-        />
-        <input
-          type="time"
-          value={newVisitor.time}
-          onChange={(e) => setNewVisitor({ ...newVisitor, time: e.target.value })}
-          className="p-2 rounded border dark:bg-gray-700 dark:border-gray-600"
-        />
+        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+          Invite a Visitor
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <input
+            type="text"
+            placeholder="Visitor Name"
+            value={newVisitor.name}
+            onChange={(e) =>
+              setNewVisitor({ ...newVisitor, name: e.target.value })
+            }
+            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+          />
+          <input
+            type="text"
+            placeholder="Purpose of Visit"
+            value={newVisitor.purpose}
+            onChange={(e) =>
+              setNewVisitor({ ...newVisitor, purpose: e.target.value })
+            }
+            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+          />
+          <input
+            type="time"
+            value={newVisitor.time}
+            onChange={(e) =>
+              setNewVisitor({ ...newVisitor, time: e.target.value })
+            }
+            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+          />
+        </div>
         <button
           type="submit"
-          className="col-span-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+          className="mt-6 w-full py-3 rounded-xl font-semibold shadow 
+            bg-gradient-to-r from-[#800000] to-black text-white 
+            hover:opacity-90 transition flex items-center justify-center gap-2"
         >
-          Add Visitor
+          <PlusIcon className="h-5 w-5" />
+          Invite Visitor
         </button>
       </form>
 
       {/* Visitors List */}
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Visitor Log</h2>
-        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+      <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+          Visitor Log
+        </h2>
+        <ul className="divide-y divide-gray-200 dark:divide-gray-800">
           {visitors.map((v) => (
             <li
               key={v.id}
-              className="py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+              className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p className="font-medium">{v.name}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="font-semibold text-gray-900 dark:text-white text-lg">
+                  {v.name}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <ClockIcon className="h-4 w-4" />
                   {v.purpose} — {v.time}
                 </p>
                 <span
-                  className={`inline-block mt-1 px-2 py-1 text-xs rounded ${
+                  className={`inline-block mt-2 px-3 py-1 text-xs rounded-full font-medium ${
                     v.status === "Pending"
                       ? "bg-yellow-100 text-yellow-700"
                       : v.status === "Checked-in"
@@ -132,37 +166,97 @@ export default function VisitorsPage() {
                 >
                   {v.status}
                 </span>
-                <div className="flex space-x-2 mt-2">
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2 mt-4">
                   <button
                     onClick={() => copyCode(v.code)}
-                    className="px-2 py-1 text-xs rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
                   >
+                    <ClipboardDocumentIcon className="h-4 w-4" />
                     Copy
                   </button>
                   <button
                     onClick={() => shareWhatsApp(v)}
-                    className="px-2 py-1 text-xs rounded bg-green-500 text-white"
+                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700"
                   >
+                    <PaperAirplaneIcon className="h-4 w-4" />
                     Share
+                  </button>
+                  <button
+                    onClick={() => setSelectedVisitor(v)}
+                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-gradient-to-r from-[#800000] to-black text-white hover:opacity-90"
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    Details
                   </button>
                 </div>
               </div>
 
               {/* QR Code */}
-              <div className="mt-3 sm:mt-0">
+              <div className="mt-4 sm:mt-0">
                 <QRCodeCanvas
                   value={`Visitor:${v.name}|Purpose:${v.purpose}|Time:${v.time}|Status:${v.status}|Code:${v.code}`}
-                  size={64}
+                  size={72}
                   bgColor={"#ffffff"}
                   fgColor={"#000000"}
                   level={"M"}
-                  includeMargin={false}
                 />
               </div>
             </li>
           ))}
         </ul>
-      </div>
+      </section>
+
+      {/* Slide-up Modal */}
+      {selectedVisitor && (
+        <div className="fixed inset-0 bg-black/60 flex items-end z-50">
+          <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                Visitor Details
+              </h3>
+              <button
+                onClick={() => setSelectedVisitor(null)}
+                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-2 text-gray-700 dark:text-gray-300">
+              <p>
+                <span className="font-medium">Name:</span>{" "}
+                {selectedVisitor.name}
+              </p>
+              <p>
+                <span className="font-medium">Purpose:</span>{" "}
+                {selectedVisitor.purpose}
+              </p>
+              <p>
+                <span className="font-medium">Time:</span>{" "}
+                {selectedVisitor.time}
+              </p>
+              <p>
+                <span className="font-medium">Status:</span>{" "}
+                {selectedVisitor.status}
+              </p>
+              <p>
+                <span className="font-medium">Code:</span>{" "}
+                {selectedVisitor.code}
+              </p>
+            </div>
+            <div className="flex justify-center mt-6">
+              <QRCodeCanvas
+                value={`Visitor:${selectedVisitor.name}|Code:${selectedVisitor.code}`}
+                size={128}
+                bgColor={"#ffffff"}
+                fgColor={"#000000"}
+                level={"M"}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
