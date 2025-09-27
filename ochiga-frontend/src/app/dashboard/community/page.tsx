@@ -1,4 +1,3 @@
-// src/app/dashboard/community/page.tsx
 "use client";
 
 import React, { useState, useRef } from "react";
@@ -11,33 +10,186 @@ import {
   ComposerCard,
   PinnedPostCard,
   GroupsCard,
-  PostCard,
+  PostCard, // ✅ now works
 } from "./components";
 
 import { Post, Group } from "../../../types";
 
-// Dummy posts (replace later with API data)
-const posts: Post[] = [
-  {
-    id: 1,
-    author: "Ochiga",
-    content: "Welcome to the community 🚀",
-    timestamp: new Date().toISOString(),
-  },
-];
-
 export default function CommunityPage() {
+  // posts state
+  const [posts, setPosts] = useState<Post[]>([
+    {
+      id: 1,
+      author: "Estate Manager",
+      content:
+        "Welcome to the Ochiga Community Hub 🎉. Use this space for estate updates and discussions. Official notices stay pinned here.",
+      likes: 12,
+      liked: false,
+      comments: [
+        { id: 1, author: "Jane D.", text: "Thanks! Very helpful." },
+        { id: 2, author: "Mark T.", text: "Great to have this." },
+      ],
+      pinned: true,
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: 2,
+      author: "Aisha B.",
+      content: "Does anyone recommend a reliable plumber in the estate?",
+      likes: 3,
+      liked: false,
+      comments: [
+        { id: 1, author: "Paul", text: "Try BrightFix — they helped me." },
+      ],
+      createdAt: new Date().toISOString(),
+    },
+  ]);
+
+  const [groups, setGroups] = useState<Group[]>([
+    { id: 1, name: "Gym & Fitness Club", members: 25 },
+    { id: 2, name: "Parents Forum", members: 40 },
+    { id: 3, name: "Security Watch", members: 18 },
+    { id: 4, name: "Football Crew", members: 15 },
+  ]);
+
+  // composer state
+  const [newPostText, setNewPostText] = useState("");
+  const [media, setMedia] = useState<{ image?: string | null; video?: string | null }>({});
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const videoRef = useRef<HTMLInputElement | null>(null);
+
+  // modal state
+  const [showMessages, setShowMessages] = useState(false);
+
+  // helpers
+  const makePost = () => {
+    if (!newPostText.trim() && !media.image && !media.video) return;
+    const newPost: Post = {
+      id: posts.length + 1 + Math.floor(Math.random() * 1000),
+      author: "You",
+      content: newPostText,
+      image: media.image || null,
+      video: media.video || null,
+      likes: 0,
+      liked: false,
+      comments: [],
+      createdAt: new Date().toISOString(),
+    };
+    setPosts([newPost, ...posts]);
+    setNewPostText("");
+    setMedia({});
+  };
+
+  const toggleLike = (id: number) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1,
+            }
+          : p
+      )
+    );
+  };
+
+  const addComment = (postId: number, text: string) => {
+    if (!text.trim()) return;
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              comments: [
+                ...p.comments,
+                {
+                  id: p.comments.length + 1 + Math.floor(Math.random() * 1000),
+                  author: "You",
+                  text,
+                },
+              ],
+            }
+          : p
+      )
+    );
+  };
+
+  const sharePost = async (post: Post) => {
+    const payload = `${post.author}: ${post.content}\n(shared from Ochiga Community)`;
+    await navigator.clipboard.writeText(payload);
+    alert("Post details copied to clipboard.");
+  };
+
+  const toggleJoinGroup = (id: number) => {
+    setGroups((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, joined: !g.joined } : g))
+    );
+  };
+
   return (
-    <div className="space-y-6">
-      <ComposerCard />
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6 space-y-6">
+      {/* ✅ Sub-header with just the message icon */}
+      <div className="flex justify-end pb-2 border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setShowMessages(true)}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        >
+          <ChatBubbleOvalLeftEllipsisIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+        </button>
+      </div>
 
-      <PinnedPostCard />
+      {/* ✅ Messages Modal */}
+      {showMessages && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-80 p-6 relative">
+            {/* Close button */}
+            <button
+              onClick={() => setShowMessages(false)}
+              className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+            </button>
 
-      <GroupsCard />
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
+              Direct Messages
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Direct messages coming soon 🚀
+            </p>
+          </div>
+        </div>
+      )}
 
-      {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+      {/* ✅ Composer Card */}
+      <ComposerCard
+        newPostText={newPostText}
+        setNewPostText={setNewPostText}
+        media={media}
+        setMedia={setMedia}
+        fileRef={fileRef}
+        videoRef={videoRef}
+        makePost={makePost}
+      />
+
+      {/* ✅ Pinned Post Card */}
+      {posts.filter((p) => p.pinned).map((p) => (
+        <PinnedPostCard key={p.id} post={p} />
       ))}
-    </div>
+
+      {/* ✅ Groups Card */}
+      <GroupsCard groups={groups} toggleJoinGroup={toggleJoinGroup} />
+
+      {/* ✅ Feed Posts */}
+      {posts.filter((p) => !p.pinned).map((post) => (
+        <PostCard
+          key={post.id}
+          post={post}
+          toggleLike={toggleLike}
+          addComment={addComment}
+          sharePost={sharePost}
+        />
+      ))}
+    </main>
   );
 }
