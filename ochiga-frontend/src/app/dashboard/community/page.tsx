@@ -11,7 +11,7 @@ import {
   ComposerCard,
   PinnedPostCard,
   GroupsCard,
-  PostCard,
-} from "./components"; // ✅ all from index.ts
+  PostCard, // ✅ comes directly from ./components/index.ts
+} from "./components";
 
 import { Post, Group } from "../../../types";
