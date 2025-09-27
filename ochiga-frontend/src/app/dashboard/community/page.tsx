@@ -1,72 +1,196 @@
+// src/app/dashboard/community/page.tsx
 "use client";
 
-import { useState } from "react";
+import React, { useState, useRef } from "react";
+import {
+  ChatBubbleOvalLeftEllipsisIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
+
+import {
+  ComposerCard,
+  PinnedPostCard,
+  GroupsCard,
+} from "./components"; // removed FeedPostCard
+import PostCard from "../../components/PostCard"; // ✅ use the new PostCard
+
+import { Post, Group } from "../../../types";
 
 export default function CommunityPage() {
-  const [announcements, setAnnouncements] = useState([
+  // posts state
+  const [posts, setPosts] = useState<Post[]>([
     {
       id: 1,
-      title: "General Meeting",
-      content: "All residents are invited for the estate general meeting on Saturday 31st at 12 PM.",
-      date: "2025-08-20",
+      author: "Estate Manager",
+      content:
+        "Welcome to the Ochiga Community Hub 🎉. Use this space for estate updates and discussions. Official notices stay pinned here.",
+      likes: 12,
+      liked: false,
+      comments: [
+        { id: 1, author: "Jane D.", text: "Thanks! Very helpful." },
+        { id: 2, author: "Mark T.", text: "Great to have this." },
+      ],
+      pinned: true,
+      createdAt: new Date().toISOString(),
     },
     {
       id: 2,
-      title: "Water Supply Notice",
-      content: "Water supply will be temporarily unavailable from 9 AM – 2 PM tomorrow due to maintenance.",
-      date: "2025-08-22",
+      author: "Aisha B.",
+      content: "Does anyone recommend a reliable plumber in the estate?",
+      likes: 3,
+      liked: false,
+      comments: [
+        { id: 1, author: "Paul", text: "Try BrightFix — they helped me." },
+      ],
+      createdAt: new Date().toISOString(),
     },
   ]);
 
-  const [groups] = useState([
+  const [groups, setGroups] = useState<Group[]>([
     { id: 1, name: "Gym & Fitness Club", members: 25 },
     { id: 2, name: "Parents Forum", members: 40 },
     { id: 3, name: "Security Watch", members: 18 },
+    { id: 4, name: "Football Crew", members: 15 },
   ]);
 
+  // composer state
+  const [newPostText, setNewPostText] = useState("");
+  const [media, setMedia] = useState<{ image?: string | null; video?: string | null }>({});
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const videoRef = useRef<HTMLInputElement | null>(null);
+
+  // modal state
+  const [showMessages, setShowMessages] = useState(false);
+
+  // helpers
+  const makePost = () => {
+    if (!newPostText.trim() && !media.image && !media.video) return;
+    const newPost: Post = {
+      id: posts.length + 1 + Math.floor(Math.random() * 1000),
+      author: "You",
+      content: newPostText,
+      image: media.image || null,
+      video: media.video || null,
+      likes: 0,
+      liked: false,
+      comments: [],
+      createdAt: new Date().toISOString(),
+    };
+    setPosts([newPost, ...posts]);
+    setNewPostText("");
+    setMedia({});
+  };
+
+  const toggleLike = (id: number) => {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              liked: !p.liked,
+              likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1,
+            }
+          : p
+      )
+    );
+  };
+
+  const addComment = (postId: number, text: string) => {
+    if (!text.trim()) return;
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              comments: [
+                ...p.comments,
+                {
+                  id: p.comments.length + 1 + Math.floor(Math.random() * 1000),
+                  author: "You",
+                  text,
+                },
+              ],
+            }
+          : p
+      )
+    );
+  };
+
+  const sharePost = async (post: Post) => {
+    const payload = `${post.author}: ${post.content}\n(shared from Ochiga Community)`;
+    await navigator.clipboard.writeText(payload);
+    alert("Post details copied to clipboard.");
+  };
+
+  const toggleJoinGroup = (id: number) => {
+    setGroups((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, joined: !g.joined } : g))
+    );
+  };
+
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
-        Community
-      </h1>
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6 space-y-6">
+      {/* ✅ Sub-header with just the message icon */}
+      <div className="flex justify-end pb-2 border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setShowMessages(true)}
+          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+        >
+          <ChatBubbleOvalLeftEllipsisIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+        </button>
+      </div>
 
-      {/* Announcements */}
-      <section className="mb-8">
-        <h2 className="text-lg font-semibold mb-3">📢 Announcements</h2>
-        <div className="space-y-4">
-          {announcements.map((a) => (
-            <div
-              key={a.id}
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow"
+      {/* ✅ Messages Modal */}
+      {showMessages && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-80 p-6 relative">
+            {/* Close button */}
+            <button
+              onClick={() => setShowMessages(false)}
+              className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-              <h3 className="font-medium text-gray-900 dark:text-gray-100">
-                {a.title}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-300 mt-1">{a.content}</p>
-              <p className="text-xs text-gray-400 mt-2">📅 {a.date}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+              <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
+            </button>
 
-      {/* Groups */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">👥 Groups</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {groups.map((g) => (
-            <div
-              key={g.id}
-              className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition"
-            >
-              <h3 className="font-medium text-gray-900 dark:text-gray-100">{g.name}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{g.members} members</p>
-              <button className="mt-3 w-full bg-blue-600 text-white py-1.5 rounded hover:bg-blue-700">
-                Join Group
-              </button>
-            </div>
-          ))}
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
+              Direct Messages
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Direct messages coming soon 🚀
+            </p>
+          </div>
         </div>
-      </section>
+      )}
+
+      {/* ✅ Composer Card */}
+      <ComposerCard
+        newPostText={newPostText}
+        setNewPostText={setNewPostText}
+        media={media}
+        setMedia={setMedia}
+        fileRef={fileRef}
+        videoRef={videoRef}
+        makePost={makePost}
+      />
+
+      {/* ✅ Pinned Post Card */}
+      {posts.filter((p) => p.pinned).map((p) => (
+        <PinnedPostCard key={p.id} post={p} />
+      ))}
+
+      {/* ✅ Groups Card */}
+      <GroupsCard groups={groups} toggleJoinGroup={toggleJoinGroup} />
+
+      {/* ✅ Feed Posts (now using PostCard) */}
+      {posts.filter((p) => !p.pinned).map((post) => (
+        <PostCard
+          key={post.id}
+          post={post}
+          toggleLike={toggleLike}
+          addComment={addComment}
+          sharePost={sharePost}
+        />
+      ))}
     </main>
   );
 }
