@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LightBulbIcon,
   LockClosedIcon,
   LockOpenIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
+import mqtt, { MqttClient } from "mqtt";
 
 export default function DevicesPage() {
   const [devices, setDevices] = useState([
@@ -15,10 +16,50 @@ export default function DevicesPage() {
     { id: 3, name: "AC Unit", type: "ac", status: true },
   ]);
 
+  const [client, setClient] = useState<MqttClient | null>(null);
+
+  // Connect to MQTT broker
+  useEffect(() => {
+    const mqttClient = mqtt.connect("wss://broker.hivemq.com:8884/mqtt"); // free public broker
+    setClient(mqttClient);
+
+    mqttClient.on("connect", () => {
+      console.log("✅ Connected to MQTT broker");
+      mqttClient.subscribe("estate/devices/+/status"); // e.g., estate/devices/1/status
+    });
+
+    mqttClient.on("message", (topic, message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        // Example payload: { id: 1, status: true }
+        setDevices((prev) =>
+          prev.map((d) => (d.id === data.id ? { ...d, status: data.status } : d))
+        );
+      } catch (err) {
+        console.error("MQTT parse error:", err);
+      }
+    });
+
+    return () => {
+      mqttClient.end();
+    };
+  }, []);
+
+  // Publish toggle command
   const toggleDevice = (id: number) => {
     setDevices((prev) =>
       prev.map((d) => (d.id === id ? { ...d, status: !d.status } : d))
     );
+
+    if (client) {
+      const updatedDevice = devices.find((d) => d.id === id);
+      if (updatedDevice) {
+        client.publish(
+          `estate/devices/${id}/toggle`,
+          JSON.stringify({ status: !updatedDevice.status })
+        );
+      }
+    }
   };
 
   const renderIcon = (type: string, status: boolean) => {
