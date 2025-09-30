@@ -1,8 +1,8 @@
+// ochiga-frontend/src/app/manager-dashboard/devices/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
-import mqtt, { MqttClient } from "mqtt";
 import {
   Chart as ChartJS,
   LineElement,
@@ -12,95 +12,56 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { IotApi } from "@/services/iotApi";
+import mqtt, { MqttClient } from "mqtt";
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend);
 
-export default function ManagerDevicesPage() {
-  const [devices, setDevices] = useState<
-    { id: number; name: string; type: string; status: boolean; online: boolean }[]
-  >([]);
-  const [alerts, setAlerts] = useState<{ id: number; message: string; time: string }[]>([]);
-  const [powerUsage, setPowerUsage] = useState<number[]>([]);
-  const [waterUsage, setWaterUsage] = useState<number[]>([]);
+interface Device {
+  id: string;
+  name: string;
+  type?: string;
+  status: boolean;
+}
 
+export default function ManagerDevicesPage() {
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [alerts, setAlerts] = useState<any[]>([]);
   const [client, setClient] = useState<MqttClient | null>(null);
 
+  // 🔌 Fetch devices from backend
   useEffect(() => {
-    const mqttClient = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
-      clientId: `manager-${Math.random().toString(16).slice(2)}`,
-      clean: true,
-      reconnectPeriod: 2000,
-      connectTimeout: 30 * 1000,
-      will: {
-        topic: "estate/clients/manager/disconnect",
-        payload: JSON.stringify({ client: "manager-ui", timestamp: Date.now() }),
-        qos: 1,
-        retain: false,
-      },
-    });
+    const loadDevices = async () => {
+      try {
+        const data = await IotApi.getEstateDevices();
+        setDevices(data);
+      } catch (err) {
+        console.error("❌ Failed to load estate devices:", err);
+      }
+    };
+    loadDevices();
+  }, []);
 
+  // 📡 Optional: connect to MQTT/WebSocket for real-time updates
+  useEffect(() => {
+    const mqttClient = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
     setClient(mqttClient);
 
     mqttClient.on("connect", () => {
-      console.log("✅ Manager connected to MQTT broker");
-
-      // Subscribe to all device statuses + analytics + alerts
-      mqttClient.subscribe("estate/devices/+/status", { qos: 1 });
-      mqttClient.subscribe("estate/analytics/power", { qos: 1 });
-      mqttClient.subscribe("estate/analytics/water", { qos: 1 });
-      mqttClient.subscribe("estate/alerts", { qos: 1 });
+      console.log("✅ Connected to MQTT broker");
+      mqttClient.subscribe("estate/devices/+/status");
     });
 
     mqttClient.on("message", (topic, message) => {
       try {
-        const payload = JSON.parse(message.toString());
-
-        if (topic.startsWith("estate/devices/")) {
-          setDevices((prev) => {
-            const exists = prev.find((d) => d.id === payload.id);
-            if (exists) {
-              return prev.map((d) =>
-                d.id === payload.id
-                  ? { ...d, status: payload.status, online: true }
-                  : d
-              );
-            } else {
-              return [
-                ...prev,
-                {
-                  id: payload.id,
-                  name: payload.name || `Device ${payload.id}`,
-                  type: payload.type || "unknown",
-                  status: payload.status,
-                  online: true,
-                },
-              ];
-            }
-          });
-        }
-
-        if (topic === "estate/analytics/power") {
-          setPowerUsage(payload.values || []);
-        }
-
-        if (topic === "estate/analytics/water") {
-          setWaterUsage(payload.values || []);
-        }
-
-        if (topic === "estate/alerts") {
-          setAlerts((prev) => [
-            { id: Date.now(), message: payload.message, time: new Date().toLocaleString() },
-            ...prev,
-          ]);
-        }
+        const data = JSON.parse(message.toString());
+        // Example payload: { id: "1", status: true }
+        setDevices((prev) =>
+          prev.map((d) => (d.id === data.id ? { ...d, status: data.status } : d))
+        );
       } catch (err) {
         console.error("MQTT parse error:", err);
       }
-    });
-
-    mqttClient.on("error", (err) => {
-      console.error("Manager MQTT error:", err);
-      mqttClient.end();
     });
 
     return () => {
@@ -108,7 +69,27 @@ export default function ManagerDevicesPage() {
     };
   }, []);
 
-  // Charts
+  // 🔘 Toggle device using API + sync to backend
+  const toggleDevice = async (id: string, currentStatus: boolean) => {
+    try {
+      const newStatus = !currentStatus;
+      await IotApi.controlDevice(id, {
+        action: newStatus ? "on" : "off",
+      });
+
+      // Update UI instantly
+      setDevices((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d))
+      );
+    } catch (err) {
+      console.error("❌ Failed to control device:", err);
+    }
+  };
+
+  // Mock analytics data (could come from API later)
+  const powerUsage = [30, 45, 50, 40, 60, 70, 55];
+  const waterUsage = [1000, 1200, 950, 1300, 1250, 1400, 1100];
+
   const powerChart = {
     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     datasets: [
@@ -143,23 +124,35 @@ export default function ManagerDevicesPage() {
         Estate Devices Control & Analytics
       </h1>
 
-      {/* Stats Overview */}
+      {/* Analytics Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <h3 className="text-gray-600 dark:text-gray-300">Power Usage Today</h3>
+          <p className="text-2xl font-bold text-green-600">72 kWh</p>
+        </div>
+        <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+          <h3 className="text-gray-600 dark:text-gray-300">Water Consumption</h3>
+          <p className="text-2xl font-bold text-blue-600">1,250 L</p>
+        </div>
         <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
           <h3 className="text-gray-600 dark:text-gray-300">Devices Online</h3>
           <p className="text-2xl font-bold text-green-500">
-            {devices.filter((d) => d.online).length}/{devices.length}
+            {devices.length > 0
+              ? `${Math.round(
+                  (devices.filter((d) => d.status).length / devices.length) * 100
+                )}%`
+              : "0%"}
           </p>
         </div>
         <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-          <h3 className="text-gray-600 dark:text-gray-300">Active Alerts</h3>
+          <h3 className="text-gray-600 dark:text-gray-300">Alerts</h3>
           <p className="text-2xl font-bold text-red-500">{alerts.length}</p>
         </div>
       </div>
 
       {/* Device Controls */}
       <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4">
-        Devices Status
+        Control Devices
       </h2>
       <div className="space-y-4 mb-8">
         {devices.map((device) => (
@@ -168,22 +161,18 @@ export default function ManagerDevicesPage() {
             className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 shadow rounded-lg"
           >
             <span className="text-gray-800 dark:text-gray-200 font-medium">
-              {device.name} ({device.type}) —{" "}
-              {device.online ? (
-                <span className="text-green-500">Online</span>
-              ) : (
-                <span className="text-red-500">Offline</span>
-              )}
+              {device.name}
             </span>
-            <span
+            <button
+              onClick={() => toggleDevice(device.id, device.status)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold ${
                 device.status
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-400 text-gray-800"
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-gray-300 text-gray-700 hover:bg-gray-400 dark:bg-gray-700 dark:text-gray-300"
               }`}
             >
               {device.status ? "On" : "Off"}
-            </span>
+            </button>
           </div>
         ))}
       </div>
