@@ -1,86 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { IotApi } from "../../../services/iotApi";
 import {
   LightBulbIcon,
   LockClosedIcon,
   LockOpenIcon,
   DevicePhoneMobileIcon,
 } from "@heroicons/react/24/outline";
-import mqtt, { MqttClient } from "mqtt";
 
 export default function DevicesPage() {
-  const [devices, setDevices] = useState([
-    { id: 1, name: "Living Room Light", type: "light", status: true },
-    { id: 2, name: "Main Door Lock", type: "lock", status: false },
-    { id: 3, name: "AC Unit", type: "ac", status: true },
-  ]);
-
-  const [client, setClient] = useState<MqttClient | null>(null);
+  const [devices, setDevices] = useState<any[]>([]);
 
   useEffect(() => {
-    const mqttClient = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
-      clientId: `resident-${Math.random().toString(16).slice(2)}`,
-      clean: true, // ephemeral session for frontend
-      reconnectPeriod: 2000,
-      connectTimeout: 30 * 1000,
-      will: {
-        topic: "estate/clients/resident/disconnect",
-        payload: JSON.stringify({ client: "resident-ui", timestamp: Date.now() }),
-        qos: 1,
-        retain: false,
-      },
-    });
-
-    setClient(mqttClient);
-
-    mqttClient.on("connect", () => {
-      console.log("✅ Connected to MQTT broker");
-      mqttClient.subscribe("estate/devices/+/status", { qos: 1 });
-    });
-
-    mqttClient.on("message", (topic, message) => {
-      try {
-        const data = JSON.parse(message.toString());
-        setDevices((prev) =>
-          prev.map((d) => (d.id === data.id ? { ...d, status: data.status } : d))
-        );
-      } catch (err) {
-        console.error("MQTT parse error:", err);
-      }
-    });
-
-    mqttClient.on("error", (err) => {
-      console.error("MQTT connection error:", err);
-      mqttClient.end();
-    });
-
-    return () => {
-      mqttClient.end();
-    };
+    IotApi.getMyDevices().then(setDevices).catch(console.error);
   }, []);
 
-  const toggleDevice = (id: number) => {
-    const updatedDevice = devices.find((d) => d.id === id);
-    if (!updatedDevice || !client) return;
-
-    const newStatus = !updatedDevice.status;
-
-    setDevices((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d))
-    );
-
-    client.publish(
-      `estate/devices/${id}/set`,
-      JSON.stringify({
-        id,
-        type: updatedDevice.type,
-        status: newStatus,
-        source: "resident-ui",
-        timestamp: Date.now(),
-      }),
-      { qos: 1, retain: false }
-    );
+  const toggleDevice = async (id: string, currentStatus: boolean) => {
+    try {
+      const updated = await IotApi.controlDevice(id, {
+        action: currentStatus ? "off" : "on",
+      });
+      setDevices((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, ...updated } : d)),
+      );
+    } catch (err) {
+      console.error("Control failed:", err);
+    }
   };
 
   const renderIcon = (type: string, status: boolean) => {
@@ -123,12 +69,12 @@ export default function DevicesPage() {
           <div
             key={device.id}
             className={`p-6 rounded-lg shadow-lg flex flex-col items-center transition-transform transform hover:scale-105 cursor-pointer ${
-              device.status
+              device.isOn
                 ? "bg-gradient-to-br from-green-100 to-green-200 dark:from-green-800 dark:to-green-700"
                 : "bg-white dark:bg-gray-800"
             }`}
           >
-            {renderIcon(device.type, device.status)}
+            {renderIcon(device.type, device.isOn)}
             <h3 className="mt-3 font-semibold text-lg text-gray-900 dark:text-gray-100">
               {device.name}
             </h3>
@@ -136,14 +82,14 @@ export default function DevicesPage() {
               {device.type.toUpperCase()}
             </p>
             <button
-              onClick={() => toggleDevice(device.id)}
+              onClick={() => toggleDevice(device.id, device.isOn)}
               className={`mt-5 w-full py-2 rounded-lg font-medium shadow transition-colors ${
-                device.status
+                device.isOn
                   ? "bg-red-500 text-white hover:bg-red-600"
                   : "bg-green-500 text-white hover:bg-green-600"
               }`}
             >
-              {device.status ? "Turn Off" : "Turn On"}
+              {device.isOn ? "Turn Off" : "Turn On"}
             </button>
           </div>
         ))}
