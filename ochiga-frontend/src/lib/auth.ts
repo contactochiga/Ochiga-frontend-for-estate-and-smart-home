@@ -3,31 +3,25 @@
 
 import Cookies from "js-cookie";
 
-// Save token (in cookies + localStorage)
-export function saveToken(token: string, role?: "resident" | "manager") {
-  if (typeof window !== "undefined") {
-    // ✅ Store in cookies (readable by middleware)
-    Cookies.set("token", token, { expires: 1 }); // 1 day expiry
-    if (role) Cookies.set("role", role, { expires: 1 });
+export function saveToken(token: string, role: "resident" | "manager") {
+  // ✅ HttpOnly cookies would be best from backend
+  Cookies.set("token", token, { expires: 1, sameSite: "strict" });
+  Cookies.set("role", role, { expires: 1, sameSite: "strict" });
 
-    // ✅ Store in localStorage (for client-side hooks)
-    localStorage.setItem("ochiga_token", token);
-    if (role) localStorage.setItem("ochiga_role", role);
-  }
+  // ✅ localStorage for quick client access
+  localStorage.setItem("ochiga_role", role);
 }
 
 export function getToken(): string | null {
-  if (typeof window !== "undefined") {
-    return Cookies.get("token") || localStorage.getItem("ochiga_token");
-  }
-  return null;
+  return Cookies.get("token") || null;
+}
+
+export function getRole(): string | null {
+  return Cookies.get("role") || localStorage.getItem("ochiga_role");
 }
 
 export function clearToken() {
-  if (typeof window !== "undefined") {
-    Cookies.remove("token");
-    Cookies.remove("role");
-    localStorage.removeItem("ochiga_token");
-    localStorage.removeItem("ochiga_role");
-  }
+  Cookies.remove("token");
+  Cookies.remove("role");
+  localStorage.removeItem("ochiga_role");
 }
