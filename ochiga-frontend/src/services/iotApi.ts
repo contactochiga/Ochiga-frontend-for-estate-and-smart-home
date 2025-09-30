@@ -1,14 +1,14 @@
 // src/services/iotApi.ts
-import axios from 'axios';
+import axios from "axios";
 
-// 👇 Change this to your backend URL (NestJS host)
+// 👇 Change this to your deployed backend URL
 const API = axios.create({
-  baseURL: 'http://localhost:3000/iot',
+  baseURL: "http://localhost:3000/iot",
 });
 
-// 🔑 Add JWT automatically to every request
+// 🔑 Automatically attach JWT from localStorage (or cookies)
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token'); // or from cookies/secure storage
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -18,13 +18,13 @@ API.interceptors.request.use((config) => {
 export const IotApi = {
   // Resident’s devices
   getMyDevices: async () => {
-    const res = await API.get('/my-devices');
+    const res = await API.get("/my-devices");
     return res.data;
   },
 
   // Manager’s estate devices
   getEstateDevices: async () => {
-    const res = await API.get('/estate-devices');
+    const res = await API.get("/estate-devices");
     return res.data;
   },
 
@@ -34,16 +34,16 @@ export const IotApi = {
     type: string;
     isEstateLevel?: boolean;
   }) => {
-    const res = await API.post('/devices', data);
+    const res = await API.post("/devices", data);
     return res.data;
   },
 
-  // Control a device (on/off/set-temp)
+  // ✅ Control a device (must use POST not PATCH)
   controlDevice: async (
     deviceId: string,
-    data: { action: 'on' | 'off' | 'set-temp'; value?: any },
+    data: { action: "on" | "off" | "set-temp"; value?: any },
   ) => {
-    const res = await API.patch(`/devices/${deviceId}/control`, data);
+    const res = await API.post(`/devices/${deviceId}/control`, data);
     return res.data;
   },
 
