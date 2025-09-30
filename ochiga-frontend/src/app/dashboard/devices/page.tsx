@@ -47,6 +47,7 @@ export default function DevicesPage() {
 
   // Publish toggle command
   const toggleDevice = (id: number) => {
+    // Optimistic UI update
     setDevices((prev) =>
       prev.map((d) => (d.id === id ? { ...d, status: !d.status } : d))
     );
@@ -54,9 +55,10 @@ export default function DevicesPage() {
     if (client) {
       const updatedDevice = devices.find((d) => d.id === id);
       if (updatedDevice) {
+        const newStatus = !updatedDevice.status;
         client.publish(
-          `estate/devices/${id}/toggle`,
-          JSON.stringify({ status: !updatedDevice.status })
+          `estate/devices/${id}/control`,
+          JSON.stringify({ id, status: newStatus }) // 👈 matches ControlDeviceDto
         );
       }
     }
