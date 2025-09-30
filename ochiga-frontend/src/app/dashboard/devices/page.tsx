@@ -18,20 +18,30 @@ export default function DevicesPage() {
 
   const [client, setClient] = useState<MqttClient | null>(null);
 
-  // Connect to MQTT broker
   useEffect(() => {
-    const mqttClient = mqtt.connect("wss://broker.hivemq.com:8884/mqtt"); // free public broker
+    const mqttClient = mqtt.connect("wss://broker.hivemq.com:8884/mqtt", {
+      clientId: `resident-${Math.random().toString(16).slice(2)}`,
+      clean: true, // ephemeral session for frontend
+      reconnectPeriod: 2000,
+      connectTimeout: 30 * 1000,
+      will: {
+        topic: "estate/clients/resident/disconnect",
+        payload: JSON.stringify({ client: "resident-ui", timestamp: Date.now() }),
+        qos: 1,
+        retain: false,
+      },
+    });
+
     setClient(mqttClient);
 
     mqttClient.on("connect", () => {
       console.log("✅ Connected to MQTT broker");
-      mqttClient.subscribe("estate/devices/+/status"); // e.g., estate/devices/1/status
+      mqttClient.subscribe("estate/devices/+/status", { qos: 1 });
     });
 
     mqttClient.on("message", (topic, message) => {
       try {
         const data = JSON.parse(message.toString());
-        // Example payload: { id: 1, status: true }
         setDevices((prev) =>
           prev.map((d) => (d.id === data.id ? { ...d, status: data.status } : d))
         );
@@ -40,28 +50,37 @@ export default function DevicesPage() {
       }
     });
 
+    mqttClient.on("error", (err) => {
+      console.error("MQTT connection error:", err);
+      mqttClient.end();
+    });
+
     return () => {
       mqttClient.end();
     };
   }, []);
 
-  // Publish toggle command
   const toggleDevice = (id: number) => {
-    // Optimistic UI update
+    const updatedDevice = devices.find((d) => d.id === id);
+    if (!updatedDevice || !client) return;
+
+    const newStatus = !updatedDevice.status;
+
     setDevices((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status: !d.status } : d))
+      prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d))
     );
 
-    if (client) {
-      const updatedDevice = devices.find((d) => d.id === id);
-      if (updatedDevice) {
-        const newStatus = !updatedDevice.status;
-        client.publish(
-          `estate/devices/${id}/control`,
-          JSON.stringify({ id, status: newStatus }) // 👈 matches ControlDeviceDto
-        );
-      }
-    }
+    client.publish(
+      `estate/devices/${id}/set`,
+      JSON.stringify({
+        id,
+        type: updatedDevice.type,
+        status: newStatus,
+        source: "resident-ui",
+        timestamp: Date.now(),
+      }),
+      { qos: 1, retain: false }
+    );
   };
 
   const renderIcon = (type: string, status: boolean) => {
@@ -110,14 +129,12 @@ export default function DevicesPage() {
             }`}
           >
             {renderIcon(device.type, device.status)}
-
             <h3 className="mt-3 font-semibold text-lg text-gray-900 dark:text-gray-100">
               {device.name}
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {device.type.toUpperCase()}
             </p>
-
             <button
               onClick={() => toggleDevice(device.id)}
               className={`mt-5 w-full py-2 rounded-lg font-medium shadow transition-colors ${
