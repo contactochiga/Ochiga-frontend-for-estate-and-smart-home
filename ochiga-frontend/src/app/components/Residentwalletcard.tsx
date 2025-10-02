@@ -12,7 +12,7 @@ import {
   ClipboardDocumentIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
-import { apiRequest } from "@/lib/api"; // ✅ helper to call backend
+import { apiRequest } from "../../lib/api"; // ✅ helper to call backend
 
 export default function ResidentWalletCard() {
   const [walletBalance, setWalletBalance] = useState<number>(0);
