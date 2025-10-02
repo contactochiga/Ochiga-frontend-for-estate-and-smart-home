@@ -24,6 +24,14 @@ export default function HomePage() {
         >
           Resident Dashboard
         </button>
+
+        {/* ✅ Temporary Login button */}
+        <button
+          onClick={() => router.push("/login")}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-semibold shadow"
+        >
+          Go to Login
+        </button>
       </div>
     </div>
   );
