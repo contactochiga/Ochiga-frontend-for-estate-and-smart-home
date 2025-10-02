@@ -1,75 +1,80 @@
-// src/pages/Login.tsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { apiRequest } from "../lib/api";
 
 export default function Login() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/login`,
-        { email, password }
-      );
+      const res = await apiRequest("/auth/login", "POST", {
+        email,
+        password,
+      });
 
-      localStorage.setItem("token", res.data.access_token);
+      console.log("✅ Login success:", res);
 
-      // Redirect based on role
-      if (res.data.user.role === "manager") navigate("/manager/dashboard");
-      else navigate("/resident/dashboard");
+      // store token + role in cookies/localStorage for now
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("role", res.user.role);
+
+      alert("Login successful! Redirecting...");
+
+      // simple redirect test (will replace later with protected dashboards)
+      if (res.user.role === "manager") {
+        window.location.href = "/manager/dashboard";
+      } else {
+        window.location.href = "/resident/dashboard";
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed");
+      setError(err.message || "Login failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-gray-900 to-gray-800">
-      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-xl">
-        <h1 className="mb-6 text-2xl font-bold text-center text-gray-800">Welcome Back</h1>
-        
-        {error && <p className="mb-4 text-red-500">{error}</p>}
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded shadow-md w-96 space-y-6"
+      >
+        <h2 className="text-2xl font-bold text-center">Login</h2>
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full rounded-md border px-3 py-2 focus:border-blue-500 focus:outline-none"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full rounded-md border px-3 py-2 focus:border-blue-500 focus:outline-none"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-md bg-blue-600 py-2 font-semibold text-white hover:bg-blue-700"
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full px-3 py-2 border rounded"
+          required
+        />
 
-        <p className="mt-4 text-center text-sm text-gray-500">
-          Forgot password? <a href="/forgot-password" className="text-blue-600">Reset</a>
-        </p>
-      </div>
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+      </form>
     </div>
   );
 }
