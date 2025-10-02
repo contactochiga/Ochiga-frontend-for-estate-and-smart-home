@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -11,12 +11,18 @@ import {
   ArrowUpRightIcon,
   ClipboardDocumentIcon,
 } from "@heroicons/react/24/outline";
+import { apiRequest } from "@/lib/api";
 
 export default function WalletPage() {
-  const [walletBalance] = useState(500000);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [showBalance, setShowBalance] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // TODO: replace with logged-in user id (from auth/session)
+  const userId = "123";
 
   const paymentMethods = [
     { name: "Pay with Card", icon: CreditCardIcon },
@@ -34,11 +40,25 @@ export default function WalletPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const transactions = [
-    { id: 1, type: "credit", title: "Wallet Funding", amount: 200000, date: "Sep 5, 2025" },
-    { id: 2, type: "debit", title: "Electricity Bill", amount: 15000, date: "Sep 4, 2025" },
-    { id: 3, type: "debit", title: "Internet Subscription", amount: 25000, date: "Sep 1, 2025" },
-  ];
+  // Load wallet data
+  const loadWallet = async () => {
+    try {
+      setLoading(true);
+      const wallet = await apiRequest(`/wallet/${userId}`, "GET");
+      setWalletBalance(wallet.balance);
+
+      const txs = await apiRequest(`/wallet/${userId}/transactions`, "GET");
+      setTransactions(txs);
+    } catch (err) {
+      console.error("Error loading wallet:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWallet();
+  }, []);
 
   return (
     <div className="max-w-md mx-auto px-4 py-6 space-y-6">
@@ -64,7 +84,13 @@ export default function WalletPage() {
 
         {/* Balance */}
         <h2 className="text-3xl font-bold tracking-wide mt-3 mb-4">
-          {showBalance ? `₦${walletBalance.toLocaleString()}` : "••••••"}
+          {loading
+            ? "Loading..."
+            : showBalance
+              ? walletBalance !== null
+                ? `₦${walletBalance.toLocaleString()}`
+                : "—"
+              : "••••••"}
         </h2>
 
         {/* Fund Wallet button INSIDE the same card */}
@@ -84,27 +110,35 @@ export default function WalletPage() {
           Transaction History
         </h3>
         <div className="space-y-4">
-          {transactions.map((tx) => (
-            <div
-              key={tx.id}
-              className="flex justify-between items-center p-3 rounded-xl 
-                bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
-            >
-              <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{tx.title}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{tx.date}</p>
-              </div>
-              <span
-                className={`font-semibold ${
-                  tx.type === "credit"
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
+          {transactions.length > 0 ? (
+            transactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="flex justify-between items-center p-3 rounded-xl 
+                  bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
               >
-                {tx.type === "credit" ? "+" : "-"}₦{tx.amount.toLocaleString()}
-              </span>
-            </div>
-          ))}
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{tx.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {new Date(tx.date).toLocaleDateString()}
+                  </p>
+                </div>
+                <span
+                  className={`font-semibold ${
+                    tx.type === "credit"
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400"
+                  }`}
+                >
+                  {tx.type === "credit" ? "+" : "-"}₦{tx.amount.toLocaleString()}
+                </span>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No transactions yet.
+            </p>
+          )}
         </div>
       </div>
 
