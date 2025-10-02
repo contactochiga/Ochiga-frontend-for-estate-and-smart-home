@@ -12,13 +12,18 @@ import {
   ClipboardDocumentIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
+import { apiRequest } from "@/lib/api"; // ✅ helper to call backend
 
 export default function ResidentWalletCard() {
-  const [walletBalance] = useState(500000);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
   const [animatedBalance, setAnimatedBalance] = useState(0);
   const [showBalance, setShowBalance] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Mock user (replace with actual auth user id)
+  const userId = "123";
 
   const paymentMethods = [
     { name: "Pay with Card", icon: CreditCardIcon },
@@ -30,7 +35,20 @@ export default function ResidentWalletCard() {
   const accountNumber = "1234567890";
   const bankName = "Ochiga Microfinance Bank";
 
-  // Animate balance on load
+  // 🔹 Load wallet from backend
+  const fetchWallet = async () => {
+    try {
+      setLoading(true);
+      const res = await apiRequest(`/wallet/${userId}`, "GET");
+      setWalletBalance(res.balance);
+    } catch (err) {
+      console.error("Error loading wallet:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Animate balance on change
   useEffect(() => {
     let start = 0;
     const duration = 800;
@@ -48,6 +66,32 @@ export default function ResidentWalletCard() {
 
     return () => clearInterval(interval);
   }, [walletBalance]);
+
+  // 🔹 Initial load
+  useEffect(() => {
+    fetchWallet();
+  }, []);
+
+  // 🔹 Fund wallet shortcut
+  const handleFund = async (amount: number) => {
+    try {
+      await apiRequest(`/wallet/${userId}/fund`, "POST", { amount });
+      await fetchWallet();
+      setShowModal(false);
+    } catch (err) {
+      console.error("Error funding wallet:", err);
+    }
+  };
+
+  // 🔹 Debit wallet (optional button for spending)
+  const handleDebit = async (amount: number) => {
+    try {
+      await apiRequest(`/wallet/${userId}/debit`, "POST", { amount });
+      await fetchWallet();
+    } catch (err) {
+      console.error("Error debiting wallet:", err);
+    }
+  };
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(accountNumber);
@@ -70,7 +114,9 @@ export default function ResidentWalletCard() {
               Wallet Balance
             </p>
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
-              {showBalance
+              {loading
+                ? "Loading..."
+                : showBalance
                 ? `₦${animatedBalance.toLocaleString()}`
                 : "••••••"}
             </h2>
@@ -160,6 +206,7 @@ export default function ResidentWalletCard() {
               {[1000, 5000, 10000].map((amt) => (
                 <button
                   key={amt}
+                  onClick={() => handleFund(amt)}
                   className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
                              text-sm font-medium text-gray-700 dark:text-gray-200 
                              hover:bg-red-50 dark:hover:bg-gray-800 transition"
