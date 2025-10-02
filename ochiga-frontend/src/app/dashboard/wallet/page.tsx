@@ -11,18 +11,20 @@ import {
   ArrowUpRightIcon,
   ClipboardDocumentIcon,
 } from "@heroicons/react/24/outline";
-
-import { apiRequest } from "../../lib/api";
+import { apiRequest } from "@/lib/api";
 
 export default function WalletPage() {
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [showBalance, setShowBalance] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // TODO: Replace this with actual logged-in user ID from auth context
+  // TODO: Replace with real userId from auth context/session
   const userId = "123";
+  const accountNumber = "1234567890";
+  const bankName = "Ochiga Microfinance Bank";
 
   const paymentMethods = [
     { name: "Pay with Card", icon: CreditCardIcon },
@@ -31,21 +33,15 @@ export default function WalletPage() {
     { name: "Pay with OPay", icon: ArrowUpRightIcon },
   ];
 
-  const accountNumber = "1234567890";
-  const bankName = "Ochiga Microfinance Bank";
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(accountNumber);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Load wallet balance from backend
+  // Fetch wallet + transactions
   const loadWallet = async () => {
     try {
       setLoading(true);
       const res = await apiRequest(`/wallet/${userId}`, "GET");
       setWalletBalance(res.balance);
+
+      const txRes = await apiRequest(`/wallet/${userId}/transactions`, "GET");
+      setTransactions(txRes || []);
     } catch (err) {
       console.error("Error fetching wallet:", err);
     } finally {
@@ -57,12 +53,11 @@ export default function WalletPage() {
     loadWallet();
   }, []);
 
-  // Dummy transactions (replace with API later if needed)
-  const transactions = [
-    { id: 1, type: "credit", title: "Wallet Funding", amount: 200000, date: "Sep 5, 2025" },
-    { id: 2, type: "debit", title: "Electricity Bill", amount: 15000, date: "Sep 4, 2025" },
-    { id: 3, type: "debit", title: "Internet Subscription", amount: 25000, date: "Sep 1, 2025" },
-  ];
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(accountNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="max-w-md mx-auto px-4 py-6 space-y-6">
@@ -88,10 +83,14 @@ export default function WalletPage() {
 
         {/* Balance */}
         <h2 className="text-3xl font-bold tracking-wide mt-3 mb-4">
-          {loading ? "Loading..." : showBalance ? `₦${walletBalance?.toLocaleString() ?? "—"}` : "••••••"}
+          {loading
+            ? "Loading..."
+            : showBalance
+            ? `₦${walletBalance?.toLocaleString() || 0}`
+            : "••••••"}
         </h2>
 
-        {/* Fund Wallet button INSIDE the same card */}
+        {/* Fund Wallet button */}
         <button
           onClick={() => setShowModal(true)}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl 
@@ -108,27 +107,34 @@ export default function WalletPage() {
           Transaction History
         </h3>
         <div className="space-y-4">
-          {transactions.map((tx) => (
-            <div
-              key={tx.id}
-              className="flex justify-between items-center p-3 rounded-xl 
-                bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
-            >
-              <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">{tx.title}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{tx.date}</p>
-              </div>
-              <span
-                className={`font-semibold ${
-                  tx.type === "credit"
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
-                }`}
+          {transactions.length > 0 ? (
+            transactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="flex justify-between items-center p-3 rounded-xl 
+                  bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
               >
-                {tx.type === "credit" ? "+" : "-"}₦{tx.amount.toLocaleString()}
-              </span>
-            </div>
-          ))}
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{tx.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{tx.date}</p>
+                </div>
+                <span
+                  className={`font-semibold ${
+                    tx.type === "credit"
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400"
+                  }`}
+                >
+                  {tx.type === "credit" ? "+" : "-"}₦
+                  {tx.amount.toLocaleString()}
+                </span>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No transactions yet.
+            </p>
+          )}
         </div>
       </div>
 
