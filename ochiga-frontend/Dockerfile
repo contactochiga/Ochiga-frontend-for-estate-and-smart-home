@@ -1,17 +1,17 @@
-# Use Node.js 20 LTS
+# Use Node.js 20 LTS Alpine for smaller image
 FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Install dependencies only when needed
+# Install dependencies first (cache optimization)
 COPY package*.json ./
 RUN npm install --frozen-lockfile
 
-# Copy rest of the code
+# Copy the rest of the source code
 COPY . .
 
-# Build the app for production
+# Build the Next.js app
 RUN npm run build
 
 # Expose Next.js port
