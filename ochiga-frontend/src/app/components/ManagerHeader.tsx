@@ -75,9 +75,7 @@ export default function ManagerHeader() {
             <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
           {/* Ochiga brand in black */}
-          <h1 className="text-lg font-bold text-black dark:text-white">
-            Ochiga
-          </h1>
+          <h1 className="text-lg font-bold text-black dark:text-white">Ochiga</h1>
         </div>
 
         {/* Right: Icons */}
@@ -165,7 +163,7 @@ export default function ManagerHeader() {
             </div>
             <ul className="space-y-4 text-gray-700 dark:text-gray-200">
               {menuItems.map((item) => {
-                const isActive = pathname.startsWith(item.href);
+                const isActive = pathname ? pathname.startsWith(item.href) : false; // ✅ SAFE FIX
                 return (
                   <li
                     key={item.name}
