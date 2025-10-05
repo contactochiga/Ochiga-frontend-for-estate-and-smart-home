@@ -1,87 +1,91 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { saveToken, clearToken, getToken } from "../lib/auth";
-import { loginApi, registerResidentApi } from "../services/authApi";
-
-type Role = "resident" | "manager";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: Role;
+  id?: string;
+  email?: string;
+  name?: string;
+  [key: string]: any;
 }
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  role: Role | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  loginUser: (email: string, password: string) => Promise<boolean>;
   registerResident: (inviteToken: string, password: string) => Promise<boolean>;
   logout: () => void;
-  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [role, setRole] = useState<Role | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const storedToken = getToken();
-    const storedRole = localStorage.getItem("role") as Role | null;
-
-    if (storedToken) setToken(storedToken);
-    if (storedRole) setRole(storedRole);
-    setLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string) => {
+  // 🔹 Login function
+  const loginUser = async (email: string, password: string): Promise<boolean> => {
     try {
-      const { token, user } = await loginApi(email, password);
-      saveToken(token, user.role);
-      setToken(token);
-      setUser(user);
-      setRole(user.role);
+      const res = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        console.error("Login failed:", data.message);
+        return false;
+      }
+
+      setUser(data.user || { email });
       return true;
     } catch (err) {
-      console.error("Login failed", err);
+      console.error("Login error:", err);
       return false;
     }
   };
 
-  const registerResident = async (inviteToken: string, password: string) => {
+  // 🔹 Register resident function
+  const registerResident = async (
+    inviteToken: string,
+    password: string
+  ): Promise<boolean> => {
     try {
-      const { success } = await registerResidentApi(inviteToken, password);
-      return success;
+      const res = await fetch("http://localhost:3000/auth/register-resident", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ inviteToken, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        console.error("Registration failed:", data.message);
+        return false;
+      }
+
+      setUser(data.user || {});
+      return true;
     } catch (err) {
-      console.error("Registration failed", err);
+      console.error("Registration error:", err);
       return false;
     }
   };
 
+  // 🔹 Logout function
   const logout = () => {
-    clearToken();
     setUser(null);
-    setToken(null);
-    setRole(null);
   };
 
   return (
-    <AuthContext.Provider
-      value={{ user, token, role, login, registerResident, logout, loading }}
-    >
+    <AuthContext.Provider value={{ user, loginUser, registerResident, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
-  return ctx;
-}
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
