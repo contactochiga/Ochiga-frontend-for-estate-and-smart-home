@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@/lib/api"; // ✅ import the axios instance
+import { apiRequest } from "@/lib/api"; // ✅ Correct import
 
 export default function HealthPage() {
   const [status, setStatus] = useState("Checking...");
@@ -10,7 +10,7 @@ export default function HealthPage() {
   useEffect(() => {
     const checkHealth = async () => {
       try {
-        const { data } = await api.get("/health"); // ✅ backend health check
+        const data = await apiRequest("/health"); // ✅ Correct usage
         setStatus("✅ Backend OK");
         setDetails(data);
       } catch (err) {
