@@ -1,4 +1,4 @@
-import TopBar from "@/components/TopBar";
+import TopBar from "../components/TopBar";
 import Footer from "@/components/Footer";
 import ResidentDashboard from "@/components/ResidentDashboard";
 
