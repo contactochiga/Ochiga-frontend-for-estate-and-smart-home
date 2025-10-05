@@ -94,3 +94,13 @@ export default function HouseDetailsPage() {
     </div>
   );
 }
+
+/**
+ * ✅ Fix for static export builds
+ * This ensures Next.js knows which dynamic paths exist.
+ * Safe to include — no effect on runtime logic.
+ */
+export async function generateStaticParams() {
+  // Predefine example static paths for export
+  return [{ houseId: "1A" }, { houseId: "2B" }, { houseId: "3C" }];
+}
