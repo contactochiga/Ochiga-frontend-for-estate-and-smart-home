@@ -2,8 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { login, registerManager, inviteResident } from "../data/api";
-import { User } from "../data/types";
+import { apiRequest } from "../lib/api";
+import { User } from "../types/user";
 
 interface RegisterManagerPayload {
   estateName: string;
@@ -21,6 +21,8 @@ interface InviteResidentPayload {
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
+  loading: boolean;
   loginUser: (email: string, password: string) => Promise<void>;
   registerManager: (data: RegisterManagerPayload) => Promise<void>;
   inviteResident: (data: InviteResidentPayload) => Promise<void>;
@@ -31,46 +33,74 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedUser) setUser(JSON.parse(savedUser));
+    const savedToken = localStorage.getItem("token");
+    if (savedUser && savedToken) {
+      setUser(JSON.parse(savedUser));
+      setToken(savedToken);
+    }
+    setLoading(false);
   }, []);
 
   const loginUser = async (email: string, password: string) => {
-    const res = await login(email, password);
-    if (res && res.token) {
-      setUser(res.user);
-      localStorage.setItem("user", JSON.stringify(res.user));
-      router.push("/dashboard");
+    setLoading(true);
+    try {
+      const res = await apiRequest("/auth/login", "POST", { email, password });
+      if (res.token && res.user) {
+        setUser(res.user);
+        setToken(res.token);
+        localStorage.setItem("user", JSON.stringify(res.user));
+        localStorage.setItem("token", res.token);
+        router.push("/dashboard");
+      } else {
+        throw new Error("Invalid response from server");
+      }
+    } catch (err: any) {
+      alert(err.message || "Login failed");
+    } finally {
+      setLoading(false);
     }
   };
 
   const registerManager = async (data: RegisterManagerPayload) => {
-    const res = await registerManager(data);
-    if (res) {
-      alert("Estate and Manager registered successfully!");
+    try {
+      await apiRequest("/auth/register-estate", "POST", data);
+      alert("Estate and manager registered successfully!");
       router.push("/auth");
+    } catch (err: any) {
+      alert(err.message || "Registration failed");
     }
   };
 
   const inviteResident = async (data: InviteResidentPayload) => {
-    const res = await inviteResident(data);
-    if (res && res.inviteLink) {
-      alert(`Invitation sent! Activation link: ${res.inviteLink}`);
+    try {
+      const res = await apiRequest("/auth/invite-resident", "POST", data, token || undefined);
+      if (res.inviteLink) {
+        alert(`Resident invited successfully! Activation link:\n${res.inviteLink}`);
+      } else {
+        alert("Invitation sent successfully.");
+      }
+    } catch (err: any) {
+      alert(err.message || "Resident invitation failed");
     }
   };
 
   const logout = () => {
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
     setUser(null);
+    setToken(null);
     router.push("/auth");
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, loginUser, registerManager, inviteResident, logout }}
+      value={{ user, token, loading, loginUser, registerManager, inviteResident, logout }}
     >
       {children}
     </AuthContext.Provider>
