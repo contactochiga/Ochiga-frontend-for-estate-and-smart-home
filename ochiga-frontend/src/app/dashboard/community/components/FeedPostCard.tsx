@@ -9,7 +9,7 @@ import {
   PaperAirplaneIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Post } from "../../../types";
+import { Post } from "../types"; // ✅ fixed import path
 
 type FeedPostCardProps = {
   post: Post;
