@@ -10,13 +10,12 @@ import {
   ComposerCard,
   PinnedPostCard,
   GroupsCard,
-  PostCard, // ✅ now works
+  PostCard,
 } from "./components";
 
-import { Post, Group } from "../../../types";
+import { Post, Group } from "./types"; // ✅ Fixed import path
 
 export default function CommunityPage() {
-  // posts state
   const [posts, setPosts] = useState<Post[]>([
     {
       id: 1,
@@ -38,9 +37,7 @@ export default function CommunityPage() {
       content: "Does anyone recommend a reliable plumber in the estate?",
       likes: 3,
       liked: false,
-      comments: [
-        { id: 1, author: "Paul", text: "Try BrightFix — they helped me." },
-      ],
+      comments: [{ id: 1, author: "Paul", text: "Try BrightFix — they helped me." }],
       createdAt: new Date().toISOString(),
     },
   ]);
@@ -52,16 +49,12 @@ export default function CommunityPage() {
     { id: 4, name: "Football Crew", members: 15 },
   ]);
 
-  // composer state
   const [newPostText, setNewPostText] = useState("");
   const [media, setMedia] = useState<{ image?: string | null; video?: string | null }>({});
   const fileRef = useRef<HTMLInputElement | null>(null);
   const videoRef = useRef<HTMLInputElement | null>(null);
-
-  // modal state
   const [showMessages, setShowMessages] = useState(false);
 
-  // helpers
   const makePost = () => {
     if (!newPostText.trim() && !media.image && !media.video) return;
     const newPost: Post = {
@@ -84,11 +77,7 @@ export default function CommunityPage() {
     setPosts((prev) =>
       prev.map((p) =>
         p.id === id
-          ? {
-              ...p,
-              liked: !p.liked,
-              likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1,
-            }
+          ? { ...p, liked: !p.liked, likes: p.liked ? Math.max(0, p.likes - 1) : p.likes + 1 }
           : p
       )
     );
@@ -103,11 +92,7 @@ export default function CommunityPage() {
               ...p,
               comments: [
                 ...p.comments,
-                {
-                  id: p.comments.length + 1 + Math.floor(Math.random() * 1000),
-                  author: "You",
-                  text,
-                },
+                { id: p.comments.length + 1 + Math.floor(Math.random() * 1000), author: "You", text },
               ],
             }
           : p
@@ -129,7 +114,7 @@ export default function CommunityPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6 space-y-6">
-      {/* ✅ Sub-header with just the message icon */}
+      {/* ✅ Sub-header with message icon */}
       <div className="flex justify-end pb-2 border-b border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setShowMessages(true)}
@@ -143,7 +128,6 @@ export default function CommunityPage() {
       {showMessages && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-80 p-6 relative">
-            {/* Close button */}
             <button
               onClick={() => setShowMessages(false)}
               className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -161,7 +145,6 @@ export default function CommunityPage() {
         </div>
       )}
 
-      {/* ✅ Composer Card */}
       <ComposerCard
         newPostText={newPostText}
         setNewPostText={setNewPostText}
@@ -172,15 +155,12 @@ export default function CommunityPage() {
         makePost={makePost}
       />
 
-      {/* ✅ Pinned Post Card */}
       {posts.filter((p) => p.pinned).map((p) => (
         <PinnedPostCard key={p.id} post={p} />
       ))}
 
-      {/* ✅ Groups Card */}
       <GroupsCard groups={groups} toggleJoinGroup={toggleJoinGroup} />
 
-      {/* ✅ Feed Posts */}
       {posts.filter((p) => !p.pinned).map((post) => (
         <PostCard
           key={post.id}
