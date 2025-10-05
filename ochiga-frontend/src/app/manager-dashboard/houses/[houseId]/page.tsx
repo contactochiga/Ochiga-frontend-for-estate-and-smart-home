@@ -7,7 +7,6 @@ export default function HouseDetailsPage() {
   const params = useParams<{ houseId: string }>();
   const houseId = params?.houseId ?? "";
 
-  // Mock data (later replace with API)
   const houseData: Record<string, any> = {
     "1A": {
       owner: "John Doe",
@@ -47,7 +46,6 @@ export default function HouseDetailsPage() {
     return <p className="p-6 text-red-500">House not found</p>;
   }
 
-  // Determine overall status — e.g., Paid if both paid, otherwise Unpaid
   const overallStatus =
     house.rentStatus === "Paid" && house.serviceChargeStatus === "Paid"
       ? "Paid"
@@ -59,7 +57,6 @@ export default function HouseDetailsPage() {
         House {houseId}
       </h1>
 
-      {/* Use HouseCard */}
       <HouseCard
         houseNumber={houseId}
         owner={house.owner}
@@ -69,7 +66,6 @@ export default function HouseDetailsPage() {
         email={house.email}
       />
 
-      {/* Extra Info */}
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
         <p>
           <span className="font-medium">Rent Status:</span> {house.rentStatus}
@@ -93,14 +89,4 @@ export default function HouseDetailsPage() {
       </div>
     </div>
   );
-}
-
-/**
- * ✅ Fix for static export builds
- * This ensures Next.js knows which dynamic paths exist.
- * Safe to include — no effect on runtime logic.
- */
-export async function generateStaticParams() {
-  // Predefine example static paths for export
-  return [{ houseId: "1A" }, { houseId: "2B" }, { houseId: "3C" }];
 }
