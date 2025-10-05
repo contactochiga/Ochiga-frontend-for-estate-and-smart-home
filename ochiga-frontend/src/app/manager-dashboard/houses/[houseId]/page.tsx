@@ -3,7 +3,8 @@
 import { useParams } from "next/navigation";
 
 export default function HouseDetailsPage() {
-  const { houseId } = useParams();
+  const params = useParams<{ houseId: string }>(); // ✅ strongly typed
+  const houseId = params.houseId;
 
   // Mock data (later replace with API)
   const houseData: Record<string, any> = {
@@ -39,10 +40,14 @@ export default function HouseDetailsPage() {
     },
   };
 
-  const house = houseData[houseId as string];
+  const house = houseData[houseId];
 
   if (!house) {
-    return <p className="p-6 text-red-500">House not found</p>;
+    return (
+      <div className="p-6 text-center text-red-500 font-medium">
+        ❌ House not found
+      </div>
+    );
   }
 
   return (
@@ -51,15 +56,35 @@ export default function HouseDetailsPage() {
         House {houseId}
       </h1>
 
-      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <p><span className="font-medium">Owner:</span> {house.owner}</p>
-        <p><span className="font-medium">Phone:</span> {house.phoneNumber}</p>
-        <p><span className="font-medium">Email:</span> {house.email}</p>
-        <p><span className="font-medium">Rent:</span> {house.rentStatus}</p>
-        <p><span className="font-medium">Service Charge:</span> {house.serviceChargeStatus}</p>
-        <p><span className="font-medium">Electricity Meter:</span> {house.electricityMeter}</p>
-        <p><span className="font-medium">Water Meter:</span> {house.waterMeter}</p>
-        <p><span className="font-medium">Outstanding Balance:</span> ₦{house.balance.toLocaleString()}</p>
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-2 text-gray-700 dark:text-gray-300">
+        <p>
+          <span className="font-medium">Owner:</span> {house.owner}
+        </p>
+        <p>
+          <span className="font-medium">Phone:</span> {house.phoneNumber}
+        </p>
+        <p>
+          <span className="font-medium">Email:</span> {house.email}
+        </p>
+        <p>
+          <span className="font-medium">Rent:</span> {house.rentStatus}
+        </p>
+        <p>
+          <span className="font-medium">Service Charge:</span>{" "}
+          {house.serviceChargeStatus}
+        </p>
+        <p>
+          <span className="font-medium">Electricity Meter:</span>{" "}
+          {house.electricityMeter}
+        </p>
+        <p>
+          <span className="font-medium">Water Meter:</span>{" "}
+          {house.waterMeter}
+        </p>
+        <p>
+          <span className="font-medium">Outstanding Balance:</span>{" "}
+          ₦{house.balance.toLocaleString()}
+        </p>
       </div>
     </div>
   );
