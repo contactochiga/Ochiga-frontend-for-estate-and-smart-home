@@ -1,20 +1,25 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import { fetchHealth } from "@/lib/api";
+import api from "@/lib/api"; // ✅ import the axios instance
 
 export default function HealthPage() {
   const [status, setStatus] = useState("Checking...");
   const [details, setDetails] = useState<any>(null);
 
   useEffect(() => {
-    fetchHealth()
-      .then((data) => {
-        setStatus(`✅ Backend OK`);
+    const checkHealth = async () => {
+      try {
+        const { data } = await api.get("/health"); // ✅ backend health check
+        setStatus("✅ Backend OK");
         setDetails(data);
-      })
-      .catch(() => {
+      } catch (err) {
+        console.error("Health check failed:", err);
         setStatus("❌ Backend Unreachable");
-      });
+      }
+    };
+
+    checkHealth();
   }, []);
 
   return (
