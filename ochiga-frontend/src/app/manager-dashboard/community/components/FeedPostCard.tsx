@@ -8,7 +8,7 @@ import {
   PaperAirplaneIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { Post } from "../../../types";
+import { Post } from "../types"; // ✅ Correct relative import path
 
 type FeedPostCardProps = {
   post: Post;
@@ -33,7 +33,7 @@ export default function FeedPostCard({
 
   return (
     <div className="rounded-xl shadow-md p-5 bg-white dark:bg-gradient-to-br dark:from-[#1A1A1A] dark:via-black dark:to-gray-900 text-gray-900 dark:text-gray-100 hover:shadow-lg transition">
-      {/* Author */}
+      {/* 🧑‍💼 Author Info */}
       <div className="flex items-center space-x-2">
         <UserCircleIcon className="h-9 w-9 text-gray-400" />
         <div>
@@ -44,7 +44,7 @@ export default function FeedPostCard({
         </div>
       </div>
 
-      {/* Content */}
+      {/* 📝 Post Content */}
       <p className="mt-2 text-gray-800 dark:text-gray-200">{post.content}</p>
 
       {post.image && (
@@ -63,7 +63,7 @@ export default function FeedPostCard({
         />
       )}
 
-      {/* Actions */}
+      {/* ❤️ Actions */}
       <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400 mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
         <button
           onClick={() => toggleLike(post.id)}
@@ -91,7 +91,7 @@ export default function FeedPostCard({
         </button>
       </div>
 
-      {/* Comments */}
+      {/* 💬 Comments Section */}
       <div className="mt-3 space-y-3">
         {post.comments.map((c) => (
           <div key={c.id} className="flex items-start space-x-2">
@@ -105,7 +105,7 @@ export default function FeedPostCard({
           </div>
         ))}
 
-        {/* Add comment */}
+        {/* ➕ Add New Comment */}
         <div className="flex items-center space-x-2 pt-2 border-t border-gray-100 dark:border-gray-700">
           <input
             type="text"
