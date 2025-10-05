@@ -16,34 +16,50 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="register-container">
-      <h2>Register Estate</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-lg shadow-md w-full max-w-md space-y-4"
+      >
+        <h2 className="text-2xl font-bold text-center">Register Estate</h2>
         <input
           type="text"
           placeholder="Estate Name"
+          className="w-full p-2 border rounded"
           value={estateName}
           onChange={(e) => setEstateName(e.target.value)}
+          required
         />
         <input
           type="text"
           placeholder="Manager Name"
+          className="w-full p-2 border rounded"
           value={managerName}
           onChange={(e) => setManagerName(e.target.value)}
+          required
         />
         <input
           type="email"
           placeholder="Manager Email"
+          className="w-full p-2 border rounded"
           value={managerEmail}
           onChange={(e) => setManagerEmail(e.target.value)}
+          required
         />
         <input
           type="password"
           placeholder="Password"
+          className="w-full p-2 border rounded"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
-        <button type="submit">Create Estate</button>
+        <button
+          type="submit"
+          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+        >
+          Create Estate
+        </button>
       </form>
     </div>
   );
