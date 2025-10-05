@@ -1,7 +1,7 @@
-import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "../context/AuthContext";
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Ochiga Smart Estate",
   description: "Smart Estate Dashboard by Ochiga",
 };
@@ -12,9 +12,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors">
-        {children}
+    <html lang="en">
+      <body>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
