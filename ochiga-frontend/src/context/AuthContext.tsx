@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "../lib/api";
-import { User } from "../types/user";
+import { User } from "../data/types";
 
 interface RegisterManagerPayload {
   estateName: string;
