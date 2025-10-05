@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   ChatBubbleOvalLeftEllipsisIcon,
   XMarkIcon,
@@ -13,7 +13,7 @@ import {
   PostCard,
 } from "./components";
 
-import { Post, Group } from "./types"; // ✅ Fixed import path
+import { Post, Group } from "./types";
 
 export default function CommunityPage() {
   const [posts, setPosts] = useState<Post[]>([
@@ -51,8 +51,6 @@ export default function CommunityPage() {
 
   const [newPostText, setNewPostText] = useState("");
   const [media, setMedia] = useState<{ image?: string | null; video?: string | null }>({});
-  const fileRef = useRef<HTMLInputElement | null>(null);
-  const videoRef = useRef<HTMLInputElement | null>(null);
   const [showMessages, setShowMessages] = useState(false);
 
   const makePost = () => {
@@ -92,7 +90,11 @@ export default function CommunityPage() {
               ...p,
               comments: [
                 ...p.comments,
-                { id: p.comments.length + 1 + Math.floor(Math.random() * 1000), author: "You", text },
+                {
+                  id: p.comments.length + 1 + Math.floor(Math.random() * 1000),
+                  author: "You",
+                  text,
+                },
               ],
             }
           : p
@@ -145,31 +147,37 @@ export default function CommunityPage() {
         </div>
       )}
 
+      {/* ✅ Composer Card */}
       <ComposerCard
         newPostText={newPostText}
         setNewPostText={setNewPostText}
         media={media}
         setMedia={setMedia}
-        fileRef={fileRef}
-        videoRef={videoRef}
         makePost={makePost}
       />
 
-      {posts.filter((p) => p.pinned).map((p) => (
-        <PinnedPostCard key={p.id} post={p} />
-      ))}
+      {/* ✅ Pinned Posts */}
+      {posts
+        .filter((p) => p.pinned)
+        .map((p) => (
+          <PinnedPostCard key={p.id} post={p} />
+        ))}
 
+      {/* ✅ Groups */}
       <GroupsCard groups={groups} toggleJoinGroup={toggleJoinGroup} />
 
-      {posts.filter((p) => !p.pinned).map((post) => (
-        <PostCard
-          key={post.id}
-          post={post}
-          toggleLike={toggleLike}
-          addComment={addComment}
-          sharePost={sharePost}
-        />
-      ))}
+      {/* ✅ Regular Posts */}
+      {posts
+        .filter((p) => !p.pinned)
+        .map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            toggleLike={toggleLike}
+            addComment={addComment}
+            sharePost={sharePost}
+          />
+        ))}
     </main>
   );
 }
