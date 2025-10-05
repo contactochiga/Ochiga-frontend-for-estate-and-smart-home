@@ -1,4 +1,4 @@
-// src/app/register/page.tsx
+// src/app/auth/page.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 export default function RegisterPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const inviteToken = searchParams.get("token");
+  const inviteToken = searchParams?.get("token") || ""; // ✅ Safe optional chaining
 
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
