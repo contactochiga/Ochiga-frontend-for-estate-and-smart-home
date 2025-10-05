@@ -4,5 +4,4 @@ export interface User {
   email: string;
   role: "manager" | "resident";
   estateId: string;
-  token?: string;
 }
