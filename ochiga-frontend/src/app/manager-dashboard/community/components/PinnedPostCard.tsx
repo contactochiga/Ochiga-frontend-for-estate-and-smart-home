@@ -1,17 +1,14 @@
 "use client";
+
 import React from "react";
+import type { Post } from "../types";
 
 type Props = {
-  post: {
-    id: string;
-    author: string;
-    content: string;
-    createdAt: string;
-  };
+  post: Post;
 };
 
 export default function PinnedPostCard({ post }: Props) {
-  // Friendly date format e.g. 26 Sep 2025
+  // Format date nicely (e.g., 26 Sep 2025)
   const formattedDate = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
