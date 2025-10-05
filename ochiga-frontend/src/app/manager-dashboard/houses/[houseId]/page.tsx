@@ -3,8 +3,8 @@
 import { useParams } from "next/navigation";
 
 export default function HouseDetailsPage() {
-  const params = useParams<{ houseId: string }>(); // ✅ strongly typed
-  const houseId = params.houseId;
+  const params = useParams<{ houseId: string }>();
+  const houseId = params?.houseId ?? ""; // ✅ safely handle potential null
 
   // Mock data (later replace with API)
   const houseData: Record<string, any> = {
