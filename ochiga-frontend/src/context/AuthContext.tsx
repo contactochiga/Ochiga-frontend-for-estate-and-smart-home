@@ -1,29 +1,49 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 interface User {
-  id?: string;
-  email?: string;
-  name?: string;
-  [key: string]: any;
+  email: string;
+  role: "resident" | "manager";
 }
 
 interface AuthContextType {
   user: User | null;
+  token: string | null;
+  loading: boolean;
   loginUser: (email: string, password: string) => Promise<boolean>;
-  registerResident: (inviteToken: string, password: string) => Promise<boolean>;
   logout: () => void;
+  registerResident: (inviteToken: string, password: string) => Promise<boolean>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  token: null,
+  loading: false,
+  loginUser: async () => false,
+  logout: () => {},
+  registerResident: async () => false,
+});
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // 🔹 Login function
-  const loginUser = async (email: string, password: string): Promise<boolean> => {
+  // Simulate persistent login (e.g., from localStorage)
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+    if (savedToken && savedUser) {
+      setToken(savedToken);
+      setUser(JSON.parse(savedUser));
+    }
+    setLoading(false);
+  }, []);
+
+  const loginUser = async (email: string, password: string) => {
     try {
+      // Replace with your real backend endpoint
       const res = await fetch("http://localhost:3000/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -31,24 +51,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       const data = await res.json();
-      if (!res.ok || !data.success) {
-        console.error("Login failed:", data.message);
-        return false;
+      if (data.success && data.token) {
+        const loggedUser = { email, role: data.role || "resident" } as User;
+        setUser(loggedUser);
+        setToken(data.token);
+        localStorage.setItem("user", JSON.stringify(loggedUser));
+        localStorage.setItem("token", data.token);
+        return true;
       }
-
-      setUser(data.user || { email });
-      return true;
+      return false;
     } catch (err) {
-      console.error("Login error:", err);
+      console.error(err);
       return false;
     }
   };
 
-  // 🔹 Register resident function
-  const registerResident = async (
-    inviteToken: string,
-    password: string
-  ): Promise<boolean> => {
+  const registerResident = async (inviteToken: string, password: string) => {
     try {
       const res = await fetch("http://localhost:3000/auth/register-resident", {
         method: "POST",
@@ -57,35 +75,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       const data = await res.json();
-      if (!res.ok || !data.success) {
-        console.error("Registration failed:", data.message);
-        return false;
-      }
-
-      setUser(data.user || {});
-      return true;
+      return data.success || false;
     } catch (err) {
-      console.error("Registration error:", err);
+      console.error(err);
       return false;
     }
   };
 
-  // 🔹 Logout function
   const logout = () => {
     setUser(null);
+    setToken(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
   return (
-    <AuthContext.Provider value={{ user, loginUser, registerResident, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, loginUser, logout, registerResident }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
