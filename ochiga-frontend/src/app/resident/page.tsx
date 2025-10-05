@@ -1,4 +1,4 @@
-// src/app/resident/page.js
+// src/app/resident/page.tsx
 import ResidentDashboard from "../dashboard/page";
 
 export default function Resident() {
