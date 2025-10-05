@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Group } from "../../../types";
+import { Group } from "../types"; // ✅ Corrected import path
+
 type GroupsCardProps = {
   groups: Group[];
   toggleJoinGroup: (id: number) => void;
