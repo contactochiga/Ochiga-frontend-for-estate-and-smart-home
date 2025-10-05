@@ -1,4 +1,4 @@
-// src/data/mockData.js
+// src/data/mockData.tsx
 
 export const communityAnnouncements = [
   { id: 1, title: "Water Supply Maintenance", content: "There will be maintenance on Saturday.", date: "Aug 20, 2025" },
