@@ -8,7 +8,9 @@ export default function RegisterPage() {
   const { registerResident } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const inviteToken = searchParams.get("token");
+
+  // ✅ Safely handle possible null
+  const inviteToken = searchParams?.get("token") ?? "";
 
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,8 @@ export default function RegisterPage() {
     }
   }, [inviteToken]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // ✅ Add type for event to fix "implicitly has 'any' type" error
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!inviteToken) return;
 
@@ -42,6 +45,7 @@ export default function RegisterPage() {
         <h2 className="text-2xl font-bold mb-4 text-center">
           Complete Registration
         </h2>
+
         {inviteToken ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
@@ -63,7 +67,10 @@ export default function RegisterPage() {
         ) : (
           <p className="text-red-500 text-center">{message}</p>
         )}
-        {message && <p className="mt-4 text-center text-sm">{message}</p>}
+
+        {message && (
+          <p className="mt-4 text-center text-sm text-gray-700">{message}</p>
+        )}
       </div>
     </div>
   );
