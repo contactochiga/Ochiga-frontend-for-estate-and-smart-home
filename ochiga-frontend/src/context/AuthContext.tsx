@@ -1,88 +1,76 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { login, registerManager, inviteResident } from "../data/api";
+import { User } from "../data/types";
+
+interface RegisterManagerPayload {
+  estateName: string;
+  managerName: string;
+  managerEmail: string;
+  password: string;
+}
+
+interface InviteResidentPayload {
+  estateId: string;
+  houseId: string;
+  name: string;
+  email: string;
+}
 
 interface AuthContextType {
-  token: string | null;
-  role: "resident" | "manager" | null;
-  loading: boolean;
-  loginUser: (email: string, password: string) => Promise<boolean>;
-  registerResident: (inviteToken: string, password: string) => Promise<boolean>;
+  user: User | null;
+  loginUser: (email: string, password: string) => Promise<void>;
+  registerManager: (data: RegisterManagerPayload) => Promise<void>;
+  inviteResident: (data: InviteResidentPayload) => Promise<void>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [role, setRole] = useState<"resident" | "manager" | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
-  // ✅ Restore saved session
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    const savedRole = localStorage.getItem("role") as "resident" | "manager" | null;
-    if (savedToken) {
-      setToken(savedToken);
-      setRole(savedRole);
-    }
-    setLoading(false);
+    const savedUser = localStorage.getItem("user");
+    if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  // ✅ Login function
-  const loginUser = async (email: string, password: string): Promise<boolean> => {
-    try {
-      const res = await fetch("http://localhost:3000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("role", data.role);
-        setToken(data.token);
-        setRole(data.role);
-        return true;
-      } else {
-        console.error("Login failed:", data.message);
-        return false;
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      return false;
+  const loginUser = async (email: string, password: string) => {
+    const res = await login(email, password);
+    if (res && res.token) {
+      setUser(res.user);
+      localStorage.setItem("user", JSON.stringify(res.user));
+      router.push("/dashboard");
     }
   };
 
-  // ✅ Registration via invite link
-  const registerResident = async (inviteToken: string, password: string): Promise<boolean> => {
-    try {
-      const res = await fetch("http://localhost:3000/auth/register-resident", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inviteToken, password }),
-      });
-
-      const data = await res.json();
-      return res.ok && data.success;
-    } catch (err) {
-      console.error("Registration error:", err);
-      return false;
+  const registerManager = async (data: RegisterManagerPayload) => {
+    const res = await registerManager(data);
+    if (res) {
+      alert("Estate and Manager registered successfully!");
+      router.push("/auth");
     }
   };
 
-  // ✅ Logout
+  const inviteResident = async (data: InviteResidentPayload) => {
+    const res = await inviteResident(data);
+    if (res && res.inviteLink) {
+      alert(`Invitation sent! Activation link: ${res.inviteLink}`);
+    }
+  };
+
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    setToken(null);
-    setRole(null);
+    localStorage.removeItem("user");
+    setUser(null);
+    router.push("/auth");
   };
 
   return (
     <AuthContext.Provider
-      value={{ token, role, loading, loginUser, registerResident, logout }}
+      value={{ user, loginUser, registerManager, inviteResident, logout }}
     >
       {children}
     </AuthContext.Provider>
@@ -91,6 +79,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within an AuthProvider");
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };
