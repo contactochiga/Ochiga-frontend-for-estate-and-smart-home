@@ -4,10 +4,12 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
+export const dynamic = "force-dynamic"; // ⛔ Prevent prerendering at build time
+
 export default function RegisterPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const inviteToken = searchParams?.get("token") || ""; // ✅ Safe optional chaining
+  const inviteToken = searchParams?.get("token") || "";
 
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,18 +27,21 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:3000/auth/register-resident", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inviteToken, password }),
-      });
+      // ✅ Only run in the browser
+      if (typeof window !== "undefined") {
+        const res = await fetch("/auth/register-resident", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ inviteToken, password }),
+        });
 
-      const data = await res.json();
-      if (data.success) {
-        setMessage("✅ Registration successful! Redirecting...");
-        setTimeout(() => router.push("/login"), 2000);
-      } else {
-        setMessage(`❌ ${data.message}`);
+        const data = await res.json();
+        if (data.success) {
+          setMessage("✅ Registration successful! Redirecting...");
+          setTimeout(() => router.push("/login"), 2000);
+        } else {
+          setMessage(`❌ ${data.message}`);
+        }
       }
     } catch (err) {
       console.error(err);
