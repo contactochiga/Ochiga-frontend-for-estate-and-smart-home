@@ -16,6 +16,9 @@ export default function ManagerFooter() {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
+    // ✅ prevent error when pathname is null
+    if (!pathname) return;
+
     if (pathname.includes("/houses")) setActiveTab("houses");
     else if (pathname.includes("/requests")) setActiveTab("requests");
     else if (pathname.includes("/finance")) setActiveTab("finance");
