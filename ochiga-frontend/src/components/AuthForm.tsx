@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 
 export default function AuthForm() {
-  const { loginUser, user } = useAuth(); // ✅ changed from login → loginUser
+  const { loginUser, user } = useAuth();
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,39 +16,31 @@ export default function AuthForm() {
     e.preventDefault();
     setLoading(true);
 
-    const success = await loginUser(email, password); // ✅ updated function name
-    setLoading(false);
+    // ✅ loginUser handles navigation internally
+    await loginUser(email, password);
 
-    if (success) {
-      // ✅ Optional: redirect based on user.role if it exists in context later
-      if (user?.role === "manager") {
-        router.push("/manager-dashboard");
-      } else {
-        router.push("/dashboard");
-      }
-    } else {
-      alert("Invalid credentials");
-    }
+    setLoading(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
       <input
         type="email"
+        placeholder="Email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Email"
         className="w-full p-2 border rounded"
         required
       />
       <input
         type="password"
+        placeholder="Password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
         className="w-full p-2 border rounded"
         required
       />
+
       <button
         type="submit"
         disabled={loading}
