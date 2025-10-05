@@ -1,84 +1,69 @@
-// src/app/auth/page.tsx
 "use client";
+export const dynamic = "force-dynamic";
 
-import React, { useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 
-export const dynamic = "force-dynamic"; // ⛔ Prevent prerendering at build time
-
-export default function RegisterPage() {
-  const searchParams = useSearchParams();
+export default function AuthPage() {
+  const { loginUser } = useAuth();
   const router = useRouter();
-  const inviteToken = searchParams?.get("token") || "";
 
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    if (!inviteToken) {
-      setMessage("Invalid or missing invite token.");
-    }
-  }, [inviteToken]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!inviteToken) return;
-
     setLoading(true);
-    try {
-      // ✅ Only run in the browser
-      if (typeof window !== "undefined") {
-        const res = await fetch("/auth/register-resident", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ inviteToken, password }),
-        });
+    setMessage("");
 
-        const data = await res.json();
-        if (data.success) {
-          setMessage("✅ Registration successful! Redirecting...");
-          setTimeout(() => router.push("/login"), 2000);
-        } else {
-          setMessage(`❌ ${data.message}`);
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      setMessage("Something went wrong. Try again.");
-    } finally {
-      setLoading(false);
+    const success = await loginUser(email, password);
+    setLoading(false);
+
+    if (success) {
+      setMessage("✅ Login successful!");
+      setTimeout(() => router.push("/dashboard"), 1000);
+    } else {
+      setMessage("❌ Invalid credentials. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-md bg-white rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold mb-4 text-center">
-          Complete Registration
-        </h2>
-        {inviteToken ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <input
-              type="password"
-              placeholder="Set your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-4 py-2 border rounded-md focus:ring focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
-            >
-              {loading ? "Registering..." : "Register"}
-            </button>
-          </form>
-        ) : (
-          <p className="text-red-500 text-center">{message}</p>
+        <h2 className="text-2xl font-bold mb-4 text-center">Sign In</h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="email"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md"
+          />
+          <input
+            type="password"
+            placeholder="Enter password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full px-4 py-2 border rounded-md"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+          >
+            {loading ? "Signing in..." : "Sign In"}
+          </button>
+        </form>
+
+        {message && (
+          <p className="mt-4 text-center text-sm text-gray-700">{message}</p>
         )}
-        {message && <p className="mt-4 text-center text-sm">{message}</p>}
       </div>
     </div>
   );
