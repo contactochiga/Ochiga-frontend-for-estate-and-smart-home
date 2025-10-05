@@ -71,12 +71,16 @@ const devices = [
 
 export default function RoomsPage() {
   const [activeRoom, setActiveRoom] = useState("All");
-  const [deviceStates, setDeviceStates] = useState(
-    devices.reduce((acc, d) => ({ ...acc, [d.id]: d.status }), {})
-  );
-  const [selectedDevice, setSelectedDevice] = useState<any>(null);
 
-  // Add modals state
+  // ✅ FIXED TYPE ISSUE HERE
+  const [deviceStates, setDeviceStates] = useState<Record<number, string>>(
+    devices.reduce(
+      (acc, d) => ({ ...acc, [d.id]: d.status }),
+      {} as Record<number, string>
+    )
+  );
+
+  const [selectedDevice, setSelectedDevice] = useState<any>(null);
   const [showAddRoom, setShowAddRoom] = useState(false);
   const [showAddDevice, setShowAddDevice] = useState(false);
   const [newRoom, setNewRoom] = useState("");
@@ -128,6 +132,7 @@ export default function RoomsPage() {
             {room}
           </button>
         ))}
+
         {/* Add Room Button */}
         <button
           onClick={() => setShowAddRoom(true)}
@@ -153,7 +158,6 @@ export default function RoomsPage() {
                   : "border-gray-200 dark:border-gray-700"
               }`}
           >
-            {/* Top row */}
             <div className="flex items-center justify-between mb-3">
               <div
                 className={`w-12 h-12 flex items-center justify-center rounded-xl 
@@ -179,7 +183,6 @@ export default function RoomsPage() {
               </span>
             </div>
 
-            {/* Bottom row */}
             <div>
               <h3 className="font-semibold text-sm text-gray-900 dark:text-white">
                 {device.name}
@@ -216,7 +219,6 @@ export default function RoomsPage() {
               </button>
             </div>
 
-            {/* Device-specific controls */}
             <div className="flex flex-col items-center gap-5 py-4 text-gray-800 dark:text-gray-200">
               {selectedDevice.icon}
               <p className="text-sm">
@@ -328,7 +330,7 @@ export default function RoomsPage() {
         </div>
       )}
 
-      {/* Add Device Modal (Wi-Fi, Bluetooth, Manual) */}
+      {/* Add Device Modal */}
       {showAddDevice && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
           <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
@@ -337,7 +339,6 @@ export default function RoomsPage() {
             </h3>
 
             <div className="space-y-4">
-              {/* Auto Discovery */}
               <button
                 onClick={() => alert("Scanning local Wi-Fi network...")}
                 className="w-full flex items-center gap-3 p-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
@@ -353,7 +354,6 @@ export default function RoomsPage() {
                 </div>
               </button>
 
-              {/* Bluetooth */}
               <button
                 onClick={() => alert("Scanning for Bluetooth devices...")}
                 className="w-full flex items-center gap-3 p-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
@@ -369,7 +369,6 @@ export default function RoomsPage() {
                 </div>
               </button>
 
-              {/* Manual */}
               <button
                 onClick={() => alert("Manual add (QR/Code/Category)...")}
                 className="w-full flex items-center gap-3 p-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
@@ -386,7 +385,6 @@ export default function RoomsPage() {
               </button>
             </div>
 
-            {/* Footer */}
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setShowAddDevice(false)}
