@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 
 export default function AuthForm() {
-  const { login, role } = useAuth();
+  const { loginUser, user } = useAuth(); // ✅ changed from login → loginUser
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,12 +15,16 @@ export default function AuthForm() {
     e.preventDefault();
     setLoading(true);
 
-    const success = await login(email, password);
+    const success = await loginUser(email, password); // ✅ updated function name
     setLoading(false);
 
     if (success) {
-      if (role === "manager") router.push("/manager-dashboard");
-      else router.push("/dashboard");
+      // ✅ Optional: redirect based on user.role if it exists in context later
+      if (user?.role === "manager") {
+        router.push("/manager-dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     } else {
       alert("Invalid credentials");
     }
