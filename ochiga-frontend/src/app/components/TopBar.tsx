@@ -24,7 +24,8 @@ export default function ResidentHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const pathname = rawPathname || ""; // ✅ Prevent null type issue
 
   const profileRef = useRef<HTMLDivElement | null>(null);
   const searchRef = useRef<HTMLDivElement | null>(null);
@@ -75,9 +76,7 @@ export default function ResidentHeader() {
           <button onClick={() => setSidebarOpen(true)}>
             <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
-          <h1 className="text-lg font-bold text-black dark:text-white">
-            Ochiga
-          </h1>
+          <h1 className="text-lg font-bold text-black dark:text-white">Ochiga</h1>
         </div>
 
         {/* Right: Icons */}
@@ -121,6 +120,7 @@ export default function ResidentHeader() {
                   <UserCircleIcon className="w-5 h-5" />
                   <span>My Profile</span>
                 </button>
+
                 <button
                   onClick={() => router.push("/dashboard/settings")}
                   className={`flex items-center space-x-2 w-full text-left px-4 py-2 text-sm ${
@@ -132,6 +132,7 @@ export default function ResidentHeader() {
                   <Cog6ToothIcon className="w-5 h-5" />
                   <span>Settings</span>
                 </button>
+
                 <button
                   onClick={() => router.push("/")}
                   className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -162,9 +163,10 @@ export default function ResidentHeader() {
                 <XMarkIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
               </button>
             </div>
+
             <ul className="space-y-4 text-gray-700 dark:text-gray-200">
               {menuItems.map((item) => {
-                const isActive = pathname.startsWith(item.href);
+                const isActive = pathname.startsWith(item.href); // ✅ Safe now
                 return (
                   <li
                     key={item.name}
