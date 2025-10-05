@@ -9,6 +9,7 @@ import {
   MdVideocam,
 } from "react-icons/md";
 
+// Room tabs
 const rooms = [
   "All",
   "Favourites",
@@ -19,6 +20,7 @@ const rooms = [
   "Outdoor",
 ];
 
+// Device list
 const devices = [
   {
     id: 1,
@@ -67,13 +69,25 @@ const devices = [
   },
 ];
 
+// Define allowed device statuses
+type DeviceStatus = "On" | "Off" | "Locked" | "Unlocked";
+
 export default function RoomsDevices() {
   const [activeRoom, setActiveRoom] = useState("All");
-  const [deviceStates, setDeviceStates] = useState(
-    devices.reduce((acc, d) => ({ ...acc, [d.id]: d.status }), {})
-  );
-  const [selectedDevice, setSelectedDevice] = useState<any>(null);
 
+  // ✅ Strongly typed state
+  const [deviceStates, setDeviceStates] = useState<Record<number, DeviceStatus>>(
+    devices.reduce(
+      (acc, d) => ({ ...acc, [d.id]: d.status as DeviceStatus }),
+      {} as Record<number, DeviceStatus>
+    )
+  );
+
+  const [selectedDevice, setSelectedDevice] = useState<(typeof devices)[0] | null>(
+    null
+  );
+
+  // Filter devices by room or favourites
   const filteredDevices =
     activeRoom === "All"
       ? devices
@@ -81,18 +95,32 @@ export default function RoomsDevices() {
       ? devices.filter((d) => d.favourite)
       : devices.filter((d) => d.location === activeRoom);
 
+  // ✅ Safer toggle function
   const toggleDevice = (id: number) => {
-    setDeviceStates((prev) => ({
-      ...prev,
-      [id]:
-        prev[id] === "On"
-          ? "Off"
-          : prev[id] === "Off"
-          ? "On"
-          : prev[id] === "Locked"
-          ? "Unlocked"
-          : "Locked",
-    }));
+    setDeviceStates((prev) => {
+      const current = prev[id];
+      let next: DeviceStatus;
+
+      switch (current) {
+        case "On":
+          next = "Off";
+          break;
+        case "Off":
+          next = "On";
+          break;
+        case "Locked":
+          next = "Unlocked";
+          break;
+        case "Unlocked":
+          next = "Locked";
+          break;
+        default:
+          next = "Off";
+          break;
+      }
+
+      return { ...prev, [id]: next };
+    });
   };
 
   return (
@@ -177,7 +205,7 @@ export default function RoomsDevices() {
         </div>
       </div>
 
-      {/* Centered Modal Panel with Animation */}
+      {/* Modal for device control */}
       {selectedDevice && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
           <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
@@ -211,6 +239,7 @@ export default function RoomsDevices() {
                 </span>
               </p>
 
+              {/* Light control */}
               {selectedDevice.type === "light" && (
                 <button
                   onClick={() => toggleDevice(selectedDevice.id)}
@@ -220,6 +249,7 @@ export default function RoomsDevices() {
                 </button>
               )}
 
+              {/* Door control */}
               {selectedDevice.type === "door" && (
                 <button
                   onClick={() => toggleDevice(selectedDevice.id)}
@@ -231,6 +261,7 @@ export default function RoomsDevices() {
                 </button>
               )}
 
+              {/* AC control */}
               {selectedDevice.type === "ac" && (
                 <div className="flex items-center gap-3">
                   <button className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700">
@@ -243,6 +274,7 @@ export default function RoomsDevices() {
                 </div>
               )}
 
+              {/* TV control */}
               {selectedDevice.type === "tv" && (
                 <div className="grid grid-cols-3 gap-2">
                   {["⏮", "⏯", "⏭"].map((btn) => (
@@ -256,6 +288,7 @@ export default function RoomsDevices() {
                 </div>
               )}
 
+              {/* CCTV feed */}
               {selectedDevice.type === "cctv" && (
                 <div className="w-full h-36 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -268,7 +301,7 @@ export default function RoomsDevices() {
         </div>
       )}
 
-      {/* Animation Styles */}
+      {/* Animations */}
       <style jsx global>{`
         @keyframes fadeIn {
           from {
