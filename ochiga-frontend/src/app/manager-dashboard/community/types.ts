@@ -9,6 +9,7 @@ export type Post = {
   comments: { id: number; author: string; text: string }[];
   pinned?: boolean;
   createdAt?: string;
+  allowComments?: boolean; // ✅ Added this to fix the TS error
 };
 
 export type Group = {
