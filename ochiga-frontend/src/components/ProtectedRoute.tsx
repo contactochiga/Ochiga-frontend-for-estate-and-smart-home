@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext"; // ✅ Fixed capitalization
+import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoute({
   children,
@@ -11,24 +11,24 @@ export default function ProtectedRoute({
   children: React.ReactNode;
   role?: "resident" | "manager";
 }) {
-  const { token, role: userRole, loading } = useAuth();
+  const { token, user, loading } = useAuth();
   const router = useRouter();
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (loading) return; // wait until auth context finishes
-
-    if (!token) {
-      router.replace("/auth");
-    } else if (role && userRole !== role) {
-      router.replace("/auth");
-    } else {
-      setChecked(true); // ✅ safe to render
+    if (!loading) {
+      if (!token) {
+        router.push("/login");
+      } else if (role && user?.role !== role) {
+        router.push("/unauthorized");
+      } else {
+        setChecked(true);
+      }
     }
-  }, [token, userRole, role, loading, router]);
+  }, [loading, token, user, role, router]);
 
-  if (loading || !checked) {
-    return <p className="text-center mt-10">Loading...</p>;
+  if (!checked) {
+    return <p className="text-center mt-20">Loading...</p>;
   }
 
   return <>{children}</>;
