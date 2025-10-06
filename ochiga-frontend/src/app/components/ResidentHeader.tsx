@@ -1,11 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { ClipboardDocumentIcon, MapPinIcon } from "@heroicons/react/24/outline";
 
 interface ResidentHeaderProps {
   name: string;
   estate: string;
-  phase?: string; // optional
+  phase?: string;
   address: string;
 }
 
@@ -15,9 +16,12 @@ export default function ResidentHeader({
   phase,
   address,
 }: ResidentHeaderProps) {
+  const [copied, setCopied] = useState(false);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(address);
-    alert("Address copied to clipboard");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -26,24 +30,55 @@ export default function ResidentHeader({
       <p className="text-sm text-gray-600 dark:text-gray-400">Good afternoon,</p>
       <h2 className="text-lg font-medium mt-1">{name}</h2>
 
-      {/* Resident Full Address — emphasized */}
-      <div className="flex items-start gap-2 mt-5 text-gray-800 dark:text-gray-100">
-        <MapPinIcon className="h-6 w-6 text-[#800000] flex-shrink-0 mt-1" />
-        <div className="flex flex-col">
-          <h1 className="text-2xl font-extrabold leading-snug">{address}</h1>
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mt-1">
-            {estate}
-            {phase && ` — ${phase}`}
-          </h2>
-        </div>
+      {/* Address */}
+      <div className="flex items-center gap-2 mt-4 text-sm text-gray-800 dark:text-gray-200">
+        <MapPinIcon className="h-5 w-5 text-[#800000]" />
+        <span className="text-base font-medium leading-snug">{address}</span>
         <button
           onClick={handleCopy}
-          className="ml-2 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-          aria-label="Copy address"
+          className="ml-1 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         >
-          <ClipboardDocumentIcon className="h-5 w-5 text-[#800000]" />
+          <ClipboardDocumentIcon className="h-4 w-4 text-[#800000]" />
         </button>
       </div>
+
+      {/* Estate Info */}
+      <h1 className="text-lg font-semibold mt-2 tracking-tight text-gray-800 dark:text-gray-100">
+        {estate}
+        {phase && (
+          <span className="font-normal text-gray-600 dark:text-gray-400"> — {phase}</span>
+        )}
+      </h1>
+
+      {/* Toast Notification */}
+      {copied && (
+        <div className="absolute bottom-3 right-3 bg-[#800000] text-white text-xs px-3 py-1 rounded-md shadow-md animate-fadeInOut">
+          📋 Address copied!
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes fadeInOut {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          10% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+        }
+        .animate-fadeInOut {
+          animation: fadeInOut 2s ease-in-out forwards;
+        }
+      `}</style>
     </div>
   );
 }
