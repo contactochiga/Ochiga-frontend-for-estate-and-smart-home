@@ -50,6 +50,7 @@ export default function ResidentWalletCard() {
     let start = 0;
     const duration = 800;
     const step = walletBalance / (duration / 16);
+
     const interval = setInterval(() => {
       start += step;
       if (start >= walletBalance) {
@@ -59,6 +60,7 @@ export default function ResidentWalletCard() {
         setAnimatedBalance(Math.floor(start));
       }
     }, 16);
+
     return () => clearInterval(interval);
   }, [walletBalance]);
 
@@ -76,15 +78,6 @@ export default function ResidentWalletCard() {
     }
   };
 
-  const handleDebit = async (amount: number) => {
-    try {
-      await apiRequest(`/wallet/${userId}/debit`, "POST", { amount });
-      await fetchWallet();
-    } catch (err) {
-      console.error("Error debiting wallet:", err);
-    }
-  };
-
   const copyToClipboard = () => {
     navigator.clipboard.writeText(accountNumber);
     setCopied(true);
@@ -95,17 +88,17 @@ export default function ResidentWalletCard() {
     <div className="w-full">
       {/* Wallet Balance Card */}
       <div
-        className="rounded-xl p-5 shadow-md 
-                   bg-white dark:bg-gray-800 
-                   flex flex-row justify-between items-center border border-gray-200 dark:border-gray-700"
+        className="rounded-xl p-5 shadow-md flex flex-row justify-between items-center 
+                   bg-white dark:bg-gradient-to-r dark:from-[#2c0000] dark:via-[#4a0000] dark:to-[#800000] 
+                   border border-gray-200 dark:border-none transition-colors"
       >
         {/* Left Section */}
         <div className="flex items-center gap-2">
           <div>
-            <p className="text-[10px] uppercase opacity-80 tracking-wide text-gray-500 dark:text-gray-300">
+            <p className="text-[10px] uppercase opacity-80 tracking-wide text-gray-500 dark:text-gray-200">
               Wallet Balance
             </p>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-50">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               {loading
                 ? "Loading..."
                 : showBalance
@@ -115,24 +108,22 @@ export default function ResidentWalletCard() {
           </div>
           <button
             onClick={() => setShowBalance(!showBalance)}
-            className="bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md 
-                       hover:bg-gray-200 dark:hover:bg-gray-600 
+            className="bg-gray-100 dark:bg-white/20 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-white/30 
                        transition flex items-center justify-center"
           >
             {showBalance ? (
-              <EyeIcon className="h-4 w-4 text-gray-700 dark:text-gray-100" />
+              <EyeIcon className="h-4 w-4 text-gray-700 dark:text-white" />
             ) : (
-              <EyeSlashIcon className="h-4 w-4 text-gray-700 dark:text-gray-100" />
+              <EyeSlashIcon className="h-4 w-4 text-gray-700 dark:text-white" />
             )}
           </button>
         </div>
 
-        {/* Right Section: Fund Wallet */}
+        {/* Right Section */}
         <button
           onClick={() => setShowModal(true)}
-          className="bg-[#800000] text-white px-3 py-1.5 rounded-md 
-                     font-medium text-xs flex items-center gap-1 
-                     whitespace-nowrap shadow-sm hover:bg-[#a00000] transition"
+          className="bg-[#800000] text-white px-3 py-1.5 rounded-md font-medium text-xs 
+                     flex items-center gap-1 whitespace-nowrap shadow-sm hover:bg-[#a00000] transition"
         >
           <BanknotesIcon className="h-4 w-4" />
           Fund
@@ -142,11 +133,13 @@ export default function ResidentWalletCard() {
       {/* Bottom Sheet Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
-          <div className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 
-                          w-full max-w-md rounded-t-2xl p-5 shadow-xl animate-slideUp">
+          <div
+            className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 
+                       w-full max-w-md rounded-t-2xl p-5 shadow-xl animate-slideUp"
+          >
             {/* Header */}
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
                 Choose Payment Method
               </h3>
               <button
@@ -158,8 +151,8 @@ export default function ResidentWalletCard() {
             </div>
 
             {/* Bank Transfer */}
-            <div className="p-3 mb-4 rounded-lg border border-[#800000] bg-red-50 dark:bg-gray-800">
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+            <div className="p-3 mb-4 rounded-lg border border-[#800000] bg-red-50 dark:bg-[#4a0000]/40">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 Bank Transfer
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
@@ -167,7 +160,7 @@ export default function ResidentWalletCard() {
               </p>
               <div className="flex items-center justify-between mt-2">
                 <div>
-                  <p className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                  <p className="text-xs font-medium text-gray-800 dark:text-gray-100">
                     {bankName}
                   </p>
                   <p className="text-base font-bold text-[#800000]">
@@ -176,7 +169,8 @@ export default function ResidentWalletCard() {
                 </div>
                 <button
                   onClick={copyToClipboard}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#800000] text-white text-xs font-medium shadow hover:bg-[#a00000]"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#800000] text-white 
+                             text-xs font-medium shadow hover:bg-[#a00000]"
                 >
                   {copied ? (
                     <>
@@ -193,30 +187,30 @@ export default function ResidentWalletCard() {
               </div>
             </div>
 
-            {/* Quick Fund Shortcuts */}
+            {/* Quick Fund Buttons */}
             <div className="flex gap-2 mb-4">
               {[1000, 5000, 10000].map((amt) => (
                 <button
                   key={amt}
                   onClick={() => handleFund(amt)}
-                  className="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-700 
+                  className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
                              text-sm font-medium text-gray-700 dark:text-gray-200 
-                             hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                             hover:bg-red-50 dark:hover:bg-[#4a0000]/40 transition"
                 >
                   ₦{amt.toLocaleString()}
                 </button>
               ))}
             </div>
 
-            {/* Other Methods */}
+            {/* Payment Methods */}
             <div className="grid gap-2">
               {paymentMethods.map((method, idx) => {
                 const Icon = method.icon;
                 return (
                   <button
                     key={idx}
-                    className="flex items-center gap-2.5 p-3 rounded-lg border border-gray-300 dark:border-gray-700 
-                               hover:bg-gray-100 dark:hover:bg-gray-800 transition shadow-sm"
+                    className="flex items-center gap-2.5 p-3 rounded-lg border border-gray-200 dark:border-gray-700 
+                               hover:bg-red-50 dark:hover:bg-[#4a0000]/40 transition shadow-sm"
                   >
                     <Icon className="h-5 w-5 text-[#800000]" />
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -227,22 +221,6 @@ export default function ResidentWalletCard() {
               })}
             </div>
           </div>
-
-          <style jsx>{`
-            @keyframes slideUp {
-              from {
-                transform: translateY(30px);
-                opacity: 0;
-              }
-              to {
-                transform: translateY(0);
-                opacity: 1;
-              }
-            }
-            .animate-slideUp {
-              animation: slideUp 0.3s ease-out forwards;
-            }
-          `}</style>
         </div>
       )}
     </div>
