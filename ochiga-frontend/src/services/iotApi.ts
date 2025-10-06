@@ -1,9 +1,11 @@
 // src/services/iotApi.ts
 import axios from "axios";
 
-// 👇 Change this to your deployed backend URL
+// ✅ Dynamically choose correct backend URL
 const API = axios.create({
-  baseURL: "http://localhost:3000/iot",
+  baseURL:
+    process.env.NEXT_PUBLIC_API_URL?.replace(":3000", ":4000") + "/iot" ||
+    "http://localhost:4000/iot",
 });
 
 // 🔑 Automatically attach JWT from localStorage (or cookies)
@@ -15,6 +17,7 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
+// ✅ IOT API functions
 export const IotApi = {
   // Resident’s devices
   getMyDevices: async () => {
@@ -41,7 +44,7 @@ export const IotApi = {
   // ✅ Control a device (must use POST not PATCH)
   controlDevice: async (
     deviceId: string,
-    data: { action: "on" | "off" | "set-temp"; value?: any },
+    data: { action: "on" | "off" | "set-temp"; value?: any }
   ) => {
     const res = await API.post(`/devices/${deviceId}/control`, data);
     return res.data;
