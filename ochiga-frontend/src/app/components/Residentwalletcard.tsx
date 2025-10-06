@@ -89,13 +89,12 @@ export default function ResidentWalletCard() {
       {/* Wallet Balance Card */}
       <div
         className="rounded-xl p-5 shadow-md flex flex-row justify-between items-center 
-                   bg-white dark:bg-gradient-to-r dark:from-[#2c0000] dark:via-[#4a0000] dark:to-[#800000] 
-                   border border-gray-200 dark:border-none transition-colors"
+                   bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 transition-colors"
       >
         {/* Left Section */}
         <div className="flex items-center gap-2">
           <div>
-            <p className="text-[10px] uppercase opacity-80 tracking-wide text-gray-500 dark:text-gray-200">
+            <p className="text-[10px] uppercase opacity-80 tracking-wide text-gray-500 dark:text-gray-300">
               Wallet Balance
             </p>
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
@@ -108,7 +107,7 @@ export default function ResidentWalletCard() {
           </div>
           <button
             onClick={() => setShowBalance(!showBalance)}
-            className="bg-gray-100 dark:bg-white/20 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-white/30 
+            className="bg-gray-100 dark:bg-gray-800 p-1.5 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
                        transition flex items-center justify-center"
           >
             {showBalance ? (
@@ -151,7 +150,7 @@ export default function ResidentWalletCard() {
             </div>
 
             {/* Bank Transfer */}
-            <div className="p-3 mb-4 rounded-lg border border-[#800000] bg-red-50 dark:bg-[#4a0000]/40">
+            <div className="p-3 mb-4 rounded-lg border border-[#800000] bg-red-50 dark:bg-gray-800">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">
                 Bank Transfer
               </p>
@@ -195,7 +194,7 @@ export default function ResidentWalletCard() {
                   onClick={() => handleFund(amt)}
                   className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
                              text-sm font-medium text-gray-700 dark:text-gray-200 
-                             hover:bg-red-50 dark:hover:bg-[#4a0000]/40 transition"
+                             hover:bg-red-50 dark:hover:bg-gray-800 transition"
                 >
                   ₦{amt.toLocaleString()}
                 </button>
@@ -210,7 +209,7 @@ export default function ResidentWalletCard() {
                   <button
                     key={idx}
                     className="flex items-center gap-2.5 p-3 rounded-lg border border-gray-200 dark:border-gray-700 
-                               hover:bg-red-50 dark:hover:bg-[#4a0000]/40 transition shadow-sm"
+                               hover:bg-red-50 dark:hover:bg-gray-800 transition shadow-sm"
                   >
                     <Icon className="h-5 w-5 text-[#800000]" />
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
