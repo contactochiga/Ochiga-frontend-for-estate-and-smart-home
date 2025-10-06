@@ -18,22 +18,26 @@ export default function ResidentHeader({
 }: ResidentHeaderProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      console.error("Failed to copy address");
+    }
   };
 
   return (
-    <div className="rounded-2xl p-6 shadow-md bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white">
+    <div className="relative rounded-2xl p-6 shadow-md bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white">
       {/* Greeting */}
       <p className="text-sm text-gray-600 dark:text-gray-400">Good afternoon,</p>
       <h2 className="text-lg font-medium mt-1">{name}</h2>
 
-      {/* Address */}
-      <div className="flex items-center gap-2 mt-4 text-sm text-gray-800 dark:text-gray-200">
+      {/* Address (Main focus) */}
+      <div className="flex items-center gap-2 mt-4 text-base text-gray-900 dark:text-gray-100 font-semibold">
         <MapPinIcon className="h-5 w-5 text-[#800000]" />
-        <span className="text-base font-medium leading-snug">{address}</span>
+        <span>{address}</span>
         <button
           onClick={handleCopy}
           className="ml-1 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -42,9 +46,9 @@ export default function ResidentHeader({
         </button>
       </div>
 
-      {/* Estate Info */}
-      <h1 className="text-lg font-semibold mt-2 tracking-tight text-gray-800 dark:text-gray-100">
-        {estate}
+      {/* Estate Info (secondary emphasis) */}
+      <h1 className="text-lg font-medium mt-2 tracking-tight text-gray-800 dark:text-gray-100">
+        <span className="font-bold text-[#800000]">{estate}</span>
         {phase && (
           <span className="font-normal text-gray-600 dark:text-gray-400"> — {phase}</span>
         )}
@@ -52,7 +56,7 @@ export default function ResidentHeader({
 
       {/* Toast Notification */}
       {copied && (
-        <div className="absolute bottom-3 right-3 bg-[#800000] text-white text-xs px-3 py-1 rounded-md shadow-md animate-fadeInOut">
+        <div className="absolute bottom-3 right-3 bg-[#800000] text-white text-xs px-3 py-1.5 rounded-md shadow-lg animate-fadeInOut">
           📋 Address copied!
         </div>
       )}
@@ -61,7 +65,7 @@ export default function ResidentHeader({
         @keyframes fadeInOut {
           0% {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(8px);
           }
           10% {
             opacity: 1;
@@ -72,7 +76,7 @@ export default function ResidentHeader({
           }
           100% {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(8px);
           }
         }
         .animate-fadeInOut {
