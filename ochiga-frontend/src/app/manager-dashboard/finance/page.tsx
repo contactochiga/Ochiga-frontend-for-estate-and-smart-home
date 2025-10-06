@@ -22,7 +22,7 @@ import {
 } from "chart.js";
 import { Line, Doughnut } from "react-chartjs-2";
 
-// === Chart.js Register ===
+// === Chart.js Config ===
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -35,7 +35,7 @@ ChartJS.register(
   ArcElement
 );
 
-// === Date Formatter (Fixes Hydration) ===
+// === Date Formatter ===
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
   return new Intl.DateTimeFormat("en-GB", {
@@ -46,7 +46,6 @@ const formatDate = (dateString: string) => {
 };
 
 export default function FinancePage() {
-  // === Demo Data ===
   const revenueTrend = {
     labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
     datasets: [
@@ -54,10 +53,10 @@ export default function FinancePage() {
         label: "Revenue (₦)",
         data: [450000, 600000, 550000, 700000, 800000, 750000],
         borderColor: "#2563eb",
-        backgroundColor: "rgba(37, 99, 235, 0.1)",
+        backgroundColor: "rgba(37,99,235,0.08)",
         pointBackgroundColor: "#2563eb",
         pointBorderWidth: 2,
-        tension: 0.4,
+        tension: 0.35,
         fill: true,
       },
     ],
@@ -80,6 +79,7 @@ export default function FinancePage() {
       {
         data: [85, 15],
         backgroundColor: ["#16a34a", "#dc2626"],
+        borderWidth: 2,
       },
     ],
   };
@@ -112,18 +112,20 @@ export default function FinancePage() {
   ];
 
   return (
-    <div className="p-6 space-y-10">
+    <div className="p-6 space-y-10 font-[Inter]">
       {/* === Header === */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Finance Overview</h1>
-        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 shadow-sm transition">
+        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+          Finance Overview
+        </h1>
+        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition">
           <PlusIcon className="w-5 h-5 mr-2" />
           New Invoice
         </button>
       </div>
 
-      {/* === KPI Cards === */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {/* === KPI CARDS === */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {[
           {
             label: "Total Revenue (MTD)",
@@ -152,60 +154,88 @@ export default function FinancePage() {
         ].map((card, i) => (
           <div
             key={i}
-            className="card p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl flex items-center justify-between hover:shadow-md transition"
+            className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5 flex justify-between items-center hover:shadow transition"
           >
             <div>
-              <p className="text-sm text-gray-500">{card.label}</p>
-              <p className="text-xl font-semibold">{card.value}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {card.label}
+              </p>
+              <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">
+                {card.value}
+              </p>
             </div>
             <card.Icon className={`w-10 h-10 ${card.color}`} />
           </div>
         ))}
       </div>
 
-      {/* === Analytics Section === */}
+      {/* === CHARTS === */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Trend */}
-        <div className="card p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl col-span-2">
-          <h2 className="text-lg font-semibold mb-4">Revenue Trend</h2>
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5 col-span-2">
+          <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+            Revenue Trend
+          </h2>
           <div className="h-64">
             <Line
               data={revenueTrend}
               options={{
-                plugins: { legend: { display: false } },
-                scales: { y: { ticks: { callback: (v) => `₦${v}` } } },
+                plugins: {
+                  legend: { display: false },
+                },
+                scales: {
+                  y: {
+                    ticks: { callback: (v) => `₦${v}` },
+                    grid: { color: "rgba(156,163,175,0.2)" },
+                  },
+                  x: { grid: { display: false } },
+                },
                 maintainAspectRatio: false,
               }}
             />
           </div>
         </div>
 
-        {/* Collections + Expenses stacked evenly */}
+        {/* Doughnuts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="card p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl h-64 flex flex-col">
-            <h2 className="text-lg font-semibold mb-4">Collections Rate</h2>
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5 h-64 flex flex-col">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+              Collections Rate
+            </h2>
             <Doughnut
               data={collectionsRate}
-              options={{ plugins: { legend: { position: "bottom" } } }}
+              options={{
+                plugins: {
+                  legend: { position: "bottom", labels: { boxWidth: 14 } },
+                },
+              }}
             />
           </div>
-          <div className="card p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl h-64 flex flex-col">
-            <h2 className="text-lg font-semibold mb-4">Expenses Breakdown</h2>
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5 h-64 flex flex-col">
+            <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+              Expenses Breakdown
+            </h2>
             <Doughnut
               data={expensesBreakdown}
-              options={{ plugins: { legend: { position: "bottom" } } }}
+              options={{
+                plugins: {
+                  legend: { position: "bottom", labels: { boxWidth: 14 } },
+                },
+              }}
             />
           </div>
         </div>
       </div>
 
-      {/* === Transactions Table === */}
-      <div className="card p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl">
-        <h2 className="text-lg font-semibold mb-4">Recent Transactions</h2>
+      {/* === TRANSACTIONS TABLE === */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+          Recent Transactions
+        </h2>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm text-left border-separate border-spacing-y-2">
             <thead>
-              <tr className="text-gray-600 uppercase text-xs">
+              <tr className="text-gray-600 dark:text-gray-400 uppercase text-xs font-medium tracking-wide">
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Resident</th>
                 <th className="px-4 py-2">Type</th>
@@ -220,13 +250,21 @@ export default function FinancePage() {
                   key={t.id}
                   className="bg-gray-50 dark:bg-gray-800/40 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition"
                 >
-                  <td className="px-4 py-2">{formatDate(t.date)}</td>
-                  <td className="px-4 py-2">{t.resident}</td>
-                  <td className="px-4 py-2">{t.type}</td>
-                  <td className="px-4 py-2">₦{t.amount.toLocaleString()}</td>
+                  <td className="px-4 py-2 text-gray-800 dark:text-gray-200">
+                    {formatDate(t.date)}
+                  </td>
+                  <td className="px-4 py-2 text-gray-800 dark:text-gray-200">
+                    {t.resident}
+                  </td>
+                  <td className="px-4 py-2 text-gray-800 dark:text-gray-200">
+                    {t.type}
+                  </td>
+                  <td className="px-4 py-2 text-gray-800 dark:text-gray-200">
+                    ₦{t.amount.toLocaleString()}
+                  </td>
                   <td className="px-4 py-2">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${
                         t.status === "Paid"
                           ? "bg-green-100 text-green-700"
                           : t.status === "Pending"
@@ -238,8 +276,8 @@ export default function FinancePage() {
                     </span>
                   </td>
                   <td className="px-4 py-2">
-                    <button className="text-blue-600 hover:underline">
-                      View Receipt
+                    <button className="text-blue-600 hover:underline font-medium">
+                      View
                     </button>
                   </td>
                 </tr>
@@ -249,9 +287,11 @@ export default function FinancePage() {
         </div>
       </div>
 
-      {/* === Debt Management === */}
-      <div className="card p-5 bg-white dark:bg-gray-900 shadow-sm rounded-xl">
-        <h2 className="text-lg font-semibold mb-4">Debt Management</h2>
+      {/* === DEBT MANAGEMENT === */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+          Debt Management
+        </h2>
         <ul className="space-y-3">
           {[
             { name: "Jane Smith (Apt 3C)", amount: "₦50,000 outstanding" },
@@ -259,7 +299,7 @@ export default function FinancePage() {
           ].map((debtor, i) => (
             <li
               key={i}
-              className="flex justify-between items-center bg-red-50 dark:bg-red-900/30 p-4 rounded-lg"
+              className="flex justify-between items-center bg-red-50 dark:bg-red-900/20 p-4 rounded-lg"
             >
               <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                 {debtor.name} – {debtor.amount}
