@@ -107,22 +107,19 @@ export default function UtilitiesCard() {
                   key={idx}
                   type={field.type}
                   placeholder={field.placeholder}
-                  className="w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm 
-                             bg-gray-50 dark:bg-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+                  className="w-full border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 text-sm bg-gray-50 dark:bg-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                 />
               ))}
 
               <button
                 type="submit"
-                className="w-full bg-[#800000] hover:bg-[#a00000] text-white py-2 rounded-md 
-                           text-sm font-medium transition"
+                className="w-full bg-[#800000] hover:bg-[#a00000] text-white py-2 rounded-md text-sm font-medium transition"
               >
                 Pay {activeUtility}
               </button>
             </form>
           </div>
 
-          {/* Animation */}
           <style jsx>{`
             @keyframes fadeIn {
               from {
