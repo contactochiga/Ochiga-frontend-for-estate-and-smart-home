@@ -25,7 +25,6 @@ export default function ResidentHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // slide panels
   const [notifOpen, setNotifOpen] = useState(false);
   const [closingNotif, setClosingNotif] = useState(false);
 
@@ -44,9 +43,7 @@ export default function ResidentHeader() {
       const t = e.target as Node;
       if (profileRef.current && !profileRef.current.contains(t)) setProfileOpen(false);
       if (searchRef.current && !searchRef.current.contains(t)) setSearchOpen(false);
-      if (notifPanelRef.current && !notifPanelRef.current.contains(t)) {
-        closeNotifPanel();
-      }
+      if (notifPanelRef.current && !notifPanelRef.current.contains(t)) closeNotifPanel();
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -81,20 +78,25 @@ export default function ResidentHeader() {
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left */}
         <div className="flex items-center space-x-3">
-          <button onClick={() => setSidebarOpen(true)}>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex items-center justify-center"
+          >
             <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
           <h1 className="text-lg font-bold text-black dark:text-white">Ochiga</h1>
         </div>
 
-        {/* Right */}
-        <div className="flex items-center space-x-4">
+        {/* Right Icons */}
+        <div className="flex items-center space-x-5">
           {/* SEARCH */}
-          <div ref={searchRef} className="relative flex items-center w-full max-w-sm">
-            <button onClick={() => setSearchOpen((s) => !s)}>
+          <div ref={searchRef} className="relative flex items-center">
+            <button
+              onClick={() => setSearchOpen((s) => !s)}
+              className="flex items-center justify-center"
+            >
               <MagnifyingGlassIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
             </button>
-
             {searchOpen && (
               <div className="absolute top-10 left-0 right-0 px-4 pb-3 z-50">
                 <input
@@ -107,16 +109,17 @@ export default function ResidentHeader() {
             )}
           </div>
 
-          {/* MESSAGES → direct route */}
+          {/* MESSAGES */}
           <button
-            onClick={() => router.push("/ochiga-frontend/src/app/messages/page.tsx")}
+            onClick={() => router.push("/messages")}
             aria-label="Messages"
+            className="flex items-center justify-center"
           >
             <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
 
-          {/* NOTIFICATIONS → slide-in/out from right */}
-          <div className="relative" ref={notifPanelRef}>
+          {/* NOTIFICATIONS */}
+          <div className="relative flex items-center justify-center" ref={notifPanelRef}>
             <button onClick={() => openNotifPanel()} aria-label="Notifications">
               <BellIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
               {hasNewNotif && (
@@ -147,10 +150,15 @@ export default function ResidentHeader() {
                   </div>
                   <div className="p-4 space-y-3 overflow-y-auto max-h-full">
                     {notifications.length === 0 ? (
-                      <p className="text-sm text-gray-600 dark:text-gray-300">No notifications.</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        No notifications.
+                      </p>
                     ) : (
                       notifications.map((n, i) => (
-                        <div key={i} className="py-2 border-b border-gray-100 dark:border-gray-800">
+                        <div
+                          key={i}
+                          className="py-2 border-b border-gray-100 dark:border-gray-800"
+                        >
                           <p className="text-sm text-gray-700 dark:text-gray-200">{n}</p>
                         </div>
                       ))
@@ -162,7 +170,7 @@ export default function ResidentHeader() {
           </div>
 
           {/* PROFILE */}
-          <div className="relative" ref={profileRef}>
+          <div className="relative flex items-center justify-center" ref={profileRef}>
             <button onClick={() => setProfileOpen((p) => !p)}>
               <UserCircleIcon className="w-7 h-7 text-gray-700 dark:text-gray-200" />
             </button>
@@ -196,7 +204,7 @@ export default function ResidentHeader() {
         </div>
       </div>
 
-      {/* SIDEBAR (blur-only overlay) */}
+      {/* SIDEBAR */}
       {sidebarOpen && (
         <>
           <div
@@ -205,7 +213,9 @@ export default function ResidentHeader() {
           />
           <div className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-50 p-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-[#800000] dark:text-[#ffcccc]">Resident Tools</h2>
+              <h2 className="text-lg font-bold text-[#800000] dark:text-[#ffcccc]">
+                Resident Tools
+              </h2>
               <button onClick={() => setSidebarOpen(false)}>
                 <XMarkIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
               </button>
