@@ -45,7 +45,7 @@ export default function ResidentVisitorCard() {
               <div className="flex items-center gap-3 text-left">
                 <div
                   className="w-10 h-10 flex items-center justify-center rounded-full 
-                    bg-gradient-to-br from-[#800000] to-black text-white"
+                  bg-gradient-to-br from-[#800000] to-black text-white"
                 >
                   <UserIcon className="h-5 w-5" />
                 </div>
@@ -68,23 +68,21 @@ export default function ResidentVisitorCard() {
         )}
       </div>
 
-      {/* Invite button → navigates to /dashboard/visitors */}
+      {/* Invite button */}
       <button
         onClick={() => router.push("/dashboard/visitors")}
         className="w-full flex items-center justify-center gap-2 py-4 mt-6 rounded-xl 
           bg-gradient-to-r from-[#800000] to-black 
-          text-white font-medium shadow-lg hover:opacity-90 transition
-          focus:outline-none focus:ring-2 focus:ring-[#800000]/60 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+          text-white font-medium shadow-lg hover:opacity-90 transition"
       >
         <QrCodeIcon className="h-5 w-5" />
         Invite Visitor
       </button>
 
-      {/* Modal for visitor details */}
+      {/* Modal */}
       {selectedVisitor && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-11/12 max-w-sm relative animate-fadeIn">
-            {/* Close button */}
             <button
               onClick={() => setSelectedVisitor(null)}
               className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -92,7 +90,6 @@ export default function ResidentVisitorCard() {
               <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             </button>
 
-            {/* Modal content */}
             <div className="flex flex-col items-center text-center">
               <div
                 className="w-14 h-14 flex items-center justify-center rounded-full 
