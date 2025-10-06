@@ -12,7 +12,7 @@ import {
   ClipboardDocumentIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
-import { apiRequest } from "../../lib/api"; // ✅ helper to call backend
+import { apiRequest } from "../../lib/api";
 
 export default function ResidentWalletCard() {
   const [walletBalance, setWalletBalance] = useState<number>(0);
@@ -22,7 +22,6 @@ export default function ResidentWalletCard() {
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Mock user (replace with actual auth user id)
   const userId = "123";
 
   const paymentMethods = [
@@ -35,7 +34,6 @@ export default function ResidentWalletCard() {
   const accountNumber = "1234567890";
   const bankName = "Ochiga Microfinance Bank";
 
-  // 🔹 Load wallet from backend
   const fetchWallet = async () => {
     try {
       setLoading(true);
@@ -48,12 +46,10 @@ export default function ResidentWalletCard() {
     }
   };
 
-  // 🔹 Animate balance on change
   useEffect(() => {
     let start = 0;
     const duration = 800;
     const step = walletBalance / (duration / 16);
-
     const interval = setInterval(() => {
       start += step;
       if (start >= walletBalance) {
@@ -63,16 +59,13 @@ export default function ResidentWalletCard() {
         setAnimatedBalance(Math.floor(start));
       }
     }, 16);
-
     return () => clearInterval(interval);
   }, [walletBalance]);
 
-  // 🔹 Initial load
   useEffect(() => {
     fetchWallet();
   }, []);
 
-  // 🔹 Fund wallet shortcut
   const handleFund = async (amount: number) => {
     try {
       await apiRequest(`/wallet/${userId}/fund`, "POST", { amount });
@@ -83,7 +76,6 @@ export default function ResidentWalletCard() {
     }
   };
 
-  // 🔹 Debit wallet (optional button for spending)
   const handleDebit = async (amount: number) => {
     try {
       await apiRequest(`/wallet/${userId}/debit`, "POST", { amount });
@@ -104,16 +96,16 @@ export default function ResidentWalletCard() {
       {/* Wallet Balance Card */}
       <div
         className="rounded-xl p-5 shadow-md 
-                   bg-white dark:bg-gradient-to-r dark:from-[#800000] dark:to-[#a00000] 
-                   flex flex-row justify-between items-center border border-gray-200 dark:border-none"
+                   bg-white dark:bg-gray-800 
+                   flex flex-row justify-between items-center border border-gray-200 dark:border-gray-700"
       >
         {/* Left Section */}
         <div className="flex items-center gap-2">
           <div>
-            <p className="text-[10px] uppercase opacity-80 tracking-wide text-gray-500 dark:text-gray-200">
+            <p className="text-[10px] uppercase opacity-80 tracking-wide text-gray-500 dark:text-gray-300">
               Wallet Balance
             </p>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-50">
               {loading
                 ? "Loading..."
                 : showBalance
@@ -123,14 +115,14 @@ export default function ResidentWalletCard() {
           </div>
           <button
             onClick={() => setShowBalance(!showBalance)}
-            className="bg-gray-100 dark:bg-white/20 p-1.5 rounded-md 
-                       hover:bg-gray-200 dark:hover:bg-white/30 
+            className="bg-gray-100 dark:bg-gray-700 p-1.5 rounded-md 
+                       hover:bg-gray-200 dark:hover:bg-gray-600 
                        transition flex items-center justify-center"
           >
             {showBalance ? (
-              <EyeIcon className="h-4 w-4 text-gray-700 dark:text-white" />
+              <EyeIcon className="h-4 w-4 text-gray-700 dark:text-gray-100" />
             ) : (
-              <EyeSlashIcon className="h-4 w-4 text-gray-700 dark:text-white" />
+              <EyeSlashIcon className="h-4 w-4 text-gray-700 dark:text-gray-100" />
             )}
           </button>
         </div>
@@ -150,11 +142,11 @@ export default function ResidentWalletCard() {
       {/* Bottom Sheet Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
-          <div className="backdrop-blur-md bg-white/90 dark:bg-gray-900/90 
+          <div className="backdrop-blur-md bg-white/95 dark:bg-gray-900/95 
                           w-full max-w-md rounded-t-2xl p-5 shadow-xl animate-slideUp">
             {/* Header */}
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">
                 Choose Payment Method
               </h3>
               <button
@@ -166,8 +158,8 @@ export default function ResidentWalletCard() {
             </div>
 
             {/* Bank Transfer */}
-            <div className="p-3 mb-4 rounded-lg border border-[#800000] bg-red-50 dark:bg-red-900/20">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white">
+            <div className="p-3 mb-4 rounded-lg border border-[#800000] bg-red-50 dark:bg-gray-800">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                 Bank Transfer
               </p>
               <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
@@ -175,7 +167,7 @@ export default function ResidentWalletCard() {
               </p>
               <div className="flex items-center justify-between mt-2">
                 <div>
-                  <p className="text-xs font-medium text-gray-800 dark:text-gray-100">
+                  <p className="text-xs font-medium text-gray-800 dark:text-gray-200">
                     {bankName}
                   </p>
                   <p className="text-base font-bold text-[#800000]">
@@ -207,9 +199,9 @@ export default function ResidentWalletCard() {
                 <button
                   key={amt}
                   onClick={() => handleFund(amt)}
-                  className="flex-1 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
+                  className="flex-1 py-2 rounded-lg border border-gray-300 dark:border-gray-700 
                              text-sm font-medium text-gray-700 dark:text-gray-200 
-                             hover:bg-red-50 dark:hover:bg-gray-800 transition"
+                             hover:bg-gray-100 dark:hover:bg-gray-800 transition"
                 >
                   ₦{amt.toLocaleString()}
                 </button>
@@ -223,8 +215,8 @@ export default function ResidentWalletCard() {
                 return (
                   <button
                     key={idx}
-                    className="flex items-center gap-2.5 p-3 rounded-lg border border-gray-200 dark:border-gray-700 
-                               hover:bg-red-50 dark:hover:bg-gray-800 transition shadow-sm"
+                    className="flex items-center gap-2.5 p-3 rounded-lg border border-gray-300 dark:border-gray-700 
+                               hover:bg-gray-100 dark:hover:bg-gray-800 transition shadow-sm"
                   >
                     <Icon className="h-5 w-5 text-[#800000]" />
                     <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -235,6 +227,22 @@ export default function ResidentWalletCard() {
               })}
             </div>
           </div>
+
+          <style jsx>{`
+            @keyframes slideUp {
+              from {
+                transform: translateY(30px);
+                opacity: 0;
+              }
+              to {
+                transform: translateY(0);
+                opacity: 1;
+              }
+            }
+            .animate-slideUp {
+              animation: slideUp 0.3s ease-out forwards;
+            }
+          `}</style>
         </div>
       )}
     </div>
