@@ -11,7 +11,6 @@ import {
   ChatBubbleOvalLeftEllipsisIcon,
   BellIcon,
   UserCircleIcon,
-  MegaphoneIcon,
   WrenchScrewdriverIcon,
   BoltIcon,
   UsersIcon,
@@ -47,8 +46,8 @@ export default function ResidentHeader() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ Community removed here
   const menuItems = [
-    { name: "Community", href: "/dashboard/community", icon: MegaphoneIcon },
     { name: "Maintenance", href: "/dashboard/maintenance", icon: WrenchScrewdriverIcon },
     { name: "Utilities", href: "/dashboard/utilities", icon: BoltIcon },
     { name: "Directory", href: "/dashboard/directory", icon: UsersIcon },
