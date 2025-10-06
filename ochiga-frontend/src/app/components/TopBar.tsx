@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import {
   Bars3Icon,
@@ -24,10 +25,7 @@ export default function ResidentHeader() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [notifOpen, setNotifOpen] = useState(false);
-  const [closingNotif, setClosingNotif] = useState(false);
-
   const [notifications, setNotifications] = useState<string[]>([]);
   const [hasNewNotif, setHasNewNotif] = useState(false);
 
@@ -43,7 +41,7 @@ export default function ResidentHeader() {
       const t = e.target as Node;
       if (profileRef.current && !profileRef.current.contains(t)) setProfileOpen(false);
       if (searchRef.current && !searchRef.current.contains(t)) setSearchOpen(false);
-      if (notifPanelRef.current && !notifPanelRef.current.contains(t)) closeNotifPanel();
+      if (notifPanelRef.current && !notifPanelRef.current.contains(t)) setNotifOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -61,16 +59,11 @@ export default function ResidentHeader() {
 
   const openNotifPanel = () => {
     setNotifOpen(true);
-    setClosingNotif(false);
     setHasNewNotif(false);
   };
 
   const closeNotifPanel = () => {
-    setClosingNotif(true);
-    setTimeout(() => {
-      setNotifOpen(false);
-      setClosingNotif(false);
-    }, 300);
+    setNotifOpen(false);
   };
 
   return (
@@ -78,10 +71,7 @@ export default function ResidentHeader() {
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left */}
         <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="flex items-center justify-center"
-          >
+          <button onClick={() => setSidebarOpen(true)} className="flex items-center justify-center">
             <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
           <h1 className="text-lg font-bold text-black dark:text-white">Ochiga</h1>
@@ -127,46 +117,51 @@ export default function ResidentHeader() {
               )}
             </button>
 
-            {notifOpen && (
-              <>
-                <div
-                  className="fixed inset-0 backdrop-blur-sm z-40"
-                  onClick={() => closeNotifPanel()}
-                />
-                <div
-                  className={`fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
-                    closingNotif
-                      ? "animate-slideOutRight"
-                      : "animate-slideInRight"
-                  }`}
-                >
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                      Notifications
-                    </h3>
-                    <button onClick={() => closeNotifPanel()}>
-                      <XMarkIcon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                    </button>
-                  </div>
-                  <div className="p-4 space-y-3 overflow-y-auto max-h-full">
-                    {notifications.length === 0 ? (
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        No notifications.
-                      </p>
-                    ) : (
-                      notifications.map((n, i) => (
-                        <div
-                          key={i}
-                          className="py-2 border-b border-gray-100 dark:border-gray-800"
-                        >
-                          <p className="text-sm text-gray-700 dark:text-gray-200">{n}</p>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
+            <AnimatePresence>
+              {notifOpen && (
+                <>
+                  <motion.div
+                    className="fixed inset-0 backdrop-blur-sm z-40"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => closeNotifPanel()}
+                  />
+                  <motion.div
+                    className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-xl z-50"
+                    initial={{ x: "100%" }}
+                    animate={{ x: 0 }}
+                    exit={{ x: "100%" }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                        Notifications
+                      </h3>
+                      <button onClick={() => closeNotifPanel()}>
+                        <XMarkIcon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                      </button>
+                    </div>
+                    <div className="p-4 space-y-3 overflow-y-auto max-h-full">
+                      {notifications.length === 0 ? (
+                        <p className="text-sm text-gray-600 dark:text-gray-300">
+                          No notifications.
+                        </p>
+                      ) : (
+                        notifications.map((n, i) => (
+                          <div
+                            key={i}
+                            className="py-2 border-b border-gray-100 dark:border-gray-800"
+                          >
+                            <p className="text-sm text-gray-700 dark:text-gray-200">{n}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* PROFILE */}
