@@ -100,7 +100,7 @@ export default function ResidentHeader() {
 
           {/* MESSAGES */}
           <button
-            onClick={() => router.push("/messages")}
+            onClick={() => router.push("/dashboard/messages")}
             aria-label="Messages"
             className="flex items-center justify-center"
           >
