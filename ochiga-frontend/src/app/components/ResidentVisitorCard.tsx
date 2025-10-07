@@ -18,10 +18,13 @@ export default function ResidentVisitorCard() {
   ];
 
   return (
-    <div className="w-full rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div className="w-full rounded-2xl bg-white dark:bg-gray-900 shadow-xl border border-gray-200 dark:border-gray-700 p-5">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+      <div
+        onClick={() => router.push("/dashboard/visitors")}
+        className="flex items-center justify-between mb-5 cursor-pointer hover:opacity-80 transition"
+      >
+        <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">
           Visitors
         </h2>
         <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -30,27 +33,27 @@ export default function ResidentVisitorCard() {
       </div>
 
       {/* Visitor list */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {visitors.map((v, i) => (
           <button
             key={i}
-            onClick={() => setSelectedVisitor(v)}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+            onClick={() => router.push("/dashboard/visitors")}
+            className="w-full flex items-center justify-between p-3 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
           >
             <div className="flex items-center gap-3 text-left">
-              <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-[#800000] to-black text-white">
-                <UserIcon className="h-5 w-5" />
+              <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gradient-to-br from-[#800000] to-black text-white">
+                <UserIcon className="h-4 w-4" />
               </div>
               <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                   {v.name}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-[11px] text-gray-500 dark:text-gray-400">
                   {v.date}
                 </p>
               </div>
             </div>
-            <ChevronRightIcon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+            <ChevronRightIcon className="h-4 w-4 text-gray-400 dark:text-gray-500" />
           </button>
         ))}
       </div>
@@ -58,9 +61,9 @@ export default function ResidentVisitorCard() {
       {/* Invite button */}
       <button
         onClick={() => router.push("/dashboard/visitors")}
-        className="w-full flex items-center justify-center gap-2 py-4 mt-6 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-medium shadow-lg hover:opacity-90 transition"
+        className="w-full flex items-center justify-center gap-2 py-2.5 mt-5 rounded-lg bg-gradient-to-r from-[#800000] to-black text-white text-sm font-medium shadow-md hover:opacity-90 transition"
       >
-        <QrCodeIcon className="h-5 w-5" />
+        <QrCodeIcon className="h-4 w-4" />
         Invite Visitor
       </button>
     </div>
