@@ -4,8 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React from "react";
 
 export default function ProfilePage() {
   const [name, setName] = useState("John Doe");
