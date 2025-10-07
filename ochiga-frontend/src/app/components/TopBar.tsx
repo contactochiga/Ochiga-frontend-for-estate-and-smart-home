@@ -52,7 +52,7 @@ export default function ResidentHeader() {
     { name: "Utilities", href: "/dashboard/Utilities", icon: BoltIcon },
     { name: "Directory", href: "/dashboard/directory", icon: UsersIcon },
     { name: "Reports", href: "/dashboard/reports", icon: ChartBarIcon },
-    { name: "Help & Support", href: "/dashboard/help", icon: QuestionMarkCircleIcon },
+    { name: "Help & Support", href: "/help", icon: QuestionMarkCircleIcon },
     { name: "Legal & Policies", href: "/dashboard/legal", icon: DocumentTextIcon },
   ];
 
