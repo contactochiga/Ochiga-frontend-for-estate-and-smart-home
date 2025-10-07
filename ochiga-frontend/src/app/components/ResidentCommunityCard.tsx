@@ -40,7 +40,7 @@ export default function ResidentCommunityCard() {
   };
 
   return (
-    <div className="rounded-2xl shadow-lg p-6 bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white">
+    <div className="rounded-2xl shadow-lg p-6 bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Header */}
       <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
         <h2 className="text-lg font-semibold">Community</h2>
@@ -54,7 +54,7 @@ export default function ResidentCommunityCard() {
         {visibleUpdates.map((u) => (
           <div
             key={u.id}
-            className="p-3 rounded-lg bg-gray-50 dark:bg-black/40"
+            className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
           >
             <div className="flex justify-between items-center">
               <h3 className="font-medium">{u.title}</h3>
