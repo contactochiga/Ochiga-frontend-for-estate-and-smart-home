@@ -49,7 +49,7 @@ export default function ResidentHeader() {
   // ✅ Community removed here
   const menuItems = [
     { name: "Maintenance", href: "/dashboard/maintenance", icon: WrenchScrewdriverIcon },
-    { name: "Utilities", href: "/dashboard/utilities", icon: BoltIcon },
+    { name: "Utilities", href: "/dashboard/Utilities", icon: BoltIcon },
     { name: "Directory", href: "/dashboard/directory", icon: UsersIcon },
     { name: "Reports", href: "/dashboard/reports", icon: ChartBarIcon },
     { name: "Help & Support", href: "/dashboard/help", icon: QuestionMarkCircleIcon },
