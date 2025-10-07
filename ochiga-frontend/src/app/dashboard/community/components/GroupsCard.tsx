@@ -1,4 +1,3 @@
-// src/app/dashboard/community/components/GroupsCard.tsx
 "use client";
 
 import React from "react";
@@ -35,10 +34,10 @@ export default function GroupsCard({ groups, toggleJoinGroup }: GroupsCardProps)
 
             <button
               onClick={() => toggleJoinGroup(group.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${
                 group.joined
-                  ? "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 cursor-default"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700"
+                  ? "border-[#800000] text-[#800000] bg-transparent dark:border-[#a05252] dark:text-[#d87f7f] cursor-default"
+                  : "bg-[#800000] text-white hover:bg-[#660000] dark:bg-[#800000] dark:hover:bg-[#990000] border-transparent"
               }`}
             >
               {group.joined ? "Joined" : "Join"}
