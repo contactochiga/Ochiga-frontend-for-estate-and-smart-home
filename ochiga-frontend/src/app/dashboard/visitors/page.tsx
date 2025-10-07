@@ -8,7 +8,6 @@ import {
   PaperAirplaneIcon,
   ClockIcon,
   PlusIcon,
-  PhoneIcon,
 } from "@heroicons/react/24/outline";
 
 interface Visitor {
@@ -26,7 +25,7 @@ export default function VisitorsPage() {
     {
       id: 1,
       name: "John Doe",
-      phone: "+2348012345678",
+      phone: "08012345678",
       purpose: "Plumber",
       status: "Pending",
       time: "10:00 AM",
@@ -35,7 +34,7 @@ export default function VisitorsPage() {
     {
       id: 2,
       name: "Jane Smith",
-      phone: "+2348098765432",
+      phone: "08198765432",
       purpose: "Friend",
       status: "Checked-in",
       time: "09:30 AM",
@@ -51,11 +50,11 @@ export default function VisitorsPage() {
   });
 
   const [selectedVisitor, setSelectedVisitor] = useState<Visitor | null>(null);
-  const [copied, setCopied] = useState(false);
 
   const addVisitor = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVisitor.name || !newVisitor.phone || !newVisitor.purpose || !newVisitor.time) return;
+    if (!newVisitor.name || !newVisitor.phone || !newVisitor.purpose || !newVisitor.time)
+      return;
 
     const newCode = Math.random().toString().slice(2, 8);
 
@@ -72,8 +71,7 @@ export default function VisitorsPage() {
 
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    alert("Code copied to clipboard!");
   };
 
   const shareWhatsApp = (visitor: Visitor) => {
@@ -83,10 +81,10 @@ export default function VisitorsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-black px-4 py-10 sm:px-8 relative">
+    <main className="min-h-screen bg-gray-50 dark:bg-black px-4 py-8">
       {/* Header */}
-      <header className="mb-10">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+      <header className="mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
           Visitor Management
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -97,9 +95,9 @@ export default function VisitorsPage() {
       {/* Add Visitor Form */}
       <form
         onSubmit={addVisitor}
-        className="bg-white dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl mb-10 border border-gray-100 dark:border-gray-800 transition"
+        className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg mb-10 border border-gray-100 dark:border-gray-800"
       >
-        <h2 className="text-lg font-semibold mb-6 text-gray-800 dark:text-gray-100">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
           Invite a Visitor
         </h2>
         <div className="grid gap-4 sm:grid-cols-4">
@@ -108,34 +106,32 @@ export default function VisitorsPage() {
             placeholder="Visitor Name"
             value={newVisitor.name}
             onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
-            className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 placeholder-gray-400 text-sm"
+            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
           />
           <input
             type="tel"
             placeholder="Phone Number"
             value={newVisitor.phone}
             onChange={(e) => setNewVisitor({ ...newVisitor, phone: e.target.value })}
-            className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 placeholder-gray-400 text-sm"
+            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
           />
           <input
             type="text"
             placeholder="Purpose of Visit"
             value={newVisitor.purpose}
             onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
-            className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 placeholder-gray-400 text-sm"
+            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
           />
           <input
             type="time"
             value={newVisitor.time}
             onChange={(e) => setNewVisitor({ ...newVisitor, time: e.target.value })}
-            className="w-full p-3 rounded-lg border border-gray-300 dark:border-gray-700 dark:bg-gray-800 text-sm"
+            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
           />
         </div>
         <button
           type="submit"
-          className="mt-6 w-full py-3 rounded-xl font-semibold shadow 
-            bg-gradient-to-r from-[#800000] to-black text-white 
-            hover:opacity-90 transition flex items-center justify-center gap-2"
+          className="mt-6 w-full py-3 rounded-xl font-semibold shadow bg-gradient-to-r from-[#800000] to-black text-white hover:opacity-90 transition flex items-center justify-center gap-2"
         >
           <PlusIcon className="h-5 w-5" />
           Invite Visitor
@@ -143,29 +139,27 @@ export default function VisitorsPage() {
       </form>
 
       {/* Visitors List */}
-      <section className="bg-white dark:bg-gray-900/80 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+      <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800">
+        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
           Visitor Log
         </h2>
         <ul className="divide-y divide-gray-200 dark:divide-gray-800">
           {visitors.map((v) => (
             <li
               key={v.id}
-              className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+              className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p className="font-semibold text-gray-900 dark:text-white text-base">
+                <p className="font-semibold text-gray-900 dark:text-white text-lg">
                   {v.name}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                  <PhoneIcon className="h-4 w-4" />
-                  {v.phone}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  📞 {v.phone}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
                   <ClockIcon className="h-4 w-4" />
                   {v.purpose} — {v.time}
                 </p>
-
                 <span
                   className={`inline-block mt-2 px-3 py-1 text-xs rounded-full font-medium ${
                     v.status === "Pending"
@@ -178,6 +172,7 @@ export default function VisitorsPage() {
                   {v.status}
                 </span>
 
+                {/* Action Buttons */}
                 <div className="flex flex-wrap gap-2 mt-4">
                   <button
                     onClick={() => copyCode(v.code)}
@@ -204,9 +199,9 @@ export default function VisitorsPage() {
               </div>
 
               {/* QR Code */}
-              <div className="sm:ml-6">
+              <div className="mt-4 sm:mt-0">
                 <QRCodeCanvas
-                  value={`Visitor:${v.name}|Phone:${v.phone}|Purpose:${v.purpose}|Time:${v.time}|Code:${v.code}`}
+                  value={`Visitor:${v.name}|Phone:${v.phone}|Purpose:${v.purpose}|Time:${v.time}|Status:${v.status}|Code:${v.code}`}
                   size={72}
                   bgColor={"#ffffff"}
                   fgColor={"#000000"}
@@ -220,15 +215,8 @@ export default function VisitorsPage() {
 
       {/* Slide-up Modal */}
       {selectedVisitor && (
-        <div
-          className="fixed inset-0 bg-black/60 flex items-end z-50"
-          onClick={() => setSelectedVisitor(null)}
-        >
-          <div
-            className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mx-auto mb-3 h-1 w-10 bg-gray-300 dark:bg-gray-700 rounded-full" />
+        <div className="fixed inset-0 bg-black/60 flex items-end z-50">
+          <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                 Visitor Details
@@ -260,36 +248,6 @@ export default function VisitorsPage() {
           </div>
         </div>
       )}
-
-      {/* Toast Notification */}
-      {copied && (
-        <div className="fixed bottom-6 right-6 bg-[#800000] text-white text-xs px-4 py-2 rounded-md shadow-md animate-fadeInOut">
-          📋 Code copied!
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes fadeInOut {
-          0% {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          10% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-          90% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-        }
-        .animate-fadeInOut {
-          animation: fadeInOut 2s ease-in-out forwards;
-        }
-      `}</style>
     </main>
   );
 }
