@@ -98,36 +98,51 @@ export default function VisitorsPage() {
         <h2 className="text-base font-semibold mb-4 text-gray-800 dark:text-gray-200">
           Invite a Visitor
         </h2>
+
+        {/* Grid Inputs */}
         <div className="grid gap-3 sm:grid-cols-4">
           <input
             type="text"
             placeholder="Visitor Name"
             value={newVisitor.name}
             onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
-            className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700"
+            className="w-full h-11 p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700 focus:ring-[#800000] focus:border-[#800000]"
           />
           <input
             type="tel"
             placeholder="Phone Number"
             value={newVisitor.phone}
             onChange={(e) => setNewVisitor({ ...newVisitor, phone: e.target.value })}
-            className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700"
+            className="w-full h-11 p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700 focus:ring-[#800000] focus:border-[#800000]"
           />
           <input
             type="text"
             placeholder="Purpose of Visit"
             value={newVisitor.purpose}
             onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
-            className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700"
+            className="w-full h-11 p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700 focus:ring-[#800000] focus:border-[#800000]"
           />
-          <input
-            type="time"
+
+          {/* Select Time Dropdown */}
+          <select
             value={newVisitor.time}
             onChange={(e) => setNewVisitor({ ...newVisitor, time: e.target.value })}
-            className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-300"
-            placeholder="Select Time"
-          />
+            className="w-full h-11 p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-300 focus:ring-[#800000] focus:border-[#800000]"
+          >
+            <option value="">Select Time</option>
+            <option value="08:00 AM">08:00 AM</option>
+            <option value="09:00 AM">09:00 AM</option>
+            <option value="10:00 AM">10:00 AM</option>
+            <option value="11:00 AM">11:00 AM</option>
+            <option value="12:00 PM">12:00 PM</option>
+            <option value="01:00 PM">01:00 PM</option>
+            <option value="02:00 PM">02:00 PM</option>
+            <option value="03:00 PM">03:00 PM</option>
+            <option value="04:00 PM">04:00 PM</option>
+            <option value="05:00 PM">05:00 PM</option>
+          </select>
         </div>
+
         <button
           type="submit"
           className="mt-6 w-full py-2.5 rounded-xl font-semibold shadow bg-gradient-to-r from-[#800000] to-black text-white hover:opacity-90 transition flex items-center justify-center gap-2 text-sm"
