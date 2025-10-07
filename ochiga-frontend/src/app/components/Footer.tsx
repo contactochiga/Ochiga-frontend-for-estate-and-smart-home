@@ -16,7 +16,6 @@ export default function ResidentFooter() {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
-    // ✅ Prevent TypeScript error by ensuring pathname exists
     if (!pathname) return;
 
     if (pathname.includes("/rooms")) setActiveTab("rooms");
@@ -46,9 +45,9 @@ export default function ResidentFooter() {
           key={id}
           className={`flex flex-col items-center flex-1 py-2 transition-colors duration-200 ${
             activeTab === id
-              ? "text-[#800000] font-semibold" // ✅ Active maroon tab
+              ? "text-[#800000] font-semibold"
               : "text-gray-500 dark:text-gray-400"
-          } hover:text-[#800000]`} // ✅ Hover maroon color
+          } hover:text-[#800000] dark:hover:text-white`}  {/* ✅ Dark mode hover = white */}
           onClick={() => handleTabChange(id, path)}
         >
           <Icon className="w-5 h-5 mb-0.5" />
