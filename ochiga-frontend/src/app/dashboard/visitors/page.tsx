@@ -53,11 +53,9 @@ export default function VisitorsPage() {
 
   const addVisitor = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVisitor.name || !newVisitor.phone || !newVisitor.purpose || !newVisitor.time)
-      return;
+    if (!newVisitor.name || !newVisitor.phone || !newVisitor.purpose || !newVisitor.time) return;
 
     const newCode = Math.random().toString().slice(2, 8);
-
     const newEntry: Visitor = {
       id: visitors.length + 1,
       ...newVisitor,
@@ -100,40 +98,47 @@ export default function VisitorsPage() {
         <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
           Invite a Visitor
         </h2>
-        <div className="grid gap-4 sm:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-4">
           <input
             type="text"
             placeholder="Visitor Name"
             value={newVisitor.name}
             onChange={(e) => setNewVisitor({ ...newVisitor, name: e.target.value })}
-            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+            className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700"
           />
           <input
             type="tel"
             placeholder="Phone Number"
             value={newVisitor.phone}
             onChange={(e) => setNewVisitor({ ...newVisitor, phone: e.target.value })}
-            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+            className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700"
           />
           <input
             type="text"
             placeholder="Purpose of Visit"
             value={newVisitor.purpose}
             onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
-            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+            className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700"
           />
-          <input
-            type="time"
-            value={newVisitor.time}
-            onChange={(e) => setNewVisitor({ ...newVisitor, time: e.target.value })}
-            className="w-full p-3 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
-          />
+          <div className="relative">
+            {!newVisitor.time && (
+              <span className="absolute left-3 top-2.5 text-gray-400 text-sm pointer-events-none">
+                Select Time
+              </span>
+            )}
+            <input
+              type="time"
+              value={newVisitor.time}
+              onChange={(e) => setNewVisitor({ ...newVisitor, time: e.target.value })}
+              className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+            />
+          </div>
         </div>
         <button
           type="submit"
-          className="mt-6 w-full py-3 rounded-xl font-semibold shadow bg-gradient-to-r from-[#800000] to-black text-white hover:opacity-90 transition flex items-center justify-center gap-2"
+          className="mt-6 w-full py-2.5 rounded-xl font-semibold shadow bg-gradient-to-r from-[#800000] to-black text-white hover:opacity-90 transition flex items-center justify-center gap-2 text-sm"
         >
-          <PlusIcon className="h-5 w-5" />
+          <PlusIcon className="h-4 w-4" />
           Invite Visitor
         </button>
       </form>
