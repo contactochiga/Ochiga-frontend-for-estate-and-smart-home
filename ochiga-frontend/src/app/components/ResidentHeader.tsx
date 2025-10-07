@@ -32,31 +32,35 @@ export default function ResidentHeader({
     <div className="relative rounded-2xl p-6 shadow-md bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
       {/* Greeting */}
       <p className="text-sm text-gray-600 dark:text-gray-400">Good afternoon,</p>
-      <h2 className="text-lg font-medium mt-1">{name}</h2>
+      <h2 className="text-lg font-medium mt-1 text-gray-900 dark:text-gray-100">
+        {name}
+      </h2>
 
-      {/* Address (Main focus) */}
-      <div className="flex items-center gap-2 mt-4 text-base text-gray-900 dark:text-gray-100 font-semibold">
-        <MapPinIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+      {/* Address */}
+      <div className="flex items-center gap-2 mt-4 text-base font-semibold text-[#800000] dark:text-[#d97777]">
+        <MapPinIcon className="h-5 w-5 text-[#800000] dark:text-[#d97777]" />
         <span>{address}</span>
         <button
           onClick={handleCopy}
           className="ml-1 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
         >
-          <ClipboardDocumentIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+          <ClipboardDocumentIcon className="h-4 w-4 text-[#800000] dark:text-[#d97777]" />
         </button>
       </div>
 
       {/* Estate Info */}
-      <h1 className="text-lg font-medium mt-2 tracking-tight text-gray-800 dark:text-gray-100">
-        <span className="font-bold text-blue-600 dark:text-blue-400">{estate}</span>
+      <h1 className="text-lg font-medium mt-2 tracking-tight">
+        <span className="font-bold text-gray-900 dark:text-gray-100">{estate}</span>
         {phase && (
-          <span className="font-normal text-gray-600 dark:text-gray-400"> — {phase}</span>
+          <span className="font-normal text-gray-600 dark:text-gray-400">
+            {" — "}{phase}
+          </span>
         )}
       </h1>
 
       {/* Toast Notification */}
       {copied && (
-        <div className="absolute bottom-3 right-3 bg-blue-600 dark:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-md shadow-lg animate-fadeInOut">
+        <div className="absolute bottom-3 right-3 bg-[#800000] dark:bg-[#d97777] text-white text-xs px-3 py-1.5 rounded-md shadow-lg animate-fadeInOut">
           📋 Address copied!
         </div>
       )}
