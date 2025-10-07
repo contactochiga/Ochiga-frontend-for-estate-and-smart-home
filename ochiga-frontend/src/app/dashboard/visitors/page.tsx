@@ -82,7 +82,7 @@ export default function VisitorsPage() {
     <main className="min-h-screen bg-gray-50 dark:bg-black px-4 py-8">
       {/* Header */}
       <header className="mb-8">
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           Visitor Management
         </h1>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -95,7 +95,7 @@ export default function VisitorsPage() {
         onSubmit={addVisitor}
         className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg mb-10 border border-gray-100 dark:border-gray-800"
       >
-        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+        <h2 className="text-base font-semibold mb-4 text-gray-800 dark:text-gray-200">
           Invite a Visitor
         </h2>
         <div className="grid gap-3 sm:grid-cols-4">
@@ -120,19 +120,13 @@ export default function VisitorsPage() {
             onChange={(e) => setNewVisitor({ ...newVisitor, purpose: e.target.value })}
             className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700"
           />
-          <div className="relative">
-            {!newVisitor.time && (
-              <span className="absolute left-3 top-2.5 text-gray-400 text-sm pointer-events-none">
-                Select Time
-              </span>
-            )}
-            <input
-              type="time"
-              value={newVisitor.time}
-              onChange={(e) => setNewVisitor({ ...newVisitor, time: e.target.value })}
-              className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-300"
-            />
-          </div>
+          <input
+            type="time"
+            value={newVisitor.time}
+            onChange={(e) => setNewVisitor({ ...newVisitor, time: e.target.value })}
+            className="w-full p-2.5 rounded-lg border text-sm dark:bg-gray-800 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+            placeholder="Select Time"
+          />
         </div>
         <button
           type="submit"
@@ -145,7 +139,7 @@ export default function VisitorsPage() {
 
       {/* Visitors List */}
       <section className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+        <h2 className="text-base font-semibold mb-4 text-gray-800 dark:text-gray-200">
           Visitor Log
         </h2>
         <ul className="divide-y divide-gray-200 dark:divide-gray-800">
@@ -155,7 +149,7 @@ export default function VisitorsPage() {
               className="py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <p className="font-semibold text-gray-900 dark:text-white text-lg">
+                <p className="font-semibold text-gray-900 dark:text-white text-base">
                   {v.name}
                 </p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -218,12 +212,12 @@ export default function VisitorsPage() {
         </ul>
       </section>
 
-      {/* Slide-up Modal */}
+      {/* Modal */}
       {selectedVisitor && (
         <div className="fixed inset-0 bg-black/60 flex items-end z-50">
           <div className="bg-white dark:bg-gray-900 w-full rounded-t-2xl p-6 animate-slideUp">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+              <h3 className="text-base font-semibold text-gray-800 dark:text-gray-100">
                 Visitor Details
               </h3>
               <button
@@ -233,7 +227,7 @@ export default function VisitorsPage() {
                 ✕
               </button>
             </div>
-            <div className="space-y-2 text-gray-700 dark:text-gray-300">
+            <div className="space-y-2 text-gray-700 dark:text-gray-300 text-sm">
               <p><span className="font-medium">Name:</span> {selectedVisitor.name}</p>
               <p><span className="font-medium">Phone:</span> {selectedVisitor.phone}</p>
               <p><span className="font-medium">Purpose:</span> {selectedVisitor.purpose}</p>
