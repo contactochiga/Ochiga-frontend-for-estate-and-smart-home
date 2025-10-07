@@ -1,4 +1,3 @@
-// src/app/dashboard/community/components/PostCard.tsx
 "use client";
 
 import React from "react";
@@ -33,7 +32,7 @@ export default function PostCard({ post, toggleLike, addComment, sharePost }: Pr
     <article className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-indigo-600 text-white">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[#800000] text-white">
           <UserCircleIcon className="h-6 w-6" />
         </div>
 
@@ -56,7 +55,7 @@ export default function PostCard({ post, toggleLike, addComment, sharePost }: Pr
                 onClick={() => toggleLike(post.id)}
                 className={`flex items-center gap-1 px-2 py-1 rounded-md text-sm transition ${
                   post.liked
-                    ? "bg-indigo-50 dark:bg-indigo-900 text-indigo-600"
+                    ? "bg-[#ffe6e6] text-[#800000]"
                     : "hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
@@ -92,10 +91,7 @@ export default function PostCard({ post, toggleLike, addComment, sharePost }: Pr
             />
           )}
           {post.video && (
-            <video
-              controls
-              className="mt-3 rounded-lg w-full max-h-64"
-            >
+            <video controls className="mt-3 rounded-lg w-full max-h-64">
               <source src={post.video} />
             </video>
           )}
@@ -121,9 +117,9 @@ export default function PostCard({ post, toggleLike, addComment, sharePost }: Pr
               type="text"
               placeholder="Write a comment..."
               onKeyDown={(e) => handleAddComment(e, post.id)}
-              className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:ring-1 focus:ring-indigo-500"
+              className="flex-1 p-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:ring-1 focus:ring-[#800000]"
             />
-            <button className="p-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition">
+            <button className="p-2 rounded-lg bg-[#800000] text-white hover:opacity-90 transition">
               <PaperAirplaneIcon className="h-4 w-4 transform rotate-45" />
             </button>
           </div>
