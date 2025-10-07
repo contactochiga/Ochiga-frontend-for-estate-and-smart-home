@@ -50,9 +50,9 @@ export default function CommunityFeedCard() {
   };
 
   return (
-    <div className="rounded-xl shadow-lg p-6 bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white">
+    <div className="rounded-xl shadow-lg p-6 bg-white dark:bg-[#111] text-gray-900 dark:text-gray-100 transition-all duration-300">
       {/* Header */}
-      <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
+      <div className="flex justify-between items-center border-b border-gray-200 dark:border-gray-800 pb-2 mb-4">
         <h2 className="text-lg font-semibold">Community Feed</h2>
         <span className="text-sm text-gray-500 dark:text-gray-400">
           {posts.length} updates
@@ -64,32 +64,36 @@ export default function CommunityFeedCard() {
         {visiblePosts.map((post) => (
           <div
             key={post.id}
-            className="p-3 rounded-lg bg-gray-50 dark:bg-black/40"
+            className="p-3 rounded-lg bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 transition-all duration-200"
           >
             <div className="flex justify-between items-center">
-              <h3 className="font-medium">{post.author}</h3>
+              <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                {post.author}
+              </h3>
               <span className="text-xs text-gray-500 dark:text-gray-400">
                 {new Date(post.createdAt).toLocaleDateString("en-GB")}
               </span>
             </div>
-            <p className="mt-1 text-sm">{post.content}</p>
+            <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
+              {post.content}
+            </p>
 
             {/* Actions */}
             <div className="flex space-x-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
-              <button className="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400">
+              <button className="flex items-center space-x-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 <ChatBubbleLeftIcon className="h-4 w-4" />
                 <span>Comment</span>
               </button>
               <button
                 onClick={() => handleShare(post)}
-                className="flex items-center space-x-1 hover:text-green-600 dark:hover:text-green-400"
+                className="flex items-center space-x-1 hover:text-green-600 dark:hover:text-green-400 transition-colors"
               >
                 <ShareIcon className="h-4 w-4" />
                 <span>Share</span>
               </button>
               <button
                 onClick={() => handleDelete(post.id)}
-                className="flex items-center space-x-1 hover:text-red-600 dark:hover:text-red-400"
+                className="flex items-center space-x-1 hover:text-red-600 dark:hover:text-red-400 transition-colors"
               >
                 <TrashIcon className="h-4 w-4" />
                 <span>Delete</span>
@@ -100,10 +104,10 @@ export default function CommunityFeedCard() {
       </div>
 
       {/* Toggle */}
-      <div className="mt-4">
+      <div className="mt-4 text-center">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="text-sm text-rose-700 dark:text-rose-400 font-medium hover:underline"
+          className="text-sm font-medium text-[#800000] dark:text-[#ffb3b3] hover:underline transition-colors"
         >
           {expanded ? "↑ Collapse" : "← View More"}
         </button>
