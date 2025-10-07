@@ -1,18 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  ChatBubbleOvalLeftEllipsisIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
-
-import {
-  ComposerCard,
-  PinnedPostCard,
-  GroupsCard,
-  PostCard,
-} from "./components";
-
+import { ComposerCard, PinnedPostCard, GroupsCard, PostCard } from "./components";
 import { Post, Group } from "./types";
 
 export default function CommunityPage() {
@@ -51,10 +40,10 @@ export default function CommunityPage() {
 
   const [newPostText, setNewPostText] = useState("");
   const [media, setMedia] = useState<{ image?: string | null; video?: string | null }>({});
-  const [showMessages, setShowMessages] = useState(false);
 
   const makePost = () => {
     if (!newPostText.trim() && !media.image && !media.video) return;
+
     const newPost: Post = {
       id: posts.length + 1 + Math.floor(Math.random() * 1000),
       author: "You",
@@ -66,6 +55,7 @@ export default function CommunityPage() {
       comments: [],
       createdAt: new Date().toISOString(),
     };
+
     setPosts([newPost, ...posts]);
     setNewPostText("");
     setMedia({});
@@ -83,6 +73,7 @@ export default function CommunityPage() {
 
   const addComment = (postId: number, text: string) => {
     if (!text.trim()) return;
+
     setPosts((prev) =>
       prev.map((p) =>
         p.id === postId
@@ -116,37 +107,6 @@ export default function CommunityPage() {
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6 space-y-6">
-      {/* ✅ Sub-header with message icon */}
-      <div className="flex justify-end pb-2 border-b border-gray-200 dark:border-gray-700">
-        <button
-          onClick={() => setShowMessages(true)}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-        >
-          <ChatBubbleOvalLeftEllipsisIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-        </button>
-      </div>
-
-      {/* ✅ Messages Modal */}
-      {showMessages && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-80 p-6 relative">
-            <button
-              onClick={() => setShowMessages(false)}
-              className="absolute top-2 right-2 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <XMarkIcon className="h-5 w-5 text-gray-500 dark:text-gray-300" />
-            </button>
-
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
-              Direct Messages
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              Direct messages coming soon 🚀
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* ✅ Composer Card */}
       <ComposerCard
         newPostText={newPostText}
@@ -163,7 +123,7 @@ export default function CommunityPage() {
           <PinnedPostCard key={p.id} post={p} />
         ))}
 
-      {/* ✅ Groups */}
+      {/* ✅ Groups Section */}
       <GroupsCard groups={groups} toggleJoinGroup={toggleJoinGroup} />
 
       {/* ✅ Regular Posts */}
