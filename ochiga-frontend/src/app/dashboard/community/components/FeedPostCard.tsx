@@ -72,24 +72,24 @@ export default function FeedPostCard({
       <div className="flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 pt-3">
         <button
           onClick={() => toggleLike(post.id)}
-          className="flex items-center gap-1 hover:text-blue-500 transition"
+          className="flex items-center gap-1 hover:text-[#800000] transition"
         >
           <HandThumbUpIcon
             className={`h-5 w-5 ${
-              post.liked ? "text-blue-500" : "text-gray-400"
+              post.liked ? "text-[#800000]" : "text-gray-400"
             }`}
           />
           <span>{post.likes}</span>
         </button>
 
-        <button className="flex items-center gap-1 hover:text-indigo-500 transition">
+        <button className="flex items-center gap-1 hover:text-[#800000] transition">
           <ChatBubbleLeftIcon className="h-5 w-5" />
           <span>{post.comments.length}</span>
         </button>
 
         <button
           onClick={() => sharePost(post)}
-          className="flex items-center gap-1 hover:text-purple-500 transition"
+          className="flex items-center gap-1 hover:text-[#800000] transition"
         >
           <ShareIcon className="h-5 w-5" />
           <span>Share</span>
@@ -119,11 +119,11 @@ export default function FeedPostCard({
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             placeholder="Write a comment..."
-            className="flex-1 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
+            className="flex-1 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#800000] dark:bg-gray-700 dark:text-white"
           />
           <button
             onClick={handleComment}
-            className="p-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition"
+            className="p-2 text-white bg-[#800000] rounded-lg hover:bg-[#a00000] transition"
           >
             <PaperAirplaneIcon className="h-4 w-4" />
           </button>
