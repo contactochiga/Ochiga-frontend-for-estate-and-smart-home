@@ -33,7 +33,7 @@ export default function ComposerCard({
     <div className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md">
       <textarea
         placeholder="Share an update with your estate..."
-        className="w-full bg-transparent resize-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-2 rounded-md border border-gray-100 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500"
+        className="w-full bg-transparent resize-none outline-none text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 p-2 rounded-md border border-gray-100 dark:border-gray-700 focus:ring-2 focus:ring-[#800000]"
         rows={3}
         value={newPostText}
         onChange={(e) => setNewPostText(e.target.value)}
@@ -91,9 +91,10 @@ export default function ComposerCard({
           </button>
         </div>
 
+        {/* ✅ Maroon Post button */}
         <button
           onClick={makePost}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-4 py-2 rounded-lg shadow hover:opacity-95 transition"
+          className="bg-gradient-to-r from-[#800000] to-black text-white px-4 py-2 rounded-lg shadow hover:opacity-95 transition"
         >
           Post
         </button>
