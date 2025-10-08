@@ -46,7 +46,6 @@ export default function ResidentHeader() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Community removed here
   const menuItems = [
     { name: "Maintenance", href: "/dashboard/maintenance", icon: WrenchScrewdriverIcon },
     { name: "Utilities", href: "/dashboard/Utilities", icon: BoltIcon },
@@ -198,48 +197,59 @@ export default function ResidentHeader() {
         </div>
       </div>
 
-      {/* SIDEBAR */}
-      {sidebarOpen && (
-        <>
-          <div
-            className="fixed inset-0 backdrop-blur-md z-40"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-50 p-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-[#800000] dark:text-[#ffcccc]">
-                Resident Tools
-              </h2>
-              <button onClick={() => setSidebarOpen(false)}>
-                <XMarkIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
-              </button>
-            </div>
+      {/* ✅ Animated SIDEBAR using Framer Motion */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 backdrop-blur-md z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+            />
+            <motion.div
+              className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-50 p-4"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-[#800000] dark:text-[#ffcccc]">
+                  Resident Tools
+                </h2>
+                <button onClick={() => setSidebarOpen(false)}>
+                  <XMarkIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+                </button>
+              </div>
 
-            <ul className="space-y-4 text-gray-700 dark:text-gray-200">
-              {menuItems.map((item) => {
-                const isActive = pathname.startsWith(item.href);
-                return (
-                  <li
-                    key={item.name}
-                    onClick={() => {
-                      setSidebarOpen(false);
-                      router.push(item.href);
-                    }}
-                    className={`flex items-center space-x-3 cursor-pointer p-2 rounded-md ${
-                      isActive
-                        ? "bg-[#800000]/10 text-[#800000] dark:bg-[#800000] dark:text-white"
-                        : "hover:text-[#800000]"
-                    }`}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span>{item.name}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </>
-      )}
+              <ul className="space-y-4 text-gray-700 dark:text-gray-200">
+                {menuItems.map((item) => {
+                  const isActive = pathname.startsWith(item.href);
+                  return (
+                    <li
+                      key={item.name}
+                      onClick={() => {
+                        setSidebarOpen(false);
+                        router.push(item.href);
+                      }}
+                      className={`flex items-center space-x-3 cursor-pointer p-2 rounded-md ${
+                        isActive
+                          ? "bg-[#800000]/10 text-[#800000] dark:bg-[#800000] dark:text-white"
+                          : "hover:text-[#800000]"
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <span>{item.name}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
