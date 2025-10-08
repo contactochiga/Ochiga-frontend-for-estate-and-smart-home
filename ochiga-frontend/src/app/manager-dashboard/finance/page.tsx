@@ -34,7 +34,7 @@ ChartJS.register(
   ArcElement
 );
 
-// Format date helper
+// Helper: format date
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
   return new Intl.DateTimeFormat("en-GB", {
@@ -46,7 +46,12 @@ const formatDate = (dateString: string) => {
 
 type ChartKey = "revenue" | "collections" | "expenses";
 
-// Unified Insights Chart Component
+/**
+ * ChartTabs
+ * - Buttons sit in their own row under "Insights"
+ * - Proper spacing (no overlap)
+ * - Active tab shows maroon border (#800000)
+ */
 function ChartTabs({
   revenueTrend,
   collectionsRate,
@@ -58,16 +63,15 @@ function ChartTabs({
 }) {
   const [active, setActive] = useState<ChartKey>("revenue");
 
-  const TabButton: React.FC<{ id: ChartKey; label: string }> = ({
-    id,
-    label,
-  }) => (
+  const TabButton: React.FC<{ id: ChartKey; label: string }> = ({ id, label }) => (
     <button
+      type="button"
+      aria-pressed={active === id}
       onClick={() => setActive(id)}
-      className={`px-3 py-1 text-sm rounded-md font-medium transition ${
+      className={`px-3 py-1.5 text-sm rounded-md font-medium transition-all duration-150 border ${
         active === id
-          ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
-          : "bg-transparent text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/60"
+          ? "border-[#800000] bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+          : "border-transparent text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/60"
       }`}
     >
       {label}
@@ -75,56 +79,72 @@ function ChartTabs({
   );
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-          Insights
-        </h2>
-        <div className="flex gap-2 items-center">
-          <TabButton id="revenue" label="Revenue" />
-          <TabButton id="collections" label="Collections" />
-          <TabButton id="expenses" label="Expenses" />
-        </div>
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3">Insights</h2>
+
+      {/* Buttons row below title — dedicated space and gap */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <TabButton id="revenue" label="Revenue" />
+        <TabButton id="collections" label="Collections" />
+        <TabButton id="expenses" label="Expenses" />
       </div>
 
-      <div className="h-64 flex items-center justify-center">
+      {/* Chart area — fixed height, responsive, no overlap */}
+      <div className="w-full h-[280px] md:h-64 flex items-center justify-center">
         {active === "revenue" && (
-          <Line
-            data={revenueTrend}
-            options={{
-              plugins: { legend: { display: false } },
-              scales: {
-                y: {
-                  ticks: { callback: (v) => `₦${v}` },
-                  grid: { color: "rgba(156,163,175,0.08)" },
+          <div className="w-full h-full">
+            <Line
+              data={revenueTrend}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                  y: {
+                    ticks: {
+                      callback: (v) => `₦${v}`,
+                    },
+                    grid: { color: "rgba(156,163,175,0.08)" },
+                  },
+                  x: { grid: { display: false } },
                 },
-                x: { grid: { display: false } },
-              },
-              maintainAspectRatio: false,
-            }}
-          />
+              }}
+            />
+          </div>
         )}
 
         {active === "collections" && (
-          <Doughnut
-            data={collectionsRate}
-            options={{
-              plugins: {
-                legend: { position: "bottom", labels: { boxWidth: 14 } },
-              },
-            }}
-          />
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="max-w-xs w-full h-full">
+              <Doughnut
+                data={collectionsRate}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: "bottom", labels: { boxWidth: 12 } },
+                  },
+                }}
+              />
+            </div>
+          </div>
         )}
 
         {active === "expenses" && (
-          <Doughnut
-            data={expensesBreakdown}
-            options={{
-              plugins: {
-                legend: { position: "bottom", labels: { boxWidth: 14 } },
-              },
-            }}
-          />
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="max-w-xs w-full h-full">
+              <Doughnut
+                data={expensesBreakdown}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { position: "bottom", labels: { boxWidth: 12 } },
+                  },
+                }}
+              />
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -171,6 +191,7 @@ export default function FinancePage() {
     ],
   };
 
+  // --- Transactions + KPIs ---
   const transactions = [
     {
       id: 1,
@@ -243,8 +264,11 @@ export default function FinancePage() {
           </p>
         </div>
 
-        {/* New Invoice button only (Funds removed) */}
-        <button className="flex items-center px-4 py-2 border-2 border-[#800000] bg-gray-100 text-gray-900 rounded-lg font-medium hover:bg-gray-200 shadow-sm transition">
+        {/* New Invoice: maroon border, grey bg, dark mode aware */}
+        <button
+          type="button"
+          className="flex items-center px-4 py-2 border-2 border-[#800000] bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-700 shadow-sm transition"
+        >
           <PlusIcon className="w-5 h-5 mr-2 text-[#800000]" />
           New Invoice
         </button>
@@ -258,23 +282,20 @@ export default function FinancePage() {
             className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition p-4 flex justify-between items-center"
           >
             <div>
-              <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
-                {card.label}
-              </p>
+              <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">{card.label}</p>
               <p className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white mt-1">
                 {card.value}
               </p>
             </div>
-            <div
-              className={`p-2 md:p-3 rounded-xl ${card.bg} flex items-center justify-center`}
-            >
+
+            <div className={`p-2 md:p-3 rounded-xl ${card.bg} flex items-center justify-center`}>
               <card.Icon className={`w-5 h-5 md:w-6 md:h-6 ${card.color}`} />
             </div>
           </div>
         ))}
       </div>
 
-      {/* Charts + Right Summary */}
+      {/* Charts + Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartTabs
           revenueTrend={revenueTrend}
@@ -285,23 +306,49 @@ export default function FinancePage() {
         {/* Right summary section */}
         <div className="space-y-6">
           <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 shadow-sm">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200">
-              Quick Summary
-            </h3>
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200">Quick Summary</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Revenue is trending up. Collections at{" "}
-              <span className="font-semibold">85%</span>. Keep an eye on Repairs
-              & Utilities.
+              Revenue is trending up. Collections at <span className="font-semibold">85%</span>.
+              Keep an eye on Repairs & Utilities.
             </p>
+          </div>
+
+          {/* Small cards for doughnuts (optional visual backup) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
+              <h4 className="text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100">Collections Rate</h4>
+              <div className="w-full h-28">
+                <Doughnut
+                  data={collectionsRate}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } },
+                  }}
+                />
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
+              <h4 className="text-sm font-semibold mb-2 text-gray-800 dark:text-gray-100">Expenses Breakdown</h4>
+              <div className="w-full h-28">
+                <Doughnut
+                  data={expensesBreakdown}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: "bottom", labels: { boxWidth: 12 } } },
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Recent Transactions */}
       <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
-          Recent Transactions
-        </h2>
+        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Recent Transactions</h2>
 
         {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
@@ -318,22 +365,11 @@ export default function FinancePage() {
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {transactions.map((t) => (
-                <tr
-                  key={t.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800/60 transition"
-                >
-                  <td className="px-4 py-3 text-gray-800 dark:text-gray-200">
-                    {formatDate(t.date)}
-                  </td>
-                  <td className="px-4 py-3 text-gray-800 dark:text-gray-200">
-                    {t.resident}
-                  </td>
-                  <td className="px-4 py-3 text-gray-800 dark:text-gray-200">
-                    {t.type}
-                  </td>
-                  <td className="px-4 py-3 text-gray-800 dark:text-gray-200">
-                    ₦{t.amount.toLocaleString()}
-                  </td>
+                <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/60 transition">
+                  <td className="px-4 py-3 text-gray-800 dark:text-gray-200">{formatDate(t.date)}</td>
+                  <td className="px-4 py-3 text-gray-800 dark:text-gray-200">{t.resident}</td>
+                  <td className="px-4 py-3 text-gray-800 dark:text-gray-200">{t.type}</td>
+                  <td className="px-4 py-3 text-gray-800 dark:text-gray-200">₦{t.amount.toLocaleString()}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -348,9 +384,7 @@ export default function FinancePage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                      View
-                    </button>
+                    <button className="text-blue-600 dark:text-blue-400 hover:underline font-medium">View</button>
                   </td>
                 </tr>
               ))}
@@ -361,23 +395,14 @@ export default function FinancePage() {
         {/* Mobile Cards */}
         <div className="md:hidden space-y-3">
           {transactions.map((t) => (
-            <div
-              key={t.id}
-              className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg flex flex-col gap-2"
-            >
+            <div key={t.id} className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                    {t.resident}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-300">
-                    {t.type} • {formatDate(t.date)}
-                  </p>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-100">{t.resident}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-300">{t.type} • {formatDate(t.date)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                    ₦{t.amount.toLocaleString()}
-                  </p>
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">₦{t.amount.toLocaleString()}</p>
                   <p
                     className={`text-xs mt-1 px-2 py-0.5 rounded-full inline-block ${
                       t.status === "Paid"
@@ -391,10 +416,9 @@ export default function FinancePage() {
                   </p>
                 </div>
               </div>
+
               <div className="flex items-center justify-end">
-                <button className="text-blue-600 dark:text-blue-400 text-sm font-medium">
-                  View
-                </button>
+                <button className="text-blue-600 dark:text-blue-400 text-sm font-medium">View</button>
               </div>
             </div>
           ))}
@@ -403,24 +427,15 @@ export default function FinancePage() {
 
       {/* Debt Management */}
       <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
-          Debt Management
-        </h2>
+        <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">Debt Management</h2>
         <ul className="space-y-3">
           {[
             { name: "Jane Smith (Apt 3C)", amount: "₦50,000 outstanding" },
             { name: "David Lee (Apt 2A)", amount: "₦15,000 overdue" },
           ].map((debtor, i) => (
-            <li
-              key={i}
-              className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl"
-            >
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                {debtor.name} – {debtor.amount}
-              </span>
-              <button className="mt-2 sm:mt-0 px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700 transition">
-                Remind
-              </button>
+            <li key={i} className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center bg-gray-50 dark:bg-gray-800/50 p-3 rounded-xl">
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{debtor.name} – {debtor.amount}</span>
+              <button className="mt-2 sm:mt-0 px-3 py-1 bg-red-600 text-white rounded-md text-xs hover:bg-red-700 transition">Remind</button>
             </li>
           ))}
         </ul>
