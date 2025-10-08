@@ -1,4 +1,3 @@
-// src/app/dashboard/rooms/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -71,8 +70,6 @@ const devices = [
 
 export default function RoomsPage() {
   const [activeRoom, setActiveRoom] = useState("All");
-
-  // ✅ FIXED TYPE ISSUE HERE
   const [deviceStates, setDeviceStates] = useState<Record<number, string>>(
     devices.reduce(
       (acc, d) => ({ ...acc, [d.id]: d.status }),
@@ -107,16 +104,14 @@ export default function RoomsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-black text-gray-900 dark:text-white p-6 pb-24 space-y-6 relative">
-      {/* Page Header */}
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-        Rooms & Devices
-      </h1>
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100 p-6 pb-24 space-y-6 relative">
+      {/* Header */}
+      <h1 className="text-2xl font-bold">Rooms & Devices</h1>
       <p className="text-sm text-gray-600 dark:text-gray-400">
         Manage your rooms and control connected devices in real-time.
       </p>
 
-      {/* Scrollable Rooms Tabs */}
+      {/* Room Tabs */}
       <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
         {rooms.map((room) => (
           <button
@@ -125,7 +120,7 @@ export default function RoomsPage() {
             className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all
               ${
                 activeRoom === room
-                  ? "bg-gradient-to-r from-[#800000] to-black text-white shadow-md"
+                  ? "bg-[#800000] text-white shadow"
                   : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
               }`}
           >
@@ -133,7 +128,6 @@ export default function RoomsPage() {
           </button>
         ))}
 
-        {/* Add Room Button */}
         <button
           onClick={() => setShowAddRoom(true)}
           className="px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all border-2 border-dashed border-gray-400 dark:border-gray-600 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800 flex items-center gap-1"
@@ -150,7 +144,7 @@ export default function RoomsPage() {
             onClick={() => setSelectedDevice(device)}
             className={`rounded-xl p-4 flex flex-col justify-between cursor-pointer
               bg-white dark:bg-gray-900 
-              shadow-sm border transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]
+              shadow border transition-transform duration-200 hover:scale-[1.03]
               ${
                 deviceStates[device.id] === "On" ||
                 deviceStates[device.id] === "Unlocked"
@@ -164,8 +158,8 @@ export default function RoomsPage() {
                   ${
                     deviceStates[device.id] === "On" ||
                     deviceStates[device.id] === "Unlocked"
-                      ? "bg-gradient-to-br from-[#800000] to-black text-white shadow-inner"
-                      : "bg-gray-100 dark:bg-gray-700 text-gray-500"
+                      ? "bg-[#800000] text-white"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-500"
                   }`}
               >
                 {device.icon}
@@ -176,7 +170,7 @@ export default function RoomsPage() {
                     deviceStates[device.id] === "On" ||
                     deviceStates[device.id] === "Unlocked"
                       ? "bg-[#800000]/20 text-[#800000] border-[#800000]/40"
-                      : "bg-gray-200 dark:bg-gray-700 text-gray-500 border-gray-300 dark:border-gray-600"
+                      : "bg-gray-200 dark:bg-gray-800 text-gray-500 border-gray-300 dark:border-gray-600"
                   }`}
               >
                 {deviceStates[device.id]}
@@ -184,9 +178,7 @@ export default function RoomsPage() {
             </div>
 
             <div>
-              <h3 className="font-semibold text-sm text-gray-900 dark:text-white">
-                {device.name}
-              </h3>
+              <h3 className="font-semibold text-sm">{device.name}</h3>
               <p className="text-xs text-gray-600 dark:text-gray-400">
                 {device.location}
               </p>
@@ -195,235 +187,13 @@ export default function RoomsPage() {
         ))}
       </div>
 
-      {/* Floating Add Device Button */}
+      {/* Floating Button */}
       <button
         onClick={() => setShowAddDevice(true)}
-        className="fixed bottom-20 right-6 w-14 h-14 rounded-full bg-gradient-to-r from-[#800000] to-black text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform z-50"
+        className="fixed bottom-20 right-6 w-14 h-14 rounded-full bg-[#800000] text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform z-50"
       >
         <MdAdd className="text-2xl" />
       </button>
-
-      {/* Device Control Modal */}
-      {selectedDevice && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {selectedDevice.name} Control
-              </h3>
-              <button
-                onClick={() => setSelectedDevice(null)}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="flex flex-col items-center gap-5 py-4 text-gray-800 dark:text-gray-200">
-              {selectedDevice.icon}
-              <p className="text-sm">
-                Current Status:{" "}
-                <span
-                  className={`font-semibold ${
-                    deviceStates[selectedDevice.id] === "On" ||
-                    deviceStates[selectedDevice.id] === "Unlocked"
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }`}
-                >
-                  {deviceStates[selectedDevice.id]}
-                </span>
-              </p>
-
-              {selectedDevice.type === "light" && (
-                <button
-                  onClick={() => toggleDevice(selectedDevice.id)}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-semibold hover:opacity-90"
-                >
-                  Toggle Light
-                </button>
-              )}
-
-              {selectedDevice.type === "door" && (
-                <button
-                  onClick={() => toggleDevice(selectedDevice.id)}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-semibold hover:opacity-90"
-                >
-                  {deviceStates[selectedDevice.id] === "Locked"
-                    ? "Unlock Door"
-                    : "Lock Door"}
-                </button>
-              )}
-
-              {selectedDevice.type === "ac" && (
-                <div className="flex items-center gap-3">
-                  <button className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700">
-                    -
-                  </button>
-                  <span className="text-base font-bold">22°C</span>
-                  <button className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-700">
-                    +
-                  </button>
-                </div>
-              )}
-
-              {selectedDevice.type === "tv" && (
-                <div className="grid grid-cols-3 gap-2">
-                  {["⏮", "⏯", "⏭"].map((btn) => (
-                    <button
-                      key={btn}
-                      className="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
-                    >
-                      {btn}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {selectedDevice.type === "cctv" && (
-                <div className="w-full h-36 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    🔴 Live Camera Feed
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Room Modal */}
-      {showAddRoom && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Add New Room
-            </h3>
-            <input
-              type="text"
-              placeholder="Room Name"
-              value={newRoom}
-              onChange={(e) => setNewRoom(e.target.value)}
-              className="w-full px-4 py-2 mb-4 rounded-lg border dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
-            />
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setShowAddRoom(false)}
-                className="px-4 py-2 rounded-lg text-gray-600 dark:text-gray-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (newRoom.trim()) {
-                    rooms.push(newRoom); // mock add
-                    setNewRoom("");
-                    setShowAddRoom(false);
-                  }
-                }}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#800000] to-black text-white font-semibold"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Add Device Modal */}
-      {showAddDevice && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Add New Device
-            </h3>
-
-            <div className="space-y-4">
-              <button
-                onClick={() => alert("Scanning local Wi-Fi network...")}
-                className="w-full flex items-center gap-3 p-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-              >
-                <span className="text-xl">📡</span>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    Auto Discover (Wi-Fi)
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Scan your local network for supported devices
-                  </p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => alert("Scanning for Bluetooth devices...")}
-                className="w-full flex items-center gap-3 p-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-              >
-                <span className="text-xl">🔵</span>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    Nearby via Bluetooth
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Detect devices broadcasting over BLE
-                  </p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => alert("Manual add (QR/Code/Category)...")}
-                className="w-full flex items-center gap-3 p-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
-              >
-                <span className="text-xl">➕</span>
-                <div className="text-left">
-                  <p className="font-medium text-gray-900 dark:text-white">
-                    Manual Add
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Add by QR code, device ID, or select category
-                  </p>
-                </div>
-              </button>
-            </div>
-
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setShowAddDevice(false)}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#800000] to-black text-white font-semibold"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Animations */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-        @keyframes scaleUp {
-          from {
-            opacity: 0;
-            transform: scale(0.9);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.25s ease-out;
-        }
-        .animate-scaleUp {
-          animation: scaleUp 0.25s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
