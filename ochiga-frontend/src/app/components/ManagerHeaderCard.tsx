@@ -9,15 +9,13 @@ export default function EstateHeader() {
   };
 
   return (
-    <div className="rounded-2xl p-6 shadow-md bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white">
+    <div className="rounded-2xl p-6 shadow-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
       {/* Greeting */}
       <p className="text-sm text-gray-600 dark:text-gray-400">Good afternoon,</p>
       <h2 className="text-lg font-medium mt-1">Manager John</h2>
 
       {/* Estate Info */}
-      <h1 className="text-2xl font-bold mt-4 tracking-tight">
-        Ochiga Estate
-      </h1>
+      <h1 className="text-2xl font-bold mt-4 tracking-tight">Ochiga Estate</h1>
       <h1 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
         Phase 2
       </h1>
