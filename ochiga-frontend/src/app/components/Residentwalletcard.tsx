@@ -118,11 +118,12 @@ export default function ResidentWalletCard() {
           </button>
         </div>
 
-        {/* Right Section */}
+        {/* Right Section - Fund Button */}
         <button
           onClick={() => setShowModal(true)}
-          className="bg-[#800000] text-white px-3 py-1.5 rounded-md font-medium text-xs 
-                     flex items-center gap-1 whitespace-nowrap shadow-sm hover:bg-[#a00000] transition"
+          className="px-3 py-1.5 rounded-md font-medium text-xs flex items-center gap-1 
+                     whitespace-nowrap shadow-sm border border-[#800000] bg-gray-100 text-black 
+                     hover:bg-[#800000] hover:text-white transition"
         >
           <BanknotesIcon className="h-4 w-4" />
           Fund
@@ -166,10 +167,12 @@ export default function ResidentWalletCard() {
                     {accountNumber}
                   </p>
                 </div>
+                {/* Copy Button */}
                 <button
                   onClick={copyToClipboard}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-md bg-[#800000] text-white 
-                             text-xs font-medium shadow hover:bg-[#a00000]"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-md border border-[#800000] 
+                             bg-gray-100 text-black text-xs font-medium shadow-sm 
+                             hover:bg-[#800000] hover:text-white transition"
                 >
                   {copied ? (
                     <>
