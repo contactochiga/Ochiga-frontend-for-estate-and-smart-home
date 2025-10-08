@@ -106,9 +106,9 @@ export default function CommunityPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-5 space-y-6">
+    <main className="min-h-screen bg-gray-50 px-4 py-5 space-y-6">
       {/* ✅ Header */}
-      <h1 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+      <h1 className="text-lg font-semibold text-gray-800 mb-2">
         Community
       </h1>
 
