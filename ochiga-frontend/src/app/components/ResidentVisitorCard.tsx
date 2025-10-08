@@ -61,9 +61,9 @@ export default function ResidentVisitorCard() {
       {/* Invite button */}
       <button
         onClick={() => router.push("/dashboard/visitors")}
-        className="w-full flex items-center justify-center gap-2 py-2.5 mt-5 rounded-lg bg-gradient-to-r from-[#800000] to-black text-white text-sm font-medium shadow-md hover:opacity-90 transition"
+        className="w-full flex items-center justify-center gap-2 py-2.5 mt-5 rounded-lg border border-[#800000] bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition"
       >
-        <QrCodeIcon className="h-4 w-4" />
+        <QrCodeIcon className="h-4 w-4 text-[#800000]" />
         Invite Visitor
       </button>
     </div>
