@@ -1,4 +1,3 @@
-// src/app/manager-dashboard/components/EstateStatsCard.tsx
 "use client";
 
 import {
@@ -37,7 +36,7 @@ export default function EstateStatsCard() {
   ];
 
   return (
-    <div className="rounded-2xl p-5 shadow-md bg-white dark:bg-gradient-to-br dark:from-[#4A0E0E] dark:via-black dark:to-gray-900 text-gray-900 dark:text-white">
+    <div className="rounded-2xl p-5 shadow-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
       <h2 className="text-lg font-semibold mb-4">Estate Overview</h2>
 
       <div className="grid grid-cols-2 gap-4">
