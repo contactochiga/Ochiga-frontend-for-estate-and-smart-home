@@ -91,14 +91,15 @@ export default function WalletPage() {
         </h2>
 
         {/* Fund Wallet button */}
-        <button
-          onClick={() => setShowModal(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl 
-            bg-[#800000] text-white font-medium shadow-md hover:opacity-90 transition"
-        >
-          <BanknotesIcon className="h-6 w-6" />
-          Fund Wallet
-        </button>
+<button
+  onClick={() => setShowModal(true)}
+  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl 
+    bg-[#800000] text-white font-medium shadow-md 
+    hover:bg-[#a00000] dark:hover:bg-white dark:hover:text-[#800000] transition"
+>
+  <BanknotesIcon className="h-6 w-6" />
+  Fund Wallet
+</button>
       </div>
 
       {/* Transaction History */}
