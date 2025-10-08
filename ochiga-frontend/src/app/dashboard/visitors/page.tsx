@@ -145,7 +145,7 @@ export default function VisitorsPage() {
 
         <button
           type="submit"
-          className="mt-6 w-full py-2.5 rounded-xl font-semibold shadow bg-gradient-to-r from-[#800000] to-black text-white hover:opacity-90 transition flex items-center justify-center gap-2 text-sm"
+          className="mt-6 w-full py-2.5 rounded-xl font-semibold shadow bg-gradient-to-r from-[#800000] to-black text-white hover:bg-[#a00000] dark:hover:text-white transition flex items-center justify-center gap-2 text-sm"
         >
           <PlusIcon className="h-4 w-4" />
           Invite Visitor
@@ -190,7 +190,7 @@ export default function VisitorsPage() {
                 <div className="flex flex-wrap gap-2 mt-4">
                   <button
                     onClick={() => copyCode(v.code)}
-                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:text-[#800000] dark:hover:text-white"
                   >
                     <ClipboardDocumentIcon className="h-4 w-4" />
                     Copy
@@ -204,7 +204,7 @@ export default function VisitorsPage() {
                   </button>
                   <button
                     onClick={() => setSelectedVisitor(v)}
-                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-gradient-to-r from-[#800000] to-black text-white hover:opacity-90"
+                    className="flex items-center gap-1 px-3 py-1 text-xs rounded-lg bg-gradient-to-r from-[#800000] to-black text-white hover:opacity-90 dark:hover:text-white"
                   >
                     <UserIcon className="h-4 w-4" />
                     Details
@@ -237,7 +237,7 @@ export default function VisitorsPage() {
               </h3>
               <button
                 onClick={() => setSelectedVisitor(null)}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                className="text-gray-500 hover:text-[#800000] dark:hover:text-white"
               >
                 ✕
               </button>
