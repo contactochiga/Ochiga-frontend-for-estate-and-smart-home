@@ -22,7 +22,6 @@ import {
 } from "chart.js";
 import { Line, Doughnut } from "react-chartjs-2";
 
-// === Chart.js Config ===
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -35,7 +34,6 @@ ChartJS.register(
   ArcElement
 );
 
-// === Date Formatter ===
 const formatDate = (dateString: string) => {
   if (!dateString) return "";
   return new Intl.DateTimeFormat("en-GB", {
@@ -111,82 +109,96 @@ export default function FinancePage() {
     },
   ];
 
+  const kpis = [
+    {
+      label: "Total Revenue (MTD)",
+      value: "₦750,000",
+      Icon: BanknotesIcon,
+      color: "text-green-500",
+      bg: "bg-green-100 dark:bg-green-900/30",
+    },
+    {
+      label: "Outstanding Balances",
+      value: "₦120,000",
+      Icon: ExclamationCircleIcon,
+      color: "text-red-500",
+      bg: "bg-red-100 dark:bg-red-900/30",
+    },
+    {
+      label: "Pending Payments",
+      value: "₦50,000",
+      Icon: DocumentTextIcon,
+      color: "text-yellow-500",
+      bg: "bg-yellow-100 dark:bg-yellow-900/30",
+    },
+    {
+      label: "Collections Rate",
+      value: "85%",
+      Icon: ArrowTrendingUpIcon,
+      color: "text-blue-500",
+      bg: "bg-blue-100 dark:bg-blue-900/30",
+    },
+  ];
+
   return (
-    <div className="p-6 space-y-10 font-[Inter]">
-      {/* === Header === */}
+    <div className="p-6 space-y-10 font-inter bg-gray-50 dark:bg-gray-950 min-h-screen transition-colors duration-300">
+      {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
-          Finance Overview
-        </h1>
-        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm transition">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Finance Overview
+          </h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Track revenue, payments, and performance across your estate.
+          </p>
+        </div>
+
+        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 shadow transition">
           <PlusIcon className="w-5 h-5 mr-2" />
           New Invoice
         </button>
       </div>
 
-      {/* === KPI CARDS === */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        {[
-          {
-            label: "Total Revenue (MTD)",
-            value: "₦750,000",
-            Icon: BanknotesIcon,
-            color: "text-green-500",
-          },
-          {
-            label: "Outstanding Balances",
-            value: "₦120,000",
-            Icon: ExclamationCircleIcon,
-            color: "text-red-500",
-          },
-          {
-            label: "Pending Payments",
-            value: "₦50,000",
-            Icon: DocumentTextIcon,
-            color: "text-yellow-500",
-          },
-          {
-            label: "Collections Rate",
-            value: "85%",
-            Icon: ArrowTrendingUpIcon,
-            color: "text-blue-500",
-          },
-        ].map((card, i) => (
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {kpis.map((card, i) => (
           <div
             key={i}
-            className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5 flex justify-between items-center hover:shadow transition"
+            className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition p-5 flex justify-between items-center"
           >
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {card.label}
               </p>
-              <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">
+              <p className="text-2xl font-semibold text-gray-900 dark:text-white mt-1">
                 {card.value}
               </p>
             </div>
-            <card.Icon className={`w-10 h-10 ${card.color}`} />
+            <div
+              className={`p-3 rounded-xl ${card.bg} flex items-center justify-center`}
+            >
+              <card.Icon className={`w-6 h-6 ${card.color}`} />
+            </div>
           </div>
         ))}
       </div>
 
-      {/* === CHARTS === */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Revenue Trend */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5 col-span-2">
-          <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
+        <div className="col-span-2 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 shadow-sm hover:shadow-md transition">
+          <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
             Revenue Trend
           </h2>
           <div className="h-64">
             <Line
               data={revenueTrend}
               options={{
-                plugins: {
-                  legend: { display: false },
-                },
+                plugins: { legend: { display: false } },
                 scales: {
                   y: {
                     ticks: { callback: (v) => `₦${v}` },
-                    grid: { color: "rgba(156,163,175,0.2)" },
+                    grid: { color: "rgba(156,163,175,0.15)" },
                   },
                   x: { grid: { display: false } },
                 },
@@ -197,58 +209,54 @@ export default function FinancePage() {
         </div>
 
         {/* Doughnuts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5 h-64 flex flex-col">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
               Collections Rate
             </h2>
             <Doughnut
               data={collectionsRate}
               options={{
-                plugins: {
-                  legend: { position: "bottom", labels: { boxWidth: 14 } },
-                },
+                plugins: { legend: { position: "bottom", labels: { boxWidth: 14 } } },
               }}
             />
           </div>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5 h-64 flex flex-col">
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
             <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
               Expenses Breakdown
             </h2>
             <Doughnut
               data={expensesBreakdown}
               options={{
-                plugins: {
-                  legend: { position: "bottom", labels: { boxWidth: 14 } },
-                },
+                plugins: { legend: { position: "bottom", labels: { boxWidth: 14 } } },
               }}
             />
           </div>
         </div>
       </div>
 
-      {/* === TRANSACTIONS TABLE === */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5">
+      {/* Transactions Table */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
         <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
           Recent Transactions
         </h2>
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm text-left border-separate border-spacing-y-2">
+          <table className="min-w-full text-sm text-left">
             <thead>
-              <tr className="text-gray-600 dark:text-gray-400 uppercase text-xs font-medium tracking-wide">
+              <tr className="text-gray-600 dark:text-gray-400 uppercase text-xs font-semibold tracking-wide border-b dark:border-gray-700">
                 <th className="px-4 py-2">Date</th>
                 <th className="px-4 py-2">Resident</th>
                 <th className="px-4 py-2">Type</th>
                 <th className="px-4 py-2">Amount</th>
                 <th className="px-4 py-2">Status</th>
-                <th className="px-4 py-2">Action</th>
+                <th className="px-4 py-2 text-right">Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {transactions.map((t) => (
                 <tr
                   key={t.id}
-                  className="bg-gray-50 dark:bg-gray-800/40 hover:bg-gray-100 dark:hover:bg-gray-700/60 transition"
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800/60 transition"
                 >
                   <td className="px-4 py-2 text-gray-800 dark:text-gray-200">
                     {formatDate(t.date)}
@@ -266,17 +274,17 @@ export default function FinancePage() {
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-semibold ${
                         t.status === "Paid"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300"
                           : t.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
+                          ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300"
+                          : "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300"
                       }`}
                     >
                       {t.status}
                     </span>
                   </td>
-                  <td className="px-4 py-2">
-                    <button className="text-blue-600 hover:underline font-medium">
+                  <td className="px-4 py-2 text-right">
+                    <button className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
                       View
                     </button>
                   </td>
@@ -287,8 +295,8 @@ export default function FinancePage() {
         </div>
       </div>
 
-      {/* === DEBT MANAGEMENT === */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl p-5">
+      {/* Debt Management */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-sm">
         <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100">
           Debt Management
         </h2>
@@ -299,7 +307,7 @@ export default function FinancePage() {
           ].map((debtor, i) => (
             <li
               key={i}
-              className="flex justify-between items-center bg-red-50 dark:bg-red-900/20 p-4 rounded-lg"
+              className="flex justify-between items-center bg-gray-50 dark:bg-gray-800/50 p-4 rounded-xl"
             >
               <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                 {debtor.name} – {debtor.amount}
