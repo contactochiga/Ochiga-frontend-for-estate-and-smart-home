@@ -1,191 +1,213 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import React, { useState } from "react";
 import {
   Bars3Icon,
+  BellIcon,
   XMarkIcon,
   MagnifyingGlassIcon,
-  ChatBubbleOvalLeftEllipsisIcon,
-  BellIcon,
-  UserCircleIcon,
-  UsersIcon,
-  BriefcaseIcon,
-  ChartBarIcon,
-  MegaphoneIcon,
-  ExclamationTriangleIcon,
-  LifebuoyIcon,
-  Cog6ToothIcon,
+  SunIcon,
+  MoonIcon,
 } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+
+interface NavItem {
+  name: string;
+  href: string;
+}
+
+const navItems: NavItem[] = [
+  { name: "Dashboard", href: "/manager-dashboard" },
+  { name: "Projects", href: "/manager-dashboard/projects" },
+  { name: "Finance", href: "/manager-dashboard/finance" },
+  { name: "Reports", href: "/manager-dashboard/reports" },
+  { name: "Staff", href: "/manager-dashboard/staff" },
+];
 
 export default function ManagerHeader() {
-  const [profileOpen, setProfileOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const router = useRouter();
-  const pathname = usePathname();
+  const [darkMode, setDarkMode] = useState(false);
 
-  const profileRef = useRef<HTMLDivElement | null>(null);
-  const searchRef = useRef<HTMLDivElement | null>(null);
-
-  // Outside click handler
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
-        setProfileOpen(false);
-      }
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
-      ) {
-        setSearchOpen(false);
-      }
-    }
-
-    if (profileOpen || searchOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [profileOpen, searchOpen]);
-
-  const menuItems = [
-    { name: "Residents", href: "/manager-dashboard/residents", icon: UsersIcon },
-    { name: "Staff", href: "/manager-dashboard/staff", icon: BriefcaseIcon },
-    { name: "Reports", href: "/manager-dashboard/reports", icon: ChartBarIcon },
-    { name: "Announcements", href: "/manager-dashboard/announcements", icon: MegaphoneIcon },
-    { name: "Complaints", href: "/manager-dashboard/complaints", icon: ExclamationTriangleIcon },
-    { name: "Devices", href: "/manager-dashboard/devices", icon: Cog6ToothIcon },
-    { name: "Support / Help", href: "/manager-dashboard/help", icon: LifebuoyIcon },
-  ];
+  // Toggle dark mode on document body
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle("dark", !darkMode);
+  };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 flex flex-col bg-white dark:bg-gray-800 shadow">
-      <div className="flex items-center justify-between px-4 py-3">
-        {/* Left: Hamburger + Logo */}
-        <div className="flex items-center space-x-3">
-          <button onClick={() => setSidebarOpen(true)}>
-            <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+    <header className="sticky top-0 z-50 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-200 dark:border-gray-700">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Left Section */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            {menuOpen ? (
+              <XMarkIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+            ) : (
+              <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+            )}
           </button>
-          {/* Ochiga brand in black */}
-          <h1 className="text-lg font-bold text-black dark:text-white">Ochiga</h1>
+          <Link href="/manager-dashboard" className="flex items-center gap-2">
+            <Image
+              src="/logo.svg"
+              alt="Company Logo"
+              width={32}
+              height={32}
+              className="rounded-full"
+            />
+            <span className="hidden sm:block font-semibold text-gray-900 dark:text-gray-100 text-lg">
+              Manager Panel
+            </span>
+          </Link>
         </div>
 
-        {/* Right: Icons */}
-        <div className="flex items-center space-x-4">
-          {/* Search */}
-          <div ref={searchRef} className="relative flex items-center">
-            <button onClick={() => setSearchOpen(!searchOpen)}>
-              <MagnifyingGlassIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+        {/* Center Nav Links */}
+        <nav className="hidden md:flex items-center gap-6">
+          {navItems.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Right Section */}
+        <div className="flex items-center gap-3">
+          {/* Animated Search Bar */}
+          <div className="relative flex items-center">
+            {searchOpen ? (
+              <motion.input
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 160, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                type="text"
+                placeholder="Search..."
+                className="rounded-lg bg-gray-100 dark:bg-gray-800 px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-200"
+              />
+            ) : null}
+            <button
+              onClick={() => setSearchOpen(!searchOpen)}
+              className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+            >
+              <MagnifyingGlassIcon className="w-5 h-5 text-gray-700 dark:text-gray-200" />
             </button>
-            {searchOpen && (
-              <div className="absolute top-10 right-0 w-64 px-4 pb-3">
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#800000]"
-                />
-              </div>
-            )}
           </div>
 
-          {/* Chat & Bell */}
-          <ChatBubbleOvalLeftEllipsisIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
-          <BellIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+          {/* Notification Bell */}
+          <button
+            onClick={() => setNotifOpen(true)}
+            className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            <BellIcon className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+          </button>
 
-          {/* Profile */}
-          <div className="relative flex items-center justify-center" ref={profileRef}>
-            <button onClick={() => setProfileOpen(!profileOpen)}>
-              <UserCircleIcon className="w-7 h-7 text-gray-700 dark:text-gray-200" />
-            </button>
-
-            {profileOpen && (
-              <div className="absolute top-10 right-0 z-50 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-2">
-                <button
-                  onClick={() => router.push("/manager-dashboard/profile")}
-                  className={`flex items-center space-x-2 w-full text-left px-4 py-2 text-sm ${
-                    pathname === "/manager-dashboard/profile"
-                      ? "bg-[#800000]/10 text-[#800000] dark:bg-[#800000] dark:text-white"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                  }`}
-                >
-                  <UserCircleIcon className="w-5 h-5" />
-                  <span>My Profile</span>
-                </button>
-                <button
-                  onClick={() => router.push("/manager-dashboard/settings")}
-                  className={`flex items-center space-x-2 w-full text-left px-4 py-2 text-sm ${
-                    pathname === "/manager-dashboard/settings"
-                      ? "bg-[#800000]/10 text-[#800000] dark:bg-[#800000] dark:text-white"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                  }`}
-                >
-                  <Cog6ToothIcon className="w-5 h-5" />
-                  <span>Settings</span>
-                </button>
-                {/* Logout → back to root "/" */}
-                <button
-                  onClick={() => router.push("/")}
-                  className="flex items-center space-x-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                >
-                  <XMarkIcon className="w-5 h-5" />
-                  <span>Logout</span>
-                </button>
-              </div>
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          >
+            {darkMode ? (
+              <SunIcon className="w-5 h-5 text-yellow-400" />
+            ) : (
+              <MoonIcon className="w-5 h-5 text-gray-700 dark:text-gray-200" />
             )}
-          </div>
+          </button>
         </div>
       </div>
 
-      {/* Sidebar Drawer */}
-      {sidebarOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black bg-opacity-40 z-40"
-            onClick={() => setSidebarOpen(false)}
-          ></div>
-
-          <div className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-50 p-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-[#800000] dark:text-[#ffcccc]">
-                Management Tools
-              </h2>
-              <button onClick={() => setSidebarOpen(false)}>
-                <XMarkIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
-              </button>
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.nav
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 overflow-hidden"
+          >
+            <div className="flex flex-col p-3 space-y-2">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition"
+                >
+                  {item.name}
+                </Link>
+              ))}
             </div>
-            <ul className="space-y-4 text-gray-700 dark:text-gray-200">
-              {menuItems.map((item) => {
-                const isActive = pathname ? pathname.startsWith(item.href) : false; // ✅ SAFE FIX
-                return (
-                  <li
-                    key={item.name}
-                    className={`flex items-center space-x-3 cursor-pointer p-2 rounded-md ${
-                      isActive
-                        ? "bg-[#800000]/10 text-[#800000] dark:bg-[#800000] dark:text-white"
-                        : "hover:text-[#800000]"
-                    }`}
-                    onClick={() => {
-                      setSidebarOpen(false);
-                      router.push(item.href);
-                    }}
-                  >
-                    <item.icon className="w-5 h-5" />
-                    <span>{item.name}</span>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        </>
-      )}
+          </motion.nav>
+        )}
+      </AnimatePresence>
+
+      {/* Notification Drawer */}
+      <AnimatePresence>
+        {notifOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black dark:bg-black/80 z-40"
+              onClick={() => setNotifOpen(false)}
+            />
+
+            {/* Drawer */}
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 120, damping: 20 }}
+              className="fixed top-0 right-0 w-80 h-full bg-white dark:bg-gray-900 shadow-xl z-50 border-l border-gray-200 dark:border-gray-700 flex flex-col"
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="font-semibold text-gray-900 dark:text-gray-100">
+                  Notifications
+                </h2>
+                <button
+                  onClick={() => setNotifOpen(false)}
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition"
+                >
+                  <XMarkIcon className="w-5 h-5 text-gray-700 dark:text-gray-200" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+                {/* Placeholder Notifications */}
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-800 dark:text-gray-200">
+                    Payment received from client.
+                  </p>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    10 mins ago
+                  </span>
+                </div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-800 dark:text-gray-200">
+                    New project assigned.
+                  </p>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    1 hour ago
+                  </span>
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
