@@ -1,3 +1,4 @@
+// ochiga-frontend/src/app/components/ManagerFooter.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,7 +17,6 @@ export default function ManagerFooter() {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
-    // ✅ prevent error when pathname is null
     if (!pathname) return;
 
     if (pathname.includes("/houses")) setActiveTab("houses");
@@ -44,12 +44,14 @@ export default function ManagerFooter() {
       {tabs.map(({ id, label, icon: Icon, path }) => (
         <button
           key={id}
-          className={`flex flex-col items-center flex-1 py-2 transition-colors duration-200 ${
-            activeTab === id
-              ? "text-[#800000] font-semibold" // maroon active
-              : "text-gray-500 dark:text-gray-400"
-          } hover:text-[#800000]`} // maroon hover
           onClick={() => handleTabChange(id, path)}
+          className={`flex flex-col items-center flex-1 py-2 transition-all duration-200 
+            ${
+              activeTab === id
+                ? "text-[#800000] dark:text-white font-semibold" // active: maroon on light, white on dark
+                : "text-gray-500 dark:text-gray-400"
+            }
+            hover:text-[#800000] dark:hover:text-white`} // hover: maroon on light, white on dark
         >
           <Icon className="w-5 h-5 mb-0.5" />
           <span className="text-[10px]">{label}</span>
