@@ -1,22 +1,27 @@
 // src/lib/firebase.ts
-"use client";
-
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
-// ✅ Replace with your own config values from Firebase Console → Project Settings
+// ✅ Your Firebase web app configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+  apiKey: "AIzaSyA6S8bITcmIteHZtQqT2ymprpvDWnyLDKU",
+  authDomain: "ochiga-estate-and-smart-home.firebaseapp.com",
+  projectId: "ochiga-estate-and-smart-home",
+  storageBucket: "ochiga-estate-and-smart-home.firebasestorage.app",
+  messagingSenderId: "75170521813",
+  appId: "1:75170521813:web:1e61a95961a923c83cf85c",
+  measurementId: "G-XL1GME509P",
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+// ✅ Avoid re-initializing Firebase if it's already been done
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-export default app;
+// ✅ Initialize Analytics only if supported (browser)
+let analytics: any = null;
+if (typeof window !== "undefined") {
+  isSupported().then((yes) => {
+    if (yes) analytics = getAnalytics(app);
+  });
+}
+
+export { app, analytics };
