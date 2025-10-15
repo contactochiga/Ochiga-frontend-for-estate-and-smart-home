@@ -8,6 +8,7 @@ import {
   MdAcUnit,
   MdVideocam,
 } from "react-icons/md";
+import TVRemoteControl from "./TVRemoteControl"; // ✅ added import
 
 // Room tabs
 const rooms = [
@@ -274,18 +275,12 @@ export default function RoomsDevices() {
                 </div>
               )}
 
-              {/* TV control */}
+              {/* ✅ TV Control (New Flat Maroon Remote) */}
               {selectedDevice.type === "tv" && (
-                <div className="grid grid-cols-3 gap-2">
-                  {["⏮", "⏯", "⏭"].map((btn) => (
-                    <button
-                      key={btn}
-                      className="px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
-                    >
-                      {btn}
-                    </button>
-                  ))}
-                </div>
+                <TVRemoteControl
+                  deviceId={String(selectedDevice.id)}
+                  onClose={() => setSelectedDevice(null)}
+                />
               )}
 
               {/* CCTV feed */}
