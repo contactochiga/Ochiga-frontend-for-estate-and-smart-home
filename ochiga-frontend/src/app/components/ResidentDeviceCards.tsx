@@ -7,6 +7,7 @@ import {
   MdDoorFront,
   MdAcUnit,
   MdVideocam,
+  MdAdd,
 } from "react-icons/md";
 
 import TVRemoteControl from "./TVRemoteControl";
@@ -200,15 +201,18 @@ export default function RoomsDevices() {
             </div>
           ))}
 
-          {/* Add Device Card */}
+          {/* ➕ Add Device Card */}
           <div
             onClick={() => setAddOpen(true)}
-            className="rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer
+            className={`
+              rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer
               bg-white dark:bg-gray-800 shadow-sm border border-dashed border-gray-300 
-              dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#800000]/60 hover:text-[#800000] transition-all duration-200 hover:scale-[1.03] animate-pulse-slow"
+              dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#800000]/60 
+              hover:text-[#800000] transition-all duration-200 hover:scale-[1.03] animate-pulse-slow
+            `}
           >
-            <span className="text-2xl font-bold mb-1">+</span>
-            <span className="text-sm font-medium">Add device</span>
+            <MdAdd className="text-3xl mb-1" />
+            <span className="text-sm font-medium">Add Device</span>
           </div>
         </div>
       </div>
@@ -271,11 +275,11 @@ export default function RoomsDevices() {
         </div>
       )}
 
-      {/* Add device modal */}
+      {/* Add Device Modal */}
       <AddDeviceModal
         open={addOpen}
         onClose={() => setAddOpen(false)}
-        onPaired={(d) => {
+        onPaired={() => {
           setAddOpen(false);
           try {
             if ("vibrate" in navigator) navigator.vibrate(30);
@@ -303,17 +307,6 @@ export default function RoomsDevices() {
             transform: scale(1);
           }
         }
-        @keyframes pulseSlow {
-          0% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.85;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
         .animate-fadeIn {
           animation: fadeIn 0.25s ease-out;
         }
@@ -321,7 +314,15 @@ export default function RoomsDevices() {
           animation: scaleUp 0.25s ease-out;
         }
         .animate-pulse-slow {
-          animation: pulseSlow 2.5s ease-in-out infinite;
+          animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.6;
+          }
         }
       `}</style>
     </div>
