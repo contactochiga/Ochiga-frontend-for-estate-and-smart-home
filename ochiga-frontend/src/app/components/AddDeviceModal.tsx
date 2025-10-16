@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import mqtt from "mqtt/dist/mqtt"; // browser build
+import mqtt from "mqtt"; // browser build
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 type DiscoveredDevice = {
