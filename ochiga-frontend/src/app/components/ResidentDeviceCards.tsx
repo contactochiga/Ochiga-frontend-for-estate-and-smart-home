@@ -13,8 +13,8 @@ import TVRemoteControl from "./TVRemoteControl";
 import ACControlModal from "./ACControlModal";
 import LightControlModal from "./LightControlModal";
 import DoorLockModal from "./DoorLockModal";
-import CCTVModal from "./CCTVModal"; // ✅ NEW IMPORT
-import AddDeviceModal from "./AddDeviceModal"; // ✅ NEW IMPORT
+import CCTVModal from "./CCTVModal";
+import AddDeviceModal from "./AddDeviceModal";
 
 const rooms = [
   "All",
@@ -88,7 +88,6 @@ export default function RoomsDevices() {
     null
   );
 
-  // Add device modal state
   const [addOpen, setAddOpen] = useState(false);
 
   const filteredDevices =
@@ -200,6 +199,17 @@ export default function RoomsDevices() {
               </div>
             </div>
           ))}
+
+          {/* Add Device Card */}
+          <div
+            onClick={() => setAddOpen(true)}
+            className="rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer
+              bg-white dark:bg-gray-800 shadow-sm border border-dashed border-gray-300 
+              dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-[#800000]/60 hover:text-[#800000] transition-all duration-200 hover:scale-[1.03] animate-pulse-slow"
+          >
+            <span className="text-2xl font-bold mb-1">+</span>
+            <span className="text-sm font-medium">Add device</span>
+          </div>
         </div>
       </div>
 
@@ -230,19 +240,10 @@ export default function RoomsDevices() {
               )}
 
               {selectedDevice.type === "ac" && (
-                <>
-                  <ACControlModal
-                    deviceId={String(selectedDevice.id)}
-                    onClose={() => setSelectedDevice(null)}
-                  />
-                  {/* Add Device button appears after AC controls */}
-                  <button
-                    onClick={() => setAddOpen(true)}
-                    className="mt-2 w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    + Add device (scan)
-                  </button>
-                </>
+                <ACControlModal
+                  deviceId={String(selectedDevice.id)}
+                  onClose={() => setSelectedDevice(null)}
+                />
               )}
 
               {selectedDevice.type === "tv" && (
@@ -275,14 +276,10 @@ export default function RoomsDevices() {
         open={addOpen}
         onClose={() => setAddOpen(false)}
         onPaired={(d) => {
-          // simple UX hook: close and show tiny toast / vibrate
           setAddOpen(false);
           try {
             if ("vibrate" in navigator) navigator.vibrate(30);
           } catch {}
-          // optionally add device to local list (UI only)
-          // setDeviceStates(prev => ({ ...prev, [newId]: "Off" }))
-          // or call a callback to reload devices from backend
         }}
       />
 
@@ -306,11 +303,25 @@ export default function RoomsDevices() {
             transform: scale(1);
           }
         }
+        @keyframes pulseSlow {
+          0% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.85;
+          }
+          100% {
+            opacity: 1;
+          }
+        }
         .animate-fadeIn {
           animation: fadeIn 0.25s ease-out;
         }
         .animate-scaleUp {
           animation: scaleUp 0.25s ease-out;
+        }
+        .animate-pulse-slow {
+          animation: pulseSlow 2.5s ease-in-out infinite;
         }
       `}</style>
     </div>
