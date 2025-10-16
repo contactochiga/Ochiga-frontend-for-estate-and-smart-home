@@ -7,13 +7,14 @@ import {
   MdDoorFront,
   MdAcUnit,
   MdVideocam,
+  MdAdd,
 } from "react-icons/md";
 
 import TVRemoteControl from "./TVRemoteControl";
 import ACControlModal from "./ACControlModal";
 import LightControlModal from "./LightControlModal";
 import DoorLockModal from "./DoorLockModal";
-import CCTVModal from "./CCTVModal"; // ✅ NEW IMPORT
+import CCTVModal from "./CCTVModal";
 
 const rooms = [
   "All",
@@ -196,6 +197,20 @@ export default function RoomsDevices() {
               </div>
             </div>
           ))}
+
+          {/* ➕ Add Device Card */}
+          <div
+            onClick={() => alert("Open Add Device Modal")}
+            className="rounded-xl p-3 flex flex-col justify-center items-center cursor-pointer
+              bg-gray-50 dark:bg-gray-800 border border-dashed border-[#800000]/50 
+              hover:bg-white dark:hover:bg-gray-700 transition-transform duration-200 
+              hover:scale-[1.03] active:scale-[0.97]"
+          >
+            <MdAdd className="text-[#800000] text-3xl mb-2" />
+            <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+              Add Device
+            </p>
+          </div>
         </div>
       </div>
 
@@ -224,28 +239,24 @@ export default function RoomsDevices() {
                   onClose={() => setSelectedDevice(null)}
                 />
               )}
-
               {selectedDevice.type === "ac" && (
                 <ACControlModal
                   deviceId={String(selectedDevice.id)}
                   onClose={() => setSelectedDevice(null)}
                 />
               )}
-
               {selectedDevice.type === "tv" && (
                 <TVRemoteControl
                   deviceId={String(selectedDevice.id)}
                   onClose={() => setSelectedDevice(null)}
                 />
               )}
-
               {selectedDevice.type === "door" && (
                 <DoorLockModal
                   deviceId={String(selectedDevice.id)}
                   onClose={() => setSelectedDevice(null)}
                 />
               )}
-
               {selectedDevice.type === "cctv" && (
                 <CCTVModal
                   deviceId={String(selectedDevice.id)}
