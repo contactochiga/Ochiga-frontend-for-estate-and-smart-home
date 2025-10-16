@@ -1,150 +1,163 @@
 "use client";
+
 import { useState, useEffect } from "react";
+import { MdPowerSettingsNew, MdAcUnit, MdAir, MdAutorenew, MdSwapVert } from "react-icons/md";
 
-export default function ACControlModal({ isOpen, onClose }) {
-  const [temperature, setTemperature] = useState(24);
+type ACControlModalProps = {
+  deviceId: string;
+  onClose: () => void;
+};
+
+const MAROON = "#800000";
+
+export default function ACControlModal({ deviceId, onClose }: ACControlModalProps) {
+  const [power, setPower] = useState(true);
+  const [temperature, setTemperature] = useState(22);
   const [mode, setMode] = useState("cool");
-  const [power, setPower] = useState(false);
-  const [fanSpeed, setFanSpeed] = useState("medium");
-  const [wsStatus, setWsStatus] = useState("disconnected");
+  const [fanSpeed, setFanSpeed] = useState("auto");
+  const [swing, setSwing] = useState(true);
+  const [connected, setConnected] = useState(false);
 
+  // WebSocket simulation (visual indicator only)
   useEffect(() => {
-    const ws = new WebSocket("wss://ochiga-smart-ws.example.com");
-    ws.onopen = () => setWsStatus("connected");
-    ws.onclose = () => setWsStatus("disconnected");
-    ws.onerror = () => setWsStatus("error");
-    ws.onmessage = (msg) => console.log("AC Update:", msg.data);
-
-    return () => ws.close();
+    const t = setTimeout(() => setConnected(true), 600);
+    return () => clearTimeout(t);
   }, []);
 
-  const vibrate = () => {
-    if (navigator.vibrate) navigator.vibrate(20);
+  const handleCommand = (cmd: string, value?: any) => {
+    // Simulate haptic + action
+    if (navigator.vibrate) navigator.vibrate(30);
+    console.log("AC Command:", cmd, value);
   };
 
-  const togglePower = () => {
-    setPower(!power);
-    vibrate();
+  const changeTemp = (delta: number) => {
+    setTemperature((t) => {
+      const newTemp = Math.min(30, Math.max(16, t + delta));
+      handleCommand("temperature", newTemp);
+      return newTemp;
+    });
   };
-
-  const increaseTemp = () => {
-    setTemperature((prev) => Math.min(prev + 1, 30));
-    vibrate();
-  };
-
-  const decreaseTemp = () => {
-    setTemperature((prev) => Math.max(prev - 1, 16));
-    vibrate();
-  };
-
-  const changeMode = (newMode) => {
-    setMode(newMode);
-    vibrate();
-  };
-
-  const changeFanSpeed = (speed) => {
-    setFanSpeed(speed);
-    vibrate();
-  };
-
-  if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 rounded-xl w-[90%] max-w-md p-6 border border-gray-300 dark:border-gray-700 shadow-xl flex flex-col items-center space-y-5 h-[80vh] justify-between relative">
-
-        {/* WebSocket Indicator */}
-        <div className="absolute top-3 right-4 flex items-center space-x-2">
-          <div
-            className={`w-3 h-3 rounded-full ${
-              wsStatus === "connected"
-                ? "bg-green-500"
-                : wsStatus === "error"
-                ? "bg-yellow-500"
-                : "bg-red-500"
-            }`}
-          ></div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {wsStatus}
-          </span>
-        </div>
-
-        {/* Power */}
-        <button
-          onClick={togglePower}
-          className={`px-6 py-2 rounded-md border border-[#800000] text-[#800000] text-sm font-medium transition-all ${
-            power ? "bg-[#800000]/10" : "bg-transparent"
-          }`}
-        >
-          {power ? "Turn Off" : "Turn On"}
-        </button>
-
-        {/* Temperature Display */}
-        <div className="flex flex-col items-center">
-          <div className="text-6xl font-bold text-gray-900 dark:text-gray-50">
-            {temperature}°
-          </div>
-          <div className="flex mt-3 space-x-5">
-            <button
-              onClick={decreaseTemp}
-              className="px-5 py-3 border border-[#800000] rounded-md text-[#800000] font-semibold text-lg"
-            >
-              –
-            </button>
-            <button
-              onClick={increaseTemp}
-              className="px-5 py-3 border border-[#800000] rounded-md text-[#800000] font-semibold text-lg"
-            >
-              +
-            </button>
-          </div>
-        </div>
-
-        {/* Mode Control */}
-        <div className="flex space-x-3">
-          {["cool", "heat", "fan", "auto"].map((m) => (
-            <button
-              key={m}
-              onClick={() => changeMode(m)}
-              className={`px-3 py-2 text-sm rounded-md border ${
-                mode === m
-                  ? "border-[#800000] text-[#800000]"
-                  : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300"
-              }`}
-            >
-              {m.charAt(0).toUpperCase() + m.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Fan Speed */}
-        <div className="flex flex-col items-center">
-          <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            Fan Speed
-          </span>
-          <div className="flex space-x-3">
-            {["low", "medium", "high"].map((s) => (
-              <button
-                key={s}
-                onClick={() => changeFanSpeed(s)}
-                className={`px-4 py-2 rounded-md border text-sm ${
-                  fanSpeed === s
-                    ? "border-[#800000] text-[#800000]"
-                    : "border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-300"
-                }`}
-              >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Close Button */}
+    <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+          <MdAcUnit className="text-cyan-400" /> AC Control
+        </h3>
         <button
           onClick={onClose}
-          className="w-full py-2 rounded-md border border-[#800000] text-[#800000] font-medium text-sm"
+          className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
         >
-          Close
+          ✕
+        </button>
+      </div>
+
+      {/* Connection indicator */}
+      <div className="flex items-center gap-2 mb-4">
+        <div
+          className={`w-2.5 h-2.5 rounded-full ${
+            connected ? "bg-green-500 animate-pulse" : "bg-gray-400"
+          }`}
+        />
+        <span className="text-xs text-gray-500 dark:text-gray-400">
+          {connected ? "Connected via WebSocket" : "Connecting..."}
+        </span>
+      </div>
+
+      {/* Temperature */}
+      <div className="flex flex-col items-center mb-5">
+        <div className="text-5xl font-bold text-gray-900 dark:text-white mb-1">
+          {temperature}°C
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400">Set Temperature</p>
+        <div className="flex gap-5 mt-3">
+          <button
+            onClick={() => changeTemp(-1)}
+            className="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center text-lg text-gray-700 dark:text-gray-300 active:border-[1.5px] active:border-[#800000]"
+          >
+            −
+          </button>
+          <button
+            onClick={() => changeTemp(1)}
+            className="w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center text-lg text-gray-700 dark:text-gray-300 active:border-[1.5px] active:border-[#800000]"
+          >
+            ＋
+          </button>
+        </div>
+      </div>
+
+      {/* Mode and Fan Speed */}
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <button
+          onClick={() => {
+            const nextMode =
+              mode === "cool"
+                ? "heat"
+                : mode === "heat"
+                ? "dry"
+                : mode === "dry"
+                ? "fan"
+                : "cool";
+            setMode(nextMode);
+            handleCommand("mode", nextMode);
+          }}
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-300 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 active:border-[1.5px] active:border-[#800000]"
+        >
+          <MdAutorenew className="text-xl mb-1" />
+          <span className="capitalize">{mode} mode</span>
+        </button>
+
+        <button
+          onClick={() => {
+            const nextSpeed =
+              fanSpeed === "auto"
+                ? "low"
+                : fanSpeed === "low"
+                ? "medium"
+                : fanSpeed === "medium"
+                ? "high"
+                : "auto";
+            setFanSpeed(nextSpeed);
+            handleCommand("fan_speed", nextSpeed);
+          }}
+          className="flex flex-col items-center justify-center p-3 rounded-xl border border-gray-300 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 active:border-[1.5px] active:border-[#800000]"
+        >
+          <MdAir className="text-xl mb-1" />
+          <span className="capitalize">{fanSpeed} fan</span>
+        </button>
+      </div>
+
+      {/* Swing + Power */}
+      <div className="flex items-center justify-between gap-3">
+        <button
+          onClick={() => {
+            setSwing((s) => !s);
+            handleCommand("swing", !swing);
+          }}
+          className="flex-1 flex flex-col items-center justify-center p-3 rounded-xl border border-gray-300 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300 active:border-[1.5px] active:border-[#800000]"
+        >
+          <MdSwapVert className="text-xl mb-1" />
+          <span>{swing ? "Swing On" : "Swing Off"}</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setPower((p) => !p);
+            handleCommand("power", !power);
+          }}
+          className={`flex-1 flex flex-col items-center justify-center p-3 rounded-xl border text-sm transition ${
+            power
+              ? "border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 active:border-[1.5px] active:border-[#800000]"
+              : "border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 active:border-[1.5px] active:border-[#800000]"
+          }`}
+        >
+          <MdPowerSettingsNew
+            className={`text-xl mb-1 ${
+              power ? "text-[#800000]" : "text-gray-500 dark:text-gray-400"
+            }`}
+          />
+          <span>{power ? "Power On" : "Power Off"}</span>
         </button>
       </div>
     </div>
