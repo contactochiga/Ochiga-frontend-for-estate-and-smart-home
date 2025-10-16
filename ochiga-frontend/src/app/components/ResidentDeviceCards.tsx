@@ -12,7 +12,8 @@ import {
 import TVRemoteControl from "./TVRemoteControl";
 import ACControlModal from "./ACControlModal";
 import LightControlModal from "./LightControlModal";
-import DoorLockModal from "./DoorLockModal"; // ✅ NEW IMPORT
+import DoorLockModal from "./DoorLockModal";
+import CCTVModal from "./CCTVModal"; // ✅ NEW IMPORT
 
 const rooms = [
   "All",
@@ -246,11 +247,10 @@ export default function RoomsDevices() {
               )}
 
               {selectedDevice.type === "cctv" && (
-                <div className="w-full h-36 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    🔴 Live Camera Feed
-                  </p>
-                </div>
+                <CCTVModal
+                  deviceId={String(selectedDevice.id)}
+                  onClose={() => setSelectedDevice(null)}
+                />
               )}
             </div>
           </div>
