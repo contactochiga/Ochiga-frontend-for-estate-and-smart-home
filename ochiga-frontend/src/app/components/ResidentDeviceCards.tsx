@@ -10,6 +10,7 @@ import {
 } from "react-icons/md";
 import TVRemoteControl from "./TVRemoteControl"; // ✅ added import
 import ACControlModal from "./ACControlModal"; // ✅ NEW import added here
+import LightControlModal from "./LightControlModal";
 
 // Room tabs
 const rooms = [
