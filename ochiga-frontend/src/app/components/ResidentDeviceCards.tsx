@@ -8,11 +8,11 @@ import {
   MdAcUnit,
   MdVideocam,
 } from "react-icons/md";
-import TVRemoteControl from "./TVRemoteControl"; // ✅ added import
-import ACControlModal from "./ACControlModal"; // ✅ NEW import added here
-import LightControlModal from "./LightControlModal";
 
-// Room tabs
+import TVRemoteControl from "./TVRemoteControl";
+import ACControlModal from "./ACControlModal";
+import LightControlModal from "./LightControlModal"; // ✅ integrated
+
 const rooms = [
   "All",
   "Favourites",
@@ -23,7 +23,6 @@ const rooms = [
   "Outdoor",
 ];
 
-// Device list
 const devices = [
   {
     id: 1,
@@ -72,25 +71,20 @@ const devices = [
   },
 ];
 
-// Define allowed device statuses
 type DeviceStatus = "On" | "Off" | "Locked" | "Unlocked";
 
 export default function RoomsDevices() {
   const [activeRoom, setActiveRoom] = useState("All");
-
-  // ✅ Strongly typed state
   const [deviceStates, setDeviceStates] = useState<Record<number, DeviceStatus>>(
     devices.reduce(
       (acc, d) => ({ ...acc, [d.id]: d.status as DeviceStatus }),
       {} as Record<number, DeviceStatus>
     )
   );
-
   const [selectedDevice, setSelectedDevice] = useState<(typeof devices)[0] | null>(
     null
   );
 
-  // Filter devices by room or favourites
   const filteredDevices =
     activeRoom === "All"
       ? devices
@@ -98,12 +92,10 @@ export default function RoomsDevices() {
       ? devices.filter((d) => d.favourite)
       : devices.filter((d) => d.location === activeRoom);
 
-  // ✅ Safer toggle function
   const toggleDevice = (id: number) => {
     setDeviceStates((prev) => {
       const current = prev[id];
       let next: DeviceStatus;
-
       switch (current) {
         case "On":
           next = "Off";
@@ -121,7 +113,6 @@ export default function RoomsDevices() {
           next = "Off";
           break;
       }
-
       return { ...prev, [id]: next };
     });
   };
@@ -134,7 +125,7 @@ export default function RoomsDevices() {
           Rooms & Devices
         </h2>
 
-        {/* Scrollable Tabs */}
+        {/* Tabs */}
         <div className="flex space-x-2 overflow-x-auto scrollbar-hide mb-5">
           {rooms.map((room) => (
             <button
@@ -168,7 +159,6 @@ export default function RoomsDevices() {
                     : "border-gray-200 dark:border-gray-700"
                 }`}
             >
-              {/* Top row */}
               <div className="flex items-center justify-between mb-2">
                 <div
                   className={`w-10 h-10 flex items-center justify-center rounded-lg 
@@ -194,7 +184,6 @@ export default function RoomsDevices() {
                 </span>
               </div>
 
-              {/* Bottom row */}
               <div>
                 <h3 className="font-medium text-sm text-gray-900 dark:text-white">
                   {device.name}
@@ -208,7 +197,7 @@ export default function RoomsDevices() {
         </div>
       </div>
 
-      {/* Modal for device control */}
+      {/* Device Control Modals */}
       {selectedDevice && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
           <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
@@ -227,32 +216,27 @@ export default function RoomsDevices() {
 
             {/* Dynamic Controls */}
             <div className="flex flex-col items-center justify-center gap-5 py-4 text-gray-800 dark:text-gray-200">
-              {selectedDevice.icon}
-              <p className="text-sm">
-                Current Status:{" "}
-                <span
-                  className={`font-semibold ${
-                    deviceStates[selectedDevice.id] === "On" ||
-                    deviceStates[selectedDevice.id] === "Unlocked"
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }`}
-                >
-                  {deviceStates[selectedDevice.id]}
-                </span>
-              </p>
-
-              {/* Light control */}
               {selectedDevice.type === "light" && (
-                <button
-                  onClick={() => toggleDevice(selectedDevice.id)}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-semibold hover:opacity-90"
-                >
-                  Toggle Light
-                </button>
+                <LightControlModal
+                  deviceId={String(selectedDevice.id)}
+                  onClose={() => setSelectedDevice(null)}
+                />
               )}
 
-              {/* Door control */}
+              {selectedDevice.type === "ac" && (
+                <ACControlModal
+                  deviceId={String(selectedDevice.id)}
+                  onClose={() => setSelectedDevice(null)}
+                />
+              )}
+
+              {selectedDevice.type === "tv" && (
+                <TVRemoteControl
+                  deviceId={String(selectedDevice.id)}
+                  onClose={() => setSelectedDevice(null)}
+                />
+              )}
+
               {selectedDevice.type === "door" && (
                 <button
                   onClick={() => toggleDevice(selectedDevice.id)}
@@ -264,23 +248,6 @@ export default function RoomsDevices() {
                 </button>
               )}
 
-              {/* ✅ AC control modal */}
-              {selectedDevice.type === "ac" && (
-                <ACControlModal
-                  deviceId={String(selectedDevice.id)}
-                  onClose={() => setSelectedDevice(null)}
-                />
-              )}
-
-              {/* ✅ TV Control (New Flat Maroon Remote) */}
-              {selectedDevice.type === "tv" && (
-                <TVRemoteControl
-                  deviceId={String(selectedDevice.id)}
-                  onClose={() => setSelectedDevice(null)}
-                />
-              )}
-
-              {/* CCTV feed */}
               {selectedDevice.type === "cctv" && (
                 <div className="w-full h-36 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
