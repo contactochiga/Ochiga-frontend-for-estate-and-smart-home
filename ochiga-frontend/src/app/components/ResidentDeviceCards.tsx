@@ -11,7 +11,8 @@ import {
 
 import TVRemoteControl from "./TVRemoteControl";
 import ACControlModal from "./ACControlModal";
-import LightControlModal from "./LightControlModal"; // ✅ integrated
+import LightControlModal from "./LightControlModal";
+import DoorLockModal from "./DoorLockModal"; // ✅ NEW import
 
 const rooms = [
   "All",
@@ -81,9 +82,7 @@ export default function RoomsDevices() {
       {} as Record<number, DeviceStatus>
     )
   );
-  const [selectedDevice, setSelectedDevice] = useState<(typeof devices)[0] | null>(
-    null
-  );
+  const [selectedDevice, setSelectedDevice] = useState<(typeof devices)[0] | null>(null);
 
   const filteredDevices =
     activeRoom === "All"
@@ -120,7 +119,6 @@ export default function RoomsDevices() {
   return (
     <div className="w-full">
       <div className="w-full rounded-2xl bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 p-5">
-        {/* Header */}
         <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
           Rooms & Devices
         </h2>
@@ -199,65 +197,65 @@ export default function RoomsDevices() {
 
       {/* Device Control Modals */}
       {selectedDevice && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {selectedDevice.name} Control
-              </h3>
-              <button
-                onClick={() => setSelectedDevice(null)}
-                className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
+        <>
+          {selectedDevice.type === "light" && (
+            <LightControlModal
+              deviceId={String(selectedDevice.id)}
+              onClose={() => setSelectedDevice(null)}
+            />
+          )}
 
-            {/* Dynamic Controls */}
-            <div className="flex flex-col items-center justify-center gap-5 py-4 text-gray-800 dark:text-gray-200">
-              {selectedDevice.type === "light" && (
-                <LightControlModal
-                  deviceId={String(selectedDevice.id)}
-                  onClose={() => setSelectedDevice(null)}
-                />
-              )}
+          {selectedDevice.type === "ac" && (
+            <ACControlModal
+              deviceId={String(selectedDevice.id)}
+              onClose={() => setSelectedDevice(null)}
+            />
+          )}
 
-              {selectedDevice.type === "ac" && (
-                <ACControlModal
-                  deviceId={String(selectedDevice.id)}
-                  onClose={() => setSelectedDevice(null)}
-                />
-              )}
+          {selectedDevice.type === "tv" && (
+            <TVRemoteControl
+              deviceId={String(selectedDevice.id)}
+              onClose={() => setSelectedDevice(null)}
+            />
+          )}
 
-              {selectedDevice.type === "tv" && (
-                <TVRemoteControl
-                  deviceId={String(selectedDevice.id)}
-                  onClose={() => setSelectedDevice(null)}
-                />
-              )}
+          {selectedDevice.type === "door" && (
+            <DoorLockModal
+              deviceId={String(selectedDevice.id)}
+              isLocked={deviceStates[selectedDevice.id] === "Locked"}
+              onLockChange={(val) =>
+                setDeviceStates((prev) => ({
+                  ...prev,
+                  [selectedDevice.id]: val ? "Locked" : "Unlocked",
+                }))
+              }
+              onClose={() => setSelectedDevice(null)}
+            />
+          )}
 
-              {selectedDevice.type === "door" && (
-                <button
-                  onClick={() => toggleDevice(selectedDevice.id)}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#800000] to-black text-white font-semibold hover:opacity-90"
-                >
-                  {deviceStates[selectedDevice.id] === "Locked"
-                    ? "Unlock Door"
-                    : "Lock Door"}
-                </button>
-              )}
-
-              {selectedDevice.type === "cctv" && (
+          {selectedDevice.type === "cctv" && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fadeIn">
+              <div className="bg-white dark:bg-gray-900 w-full max-w-sm rounded-2xl p-6 shadow-xl animate-scaleUp">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    CCTV Live Feed
+                  </h3>
+                  <button
+                    onClick={() => setSelectedDevice(null)}
+                    className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
                 <div className="w-full h-36 rounded-lg bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     🔴 Live Camera Feed
                   </p>
                 </div>
-              )}
+              </div>
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
 
       {/* Animations */}
