@@ -7,7 +7,6 @@ import {
   MdDoorFront,
   MdAcUnit,
   MdVideocam,
-  MdAdd,
 } from "react-icons/md";
 
 import TVRemoteControl from "./TVRemoteControl";
@@ -15,6 +14,7 @@ import ACControlModal from "./ACControlModal";
 import LightControlModal from "./LightControlModal";
 import DoorLockModal from "./DoorLockModal";
 import CCTVModal from "./CCTVModal"; // ✅ NEW IMPORT
+import AddDeviceModal from "./AddDeviceModal"; // ✅ NEW IMPORT
 
 const rooms = [
   "All",
@@ -26,7 +26,7 @@ const rooms = [
   "Outdoor",
 ];
 
-const initialDevices = [
+const devices = [
   {
     id: 1,
     name: "Light",
@@ -78,9 +78,8 @@ type DeviceStatus = "On" | "Off" | "Locked" | "Unlocked";
 
 export default function RoomsDevices() {
   const [activeRoom, setActiveRoom] = useState("All");
-  const [devices, setDevices] = useState(initialDevices);
   const [deviceStates, setDeviceStates] = useState<Record<number, DeviceStatus>>(
-    initialDevices.reduce(
+    devices.reduce(
       (acc, d) => ({ ...acc, [d.id]: d.status as DeviceStatus }),
       {} as Record<number, DeviceStatus>
     )
@@ -88,6 +87,9 @@ export default function RoomsDevices() {
   const [selectedDevice, setSelectedDevice] = useState<(typeof devices)[0] | null>(
     null
   );
+
+  // Add device modal state
+  const [addOpen, setAddOpen] = useState(false);
 
   const filteredDevices =
     activeRoom === "All"
@@ -121,38 +123,13 @@ export default function RoomsDevices() {
     });
   };
 
-  // ✅ Add Device (Simple placeholder function for now)
-  const handleAddDevice = () => {
-    const newId = devices.length + 1;
-    const newDevice = {
-      id: newId,
-      name: `New Device ${newId}`,
-      location: "Unassigned",
-      status: "Off",
-      icon: <MdAdd className="text-gray-500 text-xl" />,
-      type: "light",
-      favourite: false,
-    };
-    setDevices([...devices, newDevice]);
-  };
-
   return (
     <div className="w-full">
       <div className="w-full rounded-2xl bg-white dark:bg-gray-900 shadow-lg border border-gray-200 dark:border-gray-700 p-5">
         {/* Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Rooms & Devices
-          </h2>
-
-          {/* ✅ Add Device Button */}
-          <button
-            onClick={handleAddDevice}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-[#800000] to-black text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow hover:opacity-90 transition-all"
-          >
-            <MdAdd className="text-sm" /> Add Device
-          </button>
-        </div>
+        <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+          Rooms & Devices
+        </h2>
 
         {/* Tabs */}
         <div className="flex space-x-2 overflow-x-auto scrollbar-hide mb-5">
@@ -253,10 +230,19 @@ export default function RoomsDevices() {
               )}
 
               {selectedDevice.type === "ac" && (
-                <ACControlModal
-                  deviceId={String(selectedDevice.id)}
-                  onClose={() => setSelectedDevice(null)}
-                />
+                <>
+                  <ACControlModal
+                    deviceId={String(selectedDevice.id)}
+                    onClose={() => setSelectedDevice(null)}
+                  />
+                  {/* Add Device button appears after AC controls */}
+                  <button
+                    onClick={() => setAddOpen(true)}
+                    className="mt-2 w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    + Add device (scan)
+                  </button>
+                </>
               )}
 
               {selectedDevice.type === "tv" && (
@@ -283,6 +269,22 @@ export default function RoomsDevices() {
           </div>
         </div>
       )}
+
+      {/* Add device modal */}
+      <AddDeviceModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onPaired={(d) => {
+          // simple UX hook: close and show tiny toast / vibrate
+          setAddOpen(false);
+          try {
+            if ("vibrate" in navigator) navigator.vibrate(30);
+          } catch {}
+          // optionally add device to local list (UI only)
+          // setDeviceStates(prev => ({ ...prev, [newId]: "Off" }))
+          // or call a callback to reload devices from backend
+        }}
+      />
 
       {/* Animations */}
       <style jsx global>{`
