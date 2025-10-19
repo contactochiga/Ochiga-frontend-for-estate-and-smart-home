@@ -1,14 +1,14 @@
 // src/services/iotApi.ts
 import axios from "axios";
 
-// ✅ Dynamically choose correct backend URL
+// ✅ Unified base URL
 const API = axios.create({
   baseURL:
-    process.env.NEXT_PUBLIC_API_URL?.replace(":3000", ":4000") + "/iot" ||
-    "http://localhost:4000/iot",
+    process.env.NEXT_PUBLIC_API_BASE_URL + "/iot" ||
+    "http://localhost:4000/api/iot",
 });
 
-// 🔑 Automatically attach JWT from localStorage (or cookies)
+// 🔑 Attach token automatically
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -17,21 +17,18 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-// ✅ IOT API functions
+// ✅ IOT API methods
 export const IotApi = {
-  // Resident’s devices
   getMyDevices: async () => {
     const res = await API.get("/my-devices");
     return res.data;
   },
 
-  // Manager’s estate devices
   getEstateDevices: async () => {
     const res = await API.get("/estate-devices");
     return res.data;
   },
 
-  // Create/register a new device
   createDevice: async (data: {
     name: string;
     type: string;
@@ -41,7 +38,6 @@ export const IotApi = {
     return res.data;
   },
 
-  // ✅ Control a device (must use POST not PATCH)
   controlDevice: async (
     deviceId: string,
     data: { action: "on" | "off" | "set-temp"; value?: any }
@@ -50,7 +46,6 @@ export const IotApi = {
     return res.data;
   },
 
-  // Fetch device logs
   getDeviceLogs: async (deviceId: string) => {
     const res = await API.get(`/devices/${deviceId}/logs`);
     return res.data;
