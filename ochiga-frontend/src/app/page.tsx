@@ -13,21 +13,34 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [scene, setScene] = useState(0);
   const [loadingText, setLoadingText] = useState("Initializing Ochiga environment...");
-  const [backendStatus, setBackendStatus] = useState<"checking" | "connected" | "failed">("checking");
+  const [backendStatus, setBackendStatus] = useState<
+    "checking" | "connected" | "failed" | "retrying"
+  >("checking");
 
-  // ✅ Automatically test backend connection when page loads
+  // ✅ Function to check backend connection
+  const checkBackendConnection = async () => {
+    try {
+      setBackendStatus((prev) => (prev === "failed" ? "retrying" : "checking"));
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/health`);
+      const data = await res.json();
+      console.log("✅ Backend connected:", data);
+      setBackendStatus("connected");
+    } catch (err) {
+      console.error("❌ Backend connection failed:", err);
+      setBackendStatus("failed");
+    }
+  };
+
+  // ✅ Auto-check every 10 seconds if failed
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/health`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("✅ Backend connected:", data);
-        setBackendStatus("connected");
-      })
-      .catch((err) => {
-        console.error("❌ Backend connection failed:", err);
-        setBackendStatus("failed");
-      });
-  }, []);
+    checkBackendConnection();
+    const interval = setInterval(() => {
+      if (backendStatus !== "connected") {
+        checkBackendConnection();
+      }
+    }, 10000); // 10 seconds
+    return () => clearInterval(interval);
+  }, [backendStatus]);
 
   const scenes = [
     {
@@ -186,21 +199,25 @@ export default function HomePage() {
         Welcome to <span className="text-red-700">Ochiga</span>
       </h1>
 
-      {/* ✅ Show backend connection status */}
+      {/* ✅ Live backend connection status */}
       <p
         className={`mb-6 px-4 py-2 rounded-full text-sm ${
           backendStatus === "connected"
             ? "bg-green-100 text-green-700"
             : backendStatus === "failed"
             ? "bg-red-100 text-red-700"
-            : "bg-yellow-100 text-yellow-700"
+            : backendStatus === "retrying"
+            ? "bg-yellow-100 text-yellow-700 animate-pulse"
+            : "bg-gray-100 text-gray-700"
         }`}
       >
         {backendStatus === "checking"
           ? "Checking backend connection..."
           : backendStatus === "connected"
           ? "✅ Backend connected successfully!"
-          : "⚠️ Backend not reachable"}
+          : backendStatus === "retrying"
+          ? "🔁 Retrying connection..."
+          : "⚠️ Backend not reachable — retrying soon"}
       </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-md">
