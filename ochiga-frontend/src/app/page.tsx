@@ -13,6 +13,21 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [scene, setScene] = useState(0);
   const [loadingText, setLoadingText] = useState("Initializing Ochiga environment...");
+  const [backendStatus, setBackendStatus] = useState<"checking" | "connected" | "failed">("checking");
+
+  // ✅ Automatically test backend connection when page loads
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/health`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("✅ Backend connected:", data);
+        setBackendStatus("connected");
+      })
+      .catch((err) => {
+        console.error("❌ Backend connection failed:", err);
+        setBackendStatus("failed");
+      });
+  }, []);
 
   const scenes = [
     {
@@ -22,7 +37,7 @@ export default function HomePage() {
         "Verifying node integrity...",
         "Establishing secure link...",
       ],
-      bg: "from-[#0a0a0a] via-[#1b0033] to-[#330a4a]", // deep purple circuit vibe
+      bg: "from-[#0a0a0a] via-[#1b0033] to-[#330a4a]",
       graphic: (
         <svg
           viewBox="0 0 800 600"
@@ -61,16 +76,30 @@ export default function HomePage() {
         "Calibrating room sensors...",
         "Activating device control layer...",
       ],
-      bg: "from-[#010a13] via-[#001f3f] to-[#012d5e]", // deep blue glowing
+      bg: "from-[#010a13] via-[#001f3f] to-[#012d5e]",
       graphic: (
         <svg
           viewBox="0 0 800 600"
           className="absolute inset-0 w-full h-full opacity-25"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <rect x="250" y="200" width="300" height="200" rx="20" stroke="#00e0ff" strokeWidth="2" fill="none" />
+          <rect
+            x="250"
+            y="200"
+            width="300"
+            height="200"
+            rx="20"
+            stroke="#00e0ff"
+            strokeWidth="2"
+            fill="none"
+          />
           <circle cx="400" cy="220" r="6" fill="#00e0ff">
-            <animate attributeName="r" values="6;10;6" dur="1.5s" repeatCount="indefinite" />
+            <animate
+              attributeName="r"
+              values="6;10;6"
+              dur="1.5s"
+              repeatCount="indefinite"
+            />
           </circle>
           <circle cx="320" cy="320" r="4" fill="#00e0ff" />
           <circle cx="480" cy="320" r="4" fill="#00e0ff" />
@@ -84,7 +113,7 @@ export default function HomePage() {
         "Running optimization checks...",
         "Ochiga Infrastructure Online ✅",
       ],
-      bg: "from-[#0b0b0b] via-[#003300] to-[#0f6600]", // neon green flow
+      bg: "from-[#0b0b0b] via-[#003300] to-[#0f6600]",
       graphic: (
         <svg
           viewBox="0 0 800 600"
@@ -119,7 +148,6 @@ export default function HomePage() {
       }
     };
 
-    // cycle through scenes every few seconds
     const interval = setInterval(nextScene, 3500);
     return () => clearInterval(interval);
   };
@@ -129,17 +157,17 @@ export default function HomePage() {
     const progressWidth = `${((scene + 1) / scenes.length) * 100}%`;
 
     return (
-      <div className={`relative flex flex-col items-center justify-center h-screen text-white overflow-hidden bg-gradient-to-br ${current.bg}`}>
+      <div
+        className={`relative flex flex-col items-center justify-center h-screen text-white overflow-hidden bg-gradient-to-br ${current.bg}`}
+      >
         {current.graphic}
 
-        {/* Overlay Text */}
         <div className="relative z-10 text-center px-4">
           <h2 className="text-xl md:text-3xl font-semibold mb-2 animate-pulse">
             {current.caption}
           </h2>
           <p className="text-sm text-gray-300 mb-4 transition-all">{loadingText}</p>
 
-          {/* Progress line */}
           <div className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden mx-auto">
             <div
               className="bg-gradient-to-r from-red-600 to-orange-500 h-1 transition-all duration-1000"
@@ -151,12 +179,29 @@ export default function HomePage() {
     );
   }
 
-  // Normal landing
+  // ✅ Normal landing + backend connection indicator
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-200 p-6">
       <h1 className="text-3xl font-bold mb-10 text-gray-800">
         Welcome to <span className="text-red-700">Ochiga</span>
       </h1>
+
+      {/* ✅ Show backend connection status */}
+      <p
+        className={`mb-6 px-4 py-2 rounded-full text-sm ${
+          backendStatus === "connected"
+            ? "bg-green-100 text-green-700"
+            : backendStatus === "failed"
+            ? "bg-red-100 text-red-700"
+            : "bg-yellow-100 text-yellow-700"
+        }`}
+      >
+        {backendStatus === "checking"
+          ? "Checking backend connection..."
+          : backendStatus === "connected"
+          ? "✅ Backend connected successfully!"
+          : "⚠️ Backend not reachable"}
+      </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-md">
         <button
