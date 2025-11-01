@@ -1,8 +1,15 @@
-import OchigaAssistant from "../components/OchigaAssistant";
+"use client";
+
+import ResidentHeader from "../components/ResidentHeader";          // ✅ must match actual file name
+import ResidentWalletCard from "../components/ResidentWalletCard";  // ✅ check capitalization
+import ResidentUtilitiesCard from "../components/ResidentUtilitiesCard";
+import ResidentDeviceCards from "../components/ResidentDeviceCards";
+import ResidentVisitorCard from "../components/ResidentVisitorCard";
+import ResidentCommunityCard from "../components/ResidentCommunityCard";
+import OchigaAssistant from "../components/OchigaAssistant";        // ✅ AI assistant
 
 export default function DashboardPage() {
   const handleAiCommand = (response) => {
-    // You can parse the AI’s response here and trigger dashboard actions.
     console.log("AI Command:", response);
   };
 
@@ -14,13 +21,12 @@ export default function DashboardPage() {
         phase="Phase 2"
         address="Parklane, Lagos, Nigeria"
       />
+
       <ResidentWalletCard />
       <ResidentUtilitiesCard />
       <ResidentDeviceCards />
       <ResidentVisitorCard />
       <ResidentCommunityCard />
-
-      {/* 👇 Floating AI Assistant */}
       <OchigaAssistant onCommand={handleAiCommand} />
     </div>
   );
