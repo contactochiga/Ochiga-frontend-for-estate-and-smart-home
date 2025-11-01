@@ -1,5 +1,6 @@
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
+import { DashboardProvider } from "../context/DashboardContext";
 import { Toaster } from "sonner";
 
 export const metadata = {
@@ -16,8 +17,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          {children}
-          <Toaster richColors position="top-right" />
+          <DashboardProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </DashboardProvider>
         </AuthProvider>
       </body>
     </html>
