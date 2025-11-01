@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { FaMicrophone, FaPaperPlane, FaRobot } from "react-icons/fa";
+import { useDashboard } from "../context/DashboardContext";
 
 export default function OchigaAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +13,17 @@ export default function OchigaAssistant() {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // ✅ Initialize voice recognition (browser)
+  // ✅ Access dashboard context
+  const {
+    notifications,
+    hasNewNotif,
+    sidebarOpen,
+    profileOpen,
+    searchOpen,
+    markNotifRead,
+  } = useDashboard();
+
+  // Initialize voice recognition (browser)
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
       const recognition = new (window as any).webkitSpeechRecognition();
@@ -49,13 +60,14 @@ export default function OchigaAssistant() {
     setMessages(newMessages);
     setInput("");
 
-    // ✅ Simulated AI response — later connect to your NestJS AiModule endpoint
+    // Simulated AI response — can later connect to your NestJS AI endpoint
     setTimeout(() => {
       const aiResponse = getSmartResponse(text);
       setMessages((prev) => [...prev, { from: "ai", text: aiResponse }]);
-    }, 800);
+    }, 600);
   };
 
+  // ✅ Context-aware AI responses
   const getSmartResponse = (query: string): string => {
     const lower = query.toLowerCase();
 
@@ -69,6 +81,14 @@ export default function OchigaAssistant() {
       return "There’s a community event at 6 PM — Smart Estate Hall.";
     if (lower.includes("hello") || lower.includes("hi"))
       return "Hello! How can I make your estate life easier today?";
+    if (lower.includes("notifications") && hasNewNotif)
+      return `You have ${notifications.length} new notifications.`;
+    if (lower.includes("sidebar") && sidebarOpen)
+      return "The sidebar is currently open.";
+    if (lower.includes("profile") && profileOpen)
+      return "Your profile panel is open.";
+    if (lower.includes("search") && searchOpen)
+      return "The search input is currently active.";
 
     return "Got it 👍 — I'm learning from your patterns to serve you better.";
   };
