@@ -13,7 +13,7 @@ export default function OchigaAssistant() {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // ✅ Access full dashboard context
+  // ✅ Full dashboard context
   const {
     notifications,
     hasNewNotif,
@@ -22,8 +22,8 @@ export default function OchigaAssistant() {
     searchOpen,
     resident,
     wallet,
-    utilities,
     devices,
+    utilities,
     visitors,
     communityEvents,
     markNotifRead,
@@ -73,95 +73,103 @@ export default function OchigaAssistant() {
     setMessages((prev) => [...prev, { from: "user", text }]);
     setInput("");
 
-    // AI response simulation
+    // AI response with action execution
     setTimeout(() => {
       const aiResponse = getSmartResponse(text);
       setMessages((prev) => [...prev, { from: "ai", text: aiResponse }]);
-    }, 500);
+    }, 300);
   };
 
-  // Context-aware AI response
+  // ✅ Context-aware AI response & action execution
   const getSmartResponse = (query: string): string => {
     const lower = query.toLowerCase();
 
-    // Device control
-    if (lower.includes("toggle light") || lower.includes("toggle fan") || lower.includes("toggle ac")) {
-      const roomMatch = Object.keys(devices).find((r) => lower.includes(r.toLowerCase()));
-      if (roomMatch) {
-        if (lower.includes("light")) toggleDevice(roomMatch, "light");
-        if (lower.includes("fan")) toggleDevice(roomMatch, "fan");
-        if (lower.includes("ac")) toggleDevice(roomMatch, "ac");
-        return `Toggled device(s) in ${roomMatch}.`;
-      } else {
-        return "Please specify the room to toggle the device.";
+    // --- DEVICE CONTROL ---
+    if (lower.includes("toggle")) {
+      const room = Object.keys(devices).find((r) => lower.includes(r.toLowerCase()));
+      if (room) {
+        if (lower.includes("light")) toggleDevice(room, "light");
+        if (lower.includes("fan")) toggleDevice(room, "fan");
+        if (lower.includes("ac")) toggleDevice(room, "ac");
+        return `✅ Toggled device(s) in ${room}.`;
+      }
+      return "Please specify the room for the device toggle.";
+    }
+
+    // --- WALLET ---
+    if (lower.includes("wallet")) {
+      if (lower.includes("balance")) return `💰 Your wallet balance is ₦${wallet.balance}.`;
+      if (lower.includes("fund") || lower.includes("add money")) {
+        const amountMatch = query.match(/\d+/);
+        const amount = amountMatch ? parseInt(amountMatch[0]) : 0;
+        if (amount > 0) {
+          updateWallet(amount);
+          return `💵 Added ₦${amount} to your wallet.`;
+        }
+        return "Please specify the amount to fund your wallet.";
       }
     }
 
-    // Wallet commands
-    if (lower.includes("wallet") && lower.includes("balance")) {
-      return `Your wallet balance is ₦${wallet.balance}.`;
-    }
-    if (lower.includes("fund wallet") || lower.includes("add money")) {
-      const amountMatch = query.match(/\d+/);
-      const amount = amountMatch ? parseInt(amountMatch[0]) : 0;
-      if (amount > 0) updateWallet(amount);
-      return amount > 0 ? `Added ₦${amount} to wallet.` : "Please specify the amount to fund.";
-    }
-
-    // Visitor management
+    // --- VISITOR MANAGEMENT ---
     if (lower.includes("add visitor")) {
       const nameMatch = query.match(/visitor (.+)/i);
       if (nameMatch) {
         const visitor = { id: Date.now().toString(), name: nameMatch[1], scheduledTime: new Date().toISOString() };
         addVisitor(visitor);
-        return `Visitor ${visitor.name} added.`;
+        return `👤 Visitor ${visitor.name} added.`;
       }
-      return "Please provide the visitor name.";
+      return "Please provide the visitor's name.";
     }
     if (lower.includes("remove visitor")) {
       const idMatch = query.match(/\d+/);
       if (idMatch) {
         removeVisitor(idMatch[0]);
-        return `Visitor ${idMatch[0]} removed.`;
+        return `❌ Visitor ${idMatch[0]} removed.`;
       }
-      return "Please provide the visitor ID.";
+      return "Please provide the visitor ID to remove.";
     }
 
-    // Community events
+    // --- COMMUNITY EVENTS ---
     if (lower.includes("add event")) {
       const titleMatch = query.match(/event (.+)/i);
       if (titleMatch) {
         const event = { id: Date.now().toString(), title: titleMatch[1], time: new Date().toISOString() };
         addCommunityEvent(event);
-        return `Community event '${event.title}' added.`;
+        return `📅 Community event '${event.title}' added.`;
       }
       return "Please provide the event title.";
     }
+    if (lower.includes("remove event")) {
+      const idMatch = query.match(/\d+/);
+      if (idMatch) {
+        removeCommunityEvent(idMatch[0]);
+        return `❌ Community event ${idMatch[0]} removed.`;
+      }
+      return "Please provide the event ID to remove.";
+    }
 
+    // --- RESIDENT INFO ---
     if (lower.includes("resident") && lower.includes("update")) {
       const nameMatch = query.match(/name (.+)/i);
       if (nameMatch) {
         updateResident({ name: nameMatch[1] });
-        return `Resident name updated to ${nameMatch[1]}.`;
+        return `👤 Resident name updated to ${nameMatch[1]}.`;
       }
-      return "Please specify the resident info to update.";
+      return "Please specify the resident information to update.";
     }
 
-    // General info & UI
+    // --- DASHBOARD CONTEXT ---
     if (lower.includes("notifications") && hasNewNotif)
-      return `You have ${notifications.length} new notifications.`;
-    if (lower.includes("sidebar") && sidebarOpen)
-      return "The sidebar is currently open.";
-    if (lower.includes("profile") && profileOpen)
-      return "Your profile panel is open.";
-    if (lower.includes("search") && searchOpen)
-      return "The search input is currently active.";
+      return `🔔 You have ${notifications.length} new notifications.`;
+    if (lower.includes("sidebar") && sidebarOpen) return "The sidebar is open.";
+    if (lower.includes("profile") && profileOpen) return "Your profile panel is open.";
+    if (lower.includes("search") && searchOpen) return "The search input is active.";
 
-    // Fallback
+    // --- GENERAL GREETINGS ---
     if (lower.includes("hello") || lower.includes("hi"))
-      return "Hello! How can I assist you with your estate today?";
+      return "👋 Hello! How can I assist you with your estate today?";
 
-    return "Got it 👍 — I'm learning from your patterns to serve you better.";
+    return "🤖 Got it 👍 — I'm learning your patterns to serve you better.";
   };
 
   return (
