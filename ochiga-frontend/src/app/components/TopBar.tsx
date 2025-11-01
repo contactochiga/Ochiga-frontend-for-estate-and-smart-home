@@ -1,4 +1,3 @@
-// ochiga-frontend/src/app/components/TopBar.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -18,13 +17,17 @@ import {
   QuestionMarkCircleIcon,
   DocumentTextIcon,
   Cog6ToothIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 
-export default function ResidentHeader() {
+import OchigaAssistant from "./OchigaAssistant"; // ✅ AI Assistant component
+
+export default function TopBar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false); // 🧠 for AI assistant modal
   const [notifications, setNotifications] = useState<string[]>([]);
   const [hasNewNotif, setHasNewNotif] = useState(false);
 
@@ -48,7 +51,7 @@ export default function ResidentHeader() {
 
   const menuItems = [
     { name: "Maintenance", href: "/dashboard/maintenance", icon: WrenchScrewdriverIcon },
-    { name: "Utilities", href: "/dashboard/Utilities", icon: BoltIcon },
+    { name: "Utilities", href: "/dashboard/utilities", icon: BoltIcon },
     { name: "Directory", href: "/dashboard/directory", icon: UsersIcon },
     { name: "Reports", href: "/dashboard/reports", icon: ChartBarIcon },
     { name: "Help & Support", href: "/dashboard/help", icon: QuestionMarkCircleIcon },
@@ -96,6 +99,15 @@ export default function ResidentHeader() {
               </div>
             )}
           </div>
+
+          {/* AI Assistant */}
+          <button
+            onClick={() => setAssistantOpen(true)}
+            aria-label="Open Ochiga Assistant"
+            className="flex items-center justify-center relative"
+          >
+            <SparklesIcon className="w-6 h-6 text-[#800000] dark:text-[#ffcccc]" />
+          </button>
 
           {/* MESSAGES */}
           <button
@@ -246,6 +258,40 @@ export default function ResidentHeader() {
                   );
                 })}
               </ul>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* 🧠 Ochiga Assistant Modal */}
+      <AnimatePresence>
+        {assistantOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black bg-opacity-50 z-[60]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setAssistantOpen(false)}
+            />
+            <motion.div
+              className="fixed bottom-4 right-4 w-full max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-2xl z-[70] overflow-hidden"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <div className="flex justify-between items-center p-3 border-b border-gray-200 dark:border-gray-700">
+                <h3 className="text-md font-semibold text-gray-800 dark:text-gray-100">
+                  Ochiga AI Assistant
+                </h3>
+                <button onClick={() => setAssistantOpen(false)}>
+                  <XMarkIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </div>
+              <div className="h-[420px] overflow-y-auto">
+                <OchigaAssistant /> {/* 👁️ renders chat interface */}
+              </div>
             </motion.div>
           </>
         )}
