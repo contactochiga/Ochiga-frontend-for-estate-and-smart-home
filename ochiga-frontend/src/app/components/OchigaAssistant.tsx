@@ -13,7 +13,7 @@ export default function OchigaAssistant() {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // Draggable button state
+  // Draggable floating button
   const [pos, setPos] = useState({
     x: window.innerWidth - 80 - 24,
     y: window.innerHeight - 80 - 24,
@@ -22,77 +22,51 @@ export default function OchigaAssistant() {
   const draggingRef = useRef(false);
   const offsetRef = useRef({ x: 0, y: 0 });
 
+  // From dashboard context
   const {
-    notifications,
-    hasNewNotif,
-    sidebarOpen,
-    profileOpen,
-    searchOpen,
-    resident,
-    wallet,
     devices,
-    utilities,
-    visitors,
-    communityEvents,
-    markNotifRead,
+    wallet,
     toggleDevice,
     updateWallet,
-    updateUtility,
-    addVisitor,
-    removeVisitor,
-    addCommunityEvent,
-    removeCommunityEvent,
-    updateResident,
   } = useDashboard();
 
   // ---------------------------
-  // Drag handlers
+  // Dragging behavior
   // ---------------------------
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     draggingRef.current = true;
     offsetRef.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
   };
-
   const handleMouseMove = (e: MouseEvent) => {
     if (!draggingRef.current) return;
     setPos({ x: e.clientX - offsetRef.current.x, y: e.clientY - offsetRef.current.y });
   };
-
   const handleMouseUp = () => {
     if (draggingRef.current) {
       draggingRef.current = false;
       snapToBottomEdge();
     }
   };
-
   const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>) => {
     draggingRef.current = true;
     offsetRef.current = { x: e.touches[0].clientX - pos.x, y: e.touches[0].clientY - pos.y };
   };
-
   const handleTouchMove = (e: React.TouchEvent<HTMLButtonElement>) => {
     if (!draggingRef.current) return;
     setPos({ x: e.touches[0].clientX - offsetRef.current.x, y: e.touches[0].clientY - offsetRef.current.y });
   };
-
   const handleTouchEnd = () => {
     if (draggingRef.current) {
       draggingRef.current = false;
       snapToBottomEdge();
     }
   };
-
   const snapToBottomEdge = () => {
     const { innerWidth, innerHeight } = window;
     const buttonWidth = 64;
     const buttonHeight = 64;
-
-    // Snap X to nearest horizontal edge
-    let x = pos.x + buttonWidth / 2 < innerWidth / 2 ? 16 : innerWidth - buttonWidth - 16;
-
-    // Stick to bottom with 24px offset
-    let y = innerHeight - buttonHeight - 24;
-
+    const x = pos.x + buttonWidth / 2 < innerWidth / 2 ? 16 : innerWidth - buttonWidth - 16;
+    const y = innerHeight - buttonHeight - 24;
     setPos({ x, y });
   };
 
@@ -106,7 +80,7 @@ export default function OchigaAssistant() {
   }, [pos]);
 
   // ---------------------------
-  // Speech recognition
+  // Speech recognition setup
   // ---------------------------
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
@@ -136,6 +110,9 @@ export default function OchigaAssistant() {
     }
   };
 
+  // ---------------------------
+  // Send message
+  // ---------------------------
   const handleSend = async (userInput?: string) => {
     const text = userInput || input;
     if (!text.trim()) return;
@@ -143,12 +120,30 @@ export default function OchigaAssistant() {
     setMessages((prev) => [...prev, { from: "user", text }]);
     setInput("");
 
-    setTimeout(() => {
+    try {
+      // 🔹 Try sending to backend AI API
+      const res = await fetch("http://localhost:3000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setMessages((prev) => [...prev, { from: "ai", text: data.reply || "..." }]);
+      } else {
+        throw new Error("Backend not reachable");
+      }
+    } catch (err) {
+      // 🔹 Fallback to local commands if backend fails
       const aiResponse = processCommands(text);
       setMessages((prev) => [...prev, { from: "ai", text: aiResponse }]);
-    }, 300);
+    }
   };
 
+  // ---------------------------
+  // Local device / wallet logic
+  // ---------------------------
   const processCommands = (inputText: string) => {
     const commands = inputText.split(/,| and /i).map((cmd) => cmd.trim());
     const responses: string[] = [];
@@ -192,9 +187,12 @@ export default function OchigaAssistant() {
     return "🤖 Got it 👍 — I'm learning your patterns to serve you better.";
   };
 
+  // ---------------------------
+  // UI
+  // ---------------------------
   return (
     <>
-      {/* Bottom-sticky Draggable Chat Button */}
+      {/* Floating Button */}
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -208,7 +206,7 @@ export default function OchigaAssistant() {
         <FaRobot size={22} />
       </button>
 
-      {/* Chat Window */}
+      {/* Chat Popup */}
       {isOpen && (
         <div className="fixed bottom-20 right-6 w-80 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl shadow-2xl flex flex-col z-50">
           <div className="flex items-center justify-between bg-blue-600 text-white p-3 rounded-t-xl">
@@ -220,6 +218,7 @@ export default function OchigaAssistant() {
               ✕
             </button>
           </div>
+
           <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-80">
             {messages.map((msg, i) => (
               <div
@@ -234,6 +233,7 @@ export default function OchigaAssistant() {
               </div>
             ))}
           </div>
+
           <div className="flex items-center p-3 border-t border-gray-300 dark:border-gray-700">
             <button
               onClick={handleMic}
@@ -253,7 +253,10 @@ export default function OchigaAssistant() {
               placeholder="Ask Ochiga..."
               className="flex-1 mx-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm outline-none"
             />
-            <button onClick={() => handleSend()} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full">
+            <button
+              onClick={() => handleSend()}
+              className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full"
+            >
               <FaPaperPlane size={14} />
             </button>
           </div>
