@@ -14,7 +14,10 @@ export default function OchigaAssistant() {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   // Draggable button state
-  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const [pos, setPos] = useState({
+    x: window.innerWidth - 80 - 24,
+    y: window.innerHeight - 80 - 24,
+  });
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const draggingRef = useRef(false);
   const offsetRef = useRef({ x: 0, y: 0 });
@@ -42,25 +45,55 @@ export default function OchigaAssistant() {
     updateResident,
   } = useDashboard();
 
-  // --- Draggable handlers ---
+  // ---------------------------
+  // Drag handlers
+  // ---------------------------
   const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
     draggingRef.current = true;
-    offsetRef.current = {
-      x: e.clientX - pos.x,
-      y: e.clientY - pos.y,
-    };
+    offsetRef.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
   };
 
   const handleMouseMove = (e: MouseEvent) => {
     if (!draggingRef.current) return;
-    setPos({
-      x: e.clientX - offsetRef.current.x,
-      y: e.clientY - offsetRef.current.y,
-    });
+    setPos({ x: e.clientX - offsetRef.current.x, y: e.clientY - offsetRef.current.y });
   };
 
   const handleMouseUp = () => {
-    draggingRef.current = false;
+    if (draggingRef.current) {
+      draggingRef.current = false;
+      snapToBottomEdge();
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>) => {
+    draggingRef.current = true;
+    offsetRef.current = { x: e.touches[0].clientX - pos.x, y: e.touches[0].clientY - pos.y };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLButtonElement>) => {
+    if (!draggingRef.current) return;
+    setPos({ x: e.touches[0].clientX - offsetRef.current.x, y: e.touches[0].clientY - offsetRef.current.y });
+  };
+
+  const handleTouchEnd = () => {
+    if (draggingRef.current) {
+      draggingRef.current = false;
+      snapToBottomEdge();
+    }
+  };
+
+  const snapToBottomEdge = () => {
+    const { innerWidth, innerHeight } = window;
+    const buttonWidth = 64;
+    const buttonHeight = 64;
+
+    // Snap X to nearest horizontal edge
+    let x = pos.x + buttonWidth / 2 < innerWidth / 2 ? 16 : innerWidth - buttonWidth - 16;
+
+    // Stick to bottom with 24px offset
+    let y = innerHeight - buttonHeight - 24;
+
+    setPos({ x, y });
   };
 
   useEffect(() => {
@@ -70,28 +103,11 @@ export default function OchigaAssistant() {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, []);
+  }, [pos]);
 
-  // Touch support for mobile
-  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>) => {
-    draggingRef.current = true;
-    offsetRef.current = {
-      x: e.touches[0].clientX - pos.x,
-      y: e.touches[0].clientY - pos.y,
-    };
-  };
-  const handleTouchMove = (e: React.TouchEvent<HTMLButtonElement>) => {
-    if (!draggingRef.current) return;
-    setPos({
-      x: e.touches[0].clientX - offsetRef.current.x,
-      y: e.touches[0].clientY - offsetRef.current.y,
-    });
-  };
-  const handleTouchEnd = () => {
-    draggingRef.current = false;
-  };
-
-  // Initialize speech recognition
+  // ---------------------------
+  // Speech recognition
+  // ---------------------------
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
       const recognition = new (window as any).webkitSpeechRecognition();
@@ -170,8 +186,6 @@ export default function OchigaAssistant() {
       }
     }
 
-    // ... other command handlers remain unchanged ...
-
     if (lower.includes("hello") || lower.includes("hi"))
       return "👋 Hello! How can I assist you with your estate today?";
 
@@ -180,7 +194,7 @@ export default function OchigaAssistant() {
 
   return (
     <>
-      {/* Draggable Chat Button */}
+      {/* Bottom-sticky Draggable Chat Button */}
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -189,7 +203,7 @@ export default function OchigaAssistant() {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         className="fixed bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg z-50 transition-transform transform hover:scale-110"
-        style={{ left: pos.x || undefined, top: pos.y || undefined }}
+        style={{ left: pos.x, top: pos.y }}
       >
         <FaRobot size={22} />
       </button>
@@ -202,10 +216,7 @@ export default function OchigaAssistant() {
               <FaRobot />
               <span className="font-semibold text-sm">Ochiga AI Assistant</span>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-white hover:text-gray-200 text-xs"
-            >
+            <button onClick={() => setIsOpen(false)} className="text-white hover:text-gray-200 text-xs">
               ✕
             </button>
           </div>
@@ -242,10 +253,7 @@ export default function OchigaAssistant() {
               placeholder="Ask Ochiga..."
               className="flex-1 mx-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm outline-none"
             />
-            <button
-              onClick={() => handleSend()}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full"
-            >
+            <button onClick={() => handleSend()} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full">
               <FaPaperPlane size={14} />
             </button>
           </div>
