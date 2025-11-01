@@ -13,17 +13,31 @@ export default function OchigaAssistant() {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // ✅ Access dashboard context
+  // ✅ Access full dashboard context
   const {
     notifications,
     hasNewNotif,
     sidebarOpen,
     profileOpen,
     searchOpen,
+    resident,
+    wallet,
+    utilities,
+    devices,
+    visitors,
+    communityEvents,
     markNotifRead,
+    toggleDevice,
+    updateWallet,
+    updateUtility,
+    addVisitor,
+    removeVisitor,
+    addCommunityEvent,
+    removeCommunityEvent,
+    updateResident,
   } = useDashboard();
 
-  // Initialize voice recognition (browser)
+  // Initialize browser speech recognition
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
       const recognition = new (window as any).webkitSpeechRecognition();
@@ -56,31 +70,84 @@ export default function OchigaAssistant() {
     const text = userInput || input;
     if (!text.trim()) return;
 
-    const newMessages = [...messages, { from: "user", text }];
-    setMessages(newMessages);
+    setMessages((prev) => [...prev, { from: "user", text }]);
     setInput("");
 
-    // Simulated AI response — can later connect to your NestJS AI endpoint
+    // AI response simulation
     setTimeout(() => {
       const aiResponse = getSmartResponse(text);
       setMessages((prev) => [...prev, { from: "ai", text: aiResponse }]);
-    }, 600);
+    }, 500);
   };
 
-  // ✅ Context-aware AI responses
+  // Context-aware AI response
   const getSmartResponse = (query: string): string => {
     const lower = query.toLowerCase();
 
-    if (lower.includes("light") || lower.includes("device"))
-      return "I can control your smart devices for you — which room should I adjust?";
-    if (lower.includes("wallet"))
-      return "Your wallet balance is ₦42,300. Would you like to fund it?";
-    if (lower.includes("visitor"))
-      return "You currently have no scheduled visitors today.";
-    if (lower.includes("community"))
-      return "There’s a community event at 6 PM — Smart Estate Hall.";
-    if (lower.includes("hello") || lower.includes("hi"))
-      return "Hello! How can I make your estate life easier today?";
+    // Device control
+    if (lower.includes("toggle light") || lower.includes("toggle fan") || lower.includes("toggle ac")) {
+      const roomMatch = Object.keys(devices).find((r) => lower.includes(r.toLowerCase()));
+      if (roomMatch) {
+        if (lower.includes("light")) toggleDevice(roomMatch, "light");
+        if (lower.includes("fan")) toggleDevice(roomMatch, "fan");
+        if (lower.includes("ac")) toggleDevice(roomMatch, "ac");
+        return `Toggled device(s) in ${roomMatch}.`;
+      } else {
+        return "Please specify the room to toggle the device.";
+      }
+    }
+
+    // Wallet commands
+    if (lower.includes("wallet") && lower.includes("balance")) {
+      return `Your wallet balance is ₦${wallet.balance}.`;
+    }
+    if (lower.includes("fund wallet") || lower.includes("add money")) {
+      const amountMatch = query.match(/\d+/);
+      const amount = amountMatch ? parseInt(amountMatch[0]) : 0;
+      if (amount > 0) updateWallet(amount);
+      return amount > 0 ? `Added ₦${amount} to wallet.` : "Please specify the amount to fund.";
+    }
+
+    // Visitor management
+    if (lower.includes("add visitor")) {
+      const nameMatch = query.match(/visitor (.+)/i);
+      if (nameMatch) {
+        const visitor = { id: Date.now().toString(), name: nameMatch[1], scheduledTime: new Date().toISOString() };
+        addVisitor(visitor);
+        return `Visitor ${visitor.name} added.`;
+      }
+      return "Please provide the visitor name.";
+    }
+    if (lower.includes("remove visitor")) {
+      const idMatch = query.match(/\d+/);
+      if (idMatch) {
+        removeVisitor(idMatch[0]);
+        return `Visitor ${idMatch[0]} removed.`;
+      }
+      return "Please provide the visitor ID.";
+    }
+
+    // Community events
+    if (lower.includes("add event")) {
+      const titleMatch = query.match(/event (.+)/i);
+      if (titleMatch) {
+        const event = { id: Date.now().toString(), title: titleMatch[1], time: new Date().toISOString() };
+        addCommunityEvent(event);
+        return `Community event '${event.title}' added.`;
+      }
+      return "Please provide the event title.";
+    }
+
+    if (lower.includes("resident") && lower.includes("update")) {
+      const nameMatch = query.match(/name (.+)/i);
+      if (nameMatch) {
+        updateResident({ name: nameMatch[1] });
+        return `Resident name updated to ${nameMatch[1]}.`;
+      }
+      return "Please specify the resident info to update.";
+    }
+
+    // General info & UI
     if (lower.includes("notifications") && hasNewNotif)
       return `You have ${notifications.length} new notifications.`;
     if (lower.includes("sidebar") && sidebarOpen)
@@ -89,6 +156,10 @@ export default function OchigaAssistant() {
       return "Your profile panel is open.";
     if (lower.includes("search") && searchOpen)
       return "The search input is currently active.";
+
+    // Fallback
+    if (lower.includes("hello") || lower.includes("hi"))
+      return "Hello! How can I assist you with your estate today?";
 
     return "Got it 👍 — I'm learning from your patterns to serve you better.";
   };
