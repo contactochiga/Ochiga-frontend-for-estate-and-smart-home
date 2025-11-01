@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { FaMicrophone, FaPaperPlane, FaRobot } from "react-icons/fa";
-import { useDashboard } from "../../context/DashboardContext"; // <-- correct relative path
+import { useDashboard } from "../../context/DashboardContext";
 
 export default function OchigaAssistant() {
   const [isOpen, setIsOpen] = useState(false);
