@@ -1,86 +1,24 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { FaMicrophone, FaPaperPlane, FaRobot } from "react-icons/fa";
+import { FaMicrophone, FaRobot, FaPlug, FaLightbulb, FaFan, FaWallet } from "react-icons/fa";
 import { useDashboard } from "../../context/DashboardContext";
 
 export default function OchigaAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { from: "ai", text: "Hello 👋 I'm Ochiga AI, your smart estate assistant." },
+    { from: "ai", text: "👋 Hello! I’m Ochiga AI — your smart estate assistant." },
   ]);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
+  const [aiTyping, setAiTyping] = useState(false);
+  const [contextView, setContextView] = useState<"devices" | "wallet" | null>(null);
+
   const recognitionRef = useRef<SpeechRecognition | null>(null);
-
-  // Draggable floating button
-  const [pos, setPos] = useState({
-    x: window.innerWidth - 80 - 24,
-    y: window.innerHeight - 80 - 24,
-  });
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const draggingRef = useRef(false);
-  const offsetRef = useRef({ x: 0, y: 0 });
-
-  // From dashboard context
-  const {
-    devices,
-    wallet,
-    toggleDevice,
-    updateWallet,
-  } = useDashboard();
+  const { devices, wallet, toggleDevice, updateWallet } = useDashboard();
 
   // ---------------------------
-  // Dragging behavior
-  // ---------------------------
-  const handleMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => {
-    draggingRef.current = true;
-    offsetRef.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
-  };
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!draggingRef.current) return;
-    setPos({ x: e.clientX - offsetRef.current.x, y: e.clientY - offsetRef.current.y });
-  };
-  const handleMouseUp = () => {
-    if (draggingRef.current) {
-      draggingRef.current = false;
-      snapToBottomEdge();
-    }
-  };
-  const handleTouchStart = (e: React.TouchEvent<HTMLButtonElement>) => {
-    draggingRef.current = true;
-    offsetRef.current = { x: e.touches[0].clientX - pos.x, y: e.touches[0].clientY - pos.y };
-  };
-  const handleTouchMove = (e: React.TouchEvent<HTMLButtonElement>) => {
-    if (!draggingRef.current) return;
-    setPos({ x: e.touches[0].clientX - offsetRef.current.x, y: e.touches[0].clientY - offsetRef.current.y });
-  };
-  const handleTouchEnd = () => {
-    if (draggingRef.current) {
-      draggingRef.current = false;
-      snapToBottomEdge();
-    }
-  };
-  const snapToBottomEdge = () => {
-    const { innerWidth, innerHeight } = window;
-    const buttonWidth = 64;
-    const buttonHeight = 64;
-    const x = pos.x + buttonWidth / 2 < innerWidth / 2 ? 16 : innerWidth - buttonWidth - 16;
-    const y = innerHeight - buttonHeight - 24;
-    setPos({ x, y });
-  };
-
-  useEffect(() => {
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [pos]);
-
-  // ---------------------------
-  // Speech recognition setup
+  // Speech Recognition
   // ---------------------------
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
@@ -91,16 +29,17 @@ export default function OchigaAssistant() {
 
       recognition.onresult = (event: any) => {
         const speech = event.results[0][0].transcript;
-        setInput(speech);
         handleSend(speech);
       };
 
+      recognition.onend = () => setListening(false);
       recognitionRef.current = recognition;
     }
   }, []);
 
   const handleMic = () => {
-    if (!recognitionRef.current) return alert("Speech recognition not supported.");
+    if (!recognitionRef.current)
+      return alert("Speech recognition not supported in this browser.");
     if (listening) {
       recognitionRef.current.stop();
       setListening(false);
@@ -111,7 +50,17 @@ export default function OchigaAssistant() {
   };
 
   // ---------------------------
-  // Send message
+  // Text-To-Speech
+  // ---------------------------
+  const speak = (text: string) => {
+    const synth = window.speechSynthesis;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "en-NG"; // Nigerian English accent if supported
+    synth.speak(utter);
+  };
+
+  // ---------------------------
+  // Handle Send
   // ---------------------------
   const handleSend = async (userInput?: string) => {
     const text = userInput || input;
@@ -119,9 +68,10 @@ export default function OchigaAssistant() {
 
     setMessages((prev) => [...prev, { from: "user", text }]);
     setInput("");
+    setAiTyping(true);
+    setContextView(null);
 
     try {
-      // 🔹 Try sending to backend AI API
       const res = await fetch("http://localhost:3000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -130,48 +80,46 @@ export default function OchigaAssistant() {
 
       if (res.ok) {
         const data = await res.json();
-        setMessages((prev) => [...prev, { from: "ai", text: data.reply || "..." }]);
+        const reply = data.reply || "I'm here to help!";
+        setMessages((prev) => [...prev, { from: "ai", text: reply }]);
+        speak(reply);
       } else {
         throw new Error("Backend not reachable");
       }
-    } catch (err) {
-      // 🔹 Fallback to local commands if backend fails
+    } catch {
       const aiResponse = processCommands(text);
       setMessages((prev) => [...prev, { from: "ai", text: aiResponse }]);
+      speak(aiResponse);
+    } finally {
+      setAiTyping(false);
     }
   };
 
   // ---------------------------
-  // Local device / wallet logic
+  // Local Logic
   // ---------------------------
   const processCommands = (inputText: string) => {
-    const commands = inputText.split(/,| and /i).map((cmd) => cmd.trim());
-    const responses: string[] = [];
-    for (let cmd of commands) {
-      const response = executeSingleCommand(cmd);
-      responses.push(response);
-    }
-    return responses.join(" | ");
-  };
+    const lower = inputText.toLowerCase();
 
-  const executeSingleCommand = (query: string): string => {
-    const lower = query.toLowerCase();
-
+    // Toggle devices
     if (lower.includes("toggle")) {
       const room = Object.keys(devices).find((r) => lower.includes(r.toLowerCase()));
       if (room) {
         if (lower.includes("light")) toggleDevice(room, "light");
         if (lower.includes("fan")) toggleDevice(room, "fan");
         if (lower.includes("ac")) toggleDevice(room, "ac");
+        setContextView("devices");
         return `✅ Toggled device(s) in ${room}.`;
       }
       return "Please specify the room for the device toggle.";
     }
 
+    // Wallet
     if (lower.includes("wallet")) {
+      setContextView("wallet");
       if (lower.includes("balance")) return `💰 Your wallet balance is ₦${wallet.balance}.`;
       if (lower.includes("fund") || lower.includes("add money")) {
-        const amountMatch = query.match(/\d+/);
+        const amountMatch = inputText.match(/\d+/);
         const amount = amountMatch ? parseInt(amountMatch[0]) : 0;
         if (amount > 0) {
           updateWallet(amount);
@@ -181,63 +129,125 @@ export default function OchigaAssistant() {
       }
     }
 
-    if (lower.includes("hello") || lower.includes("hi"))
-      return "👋 Hello! How can I assist you with your estate today?";
+    // Greetings
+    if (lower.includes("hello") || lower.includes("hi")) return "👋 Hello! How can I assist you today?";
 
-    return "🤖 Got it 👍 — I'm learning your patterns to serve you better.";
+    // Device Status
+    if (lower.includes("status") || lower.includes("devices")) {
+      setContextView("devices");
+      return "Here’s your device status:";
+    }
+
+    return "🤖 Got it 👍 — I’ll keep learning your preferences.";
   };
+
+  // ---------------------------
+  // Contextual Components
+  // ---------------------------
+  const DeviceOverview = () => (
+    <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+      {Object.entries(devices).map(([room, state]: any) => (
+        <div
+          key={room}
+          className="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg flex flex-col space-y-1 shadow-sm"
+        >
+          <div className="font-semibold text-gray-900 dark:text-gray-100">{room}</div>
+          <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+            <FaLightbulb className={`${state.light ? "text-yellow-400" : "text-gray-400"}`} />
+            <span>Light: {state.light ? "ON" : "OFF"}</span>
+          </div>
+          <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+            <FaFan className={`${state.fan ? "text-blue-400" : "text-gray-400"}`} />
+            <span>Fan: {state.fan ? "ON" : "OFF"}</span>
+          </div>
+          <div className="flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
+            <FaPlug className={`${state.ac ? "text-green-400" : "text-gray-400"}`} />
+            <span>AC: {state.ac ? "ON" : "OFF"}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const WalletOverview = () => (
+    <div className="mt-3 p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg shadow-md">
+      <div className="flex items-center space-x-3">
+        <FaWallet size={22} />
+        <div>
+          <div className="text-xs uppercase opacity-80">Wallet Balance</div>
+          <div className="text-lg font-semibold">₦{wallet.balance}</div>
+        </div>
+      </div>
+    </div>
+  );
 
   // ---------------------------
   // UI
   // ---------------------------
   return (
-    <>
-      {/* Floating Button */}
-      <button
-        ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        className="fixed bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg z-50 transition-transform transform hover:scale-110"
-        style={{ left: pos.x, top: pos.y }}
-      >
-        <FaRobot size={22} />
-      </button>
+    <div className="fixed bottom-6 right-6 z-50">
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl transition-transform transform hover:scale-110"
+        >
+          <FaRobot size={22} />
+        </button>
+      )}
 
-      {/* Chat Popup */}
       {isOpen && (
-        <div className="fixed bottom-20 right-6 w-80 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl shadow-2xl flex flex-col z-50">
-          <div className="flex items-center justify-between bg-blue-600 text-white p-3 rounded-t-xl">
+        <div className="w-[400px] h-[550px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all">
+          {/* Header */}
+          <div className="flex justify-between items-center bg-blue-600 text-white px-4 py-3">
             <div className="flex items-center space-x-2">
               <FaRobot />
               <span className="font-semibold text-sm">Ochiga AI Assistant</span>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-white hover:text-gray-200 text-xs">
+            <button onClick={() => setIsOpen(false)} className="text-white hover:text-gray-300 text-lg">
               ✕
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-80">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`p-2 rounded-lg text-sm max-w-[80%] ${
+                className={`max-w-[80%] p-2 rounded-lg text-sm ${
                   msg.from === "ai"
-                    ? "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 self-start"
-                    : "bg-blue-600 text-white self-end"
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 self-start"
+                    : "bg-blue-600 text-white self-end ml-auto"
                 }`}
               >
                 {msg.text}
               </div>
             ))}
+
+            {aiTyping && (
+              <div className="flex items-center space-x-2 text-gray-500 text-xs">
+                <FaRobot className="animate-bounce" />
+                <span>Ochiga is thinking...</span>
+              </div>
+            )}
+
+            {/* Context Cards */}
+            {contextView === "devices" && <DeviceOverview />}
+            {contextView === "wallet" && <WalletOverview />}
           </div>
 
-          <div className="flex items-center p-3 border-t border-gray-300 dark:border-gray-700">
+          {/* Input */}
+          <div className="flex items-center border-t border-gray-200 dark:border-gray-700 px-3 py-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="Talk to Ochiga..."
+              className="flex-1 bg-transparent p-2 text-gray-800 dark:text-gray-100 text-sm outline-none"
+            />
             <button
               onClick={handleMic}
-              className={`p-2 rounded-full ${
+              className={`p-2 rounded-full transition ${
                 listening
                   ? "bg-red-600 text-white animate-pulse"
                   : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
@@ -245,23 +255,9 @@ export default function OchigaAssistant() {
             >
               <FaMicrophone />
             </button>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Ask Ochiga..."
-              className="flex-1 mx-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm outline-none"
-            />
-            <button
-              onClick={() => handleSend()}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full"
-            >
-              <FaPaperPlane size={14} />
-            </button>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
