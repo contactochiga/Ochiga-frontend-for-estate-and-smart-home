@@ -1,53 +1,113 @@
 "use client";
-import { useState } from "react";
 
-export default function OchigaAssistant({ onCommand }) {
-  const [open, setOpen] = useState(false);
-  const [input, setInput] = useState("");
+import { useState, useRef, useEffect } from "react";
+import { FaMicrophone, FaPaperPlane, FaRobot } from "react-icons/fa";
+
+export default function OchigaAssistant() {
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { sender: "ai", text: "👋 Hi! I’m Ochiga — your Smart Estate Assistant." },
+    { from: "ai", text: "Hello 👋 I'm Ochiga AI, your smart estate assistant." },
   ]);
+  const [input, setInput] = useState("");
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    const newMsg = { sender: "user", text: input };
-    setMessages([...messages, newMsg]);
+  // ✅ Initialize voice recognition (browser)
+  useEffect(() => {
+    if ("webkitSpeechRecognition" in window) {
+      const recognition = new (window as any).webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+
+      recognition.onresult = (event: any) => {
+        const speech = event.results[0][0].transcript;
+        setInput(speech);
+        handleSend(speech);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const handleMic = () => {
+    if (!recognitionRef.current) return alert("Speech recognition not supported.");
+    if (listening) {
+      recognitionRef.current.stop();
+      setListening(false);
+    } else {
+      recognitionRef.current.start();
+      setListening(true);
+    }
+  };
+
+  const handleSend = async (userInput?: string) => {
+    const text = userInput || input;
+    if (!text.trim()) return;
+
+    const newMessages = [...messages, { from: "user", text }];
+    setMessages(newMessages);
     setInput("");
 
-    const res = await fetch("/api/ai/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: input }),
-    });
-    const data = await res.json();
+    // ✅ Simulated AI response — later connect to your NestJS AiModule endpoint
+    setTimeout(() => {
+      const aiResponse = getSmartResponse(text);
+      setMessages((prev) => [...prev, { from: "ai", text: aiResponse }]);
+    }, 800);
+  };
 
-    const aiReply = data.reply || "Hmm, I’ll need to think more about that.";
-    setMessages((m) => [...m, { sender: "ai", text: aiReply }]);
+  const getSmartResponse = (query: string): string => {
+    const lower = query.toLowerCase();
 
-    if (onCommand) onCommand(aiReply);
+    if (lower.includes("light") || lower.includes("device"))
+      return "I can control your smart devices for you — which room should I adjust?";
+    if (lower.includes("wallet"))
+      return "Your wallet balance is ₦42,300. Would you like to fund it?";
+    if (lower.includes("visitor"))
+      return "You currently have no scheduled visitors today.";
+    if (lower.includes("community"))
+      return "There’s a community event at 6 PM — Smart Estate Hall.";
+    if (lower.includes("hello") || lower.includes("hi"))
+      return "Hello! How can I make your estate life easier today?";
+
+    return "Got it 👍 — I'm learning from your patterns to serve you better.";
   };
 
   return (
     <>
-      {/* Floating AI Button */}
+      {/* Floating Chat Button */}
       <button
-        onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-full shadow-lg"
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-lg z-50 transition-transform transform hover:scale-110"
       >
-        🤖
+        <FaRobot size={22} />
       </button>
 
       {/* Chat Window */}
-      {open && (
-        <div className="fixed bottom-20 right-6 w-80 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg p-3 z-50">
-          <div className="h-64 overflow-y-auto space-y-2 mb-3">
+      {isOpen && (
+        <div className="fixed bottom-20 right-6 w-80 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl shadow-2xl flex flex-col z-50">
+          <div className="flex items-center justify-between bg-blue-600 text-white p-3 rounded-t-xl">
+            <div className="flex items-center space-x-2">
+              <FaRobot />
+              <span className="font-semibold text-sm">Ochiga AI Assistant</span>
+            </div>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="text-white hover:text-gray-200 text-xs"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-3 max-h-80">
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`p-2 rounded-lg ${
-                  msg.sender === "ai"
-                    ? "bg-gray-100 dark:bg-gray-800 text-sm"
-                    : "bg-blue-600 text-white text-sm self-end text-right"
+                className={`p-2 rounded-lg text-sm max-w-[80%] ${
+                  msg.from === "ai"
+                    ? "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 self-start"
+                    : "bg-blue-600 text-white self-end"
                 }`}
               >
                 {msg.text}
@@ -55,18 +115,31 @@ export default function OchigaAssistant({ onCommand }) {
             ))}
           </div>
 
-          <div className="flex gap-2">
+          {/* Input */}
+          <div className="flex items-center p-3 border-t border-gray-300 dark:border-gray-700">
+            <button
+              onClick={handleMic}
+              className={`p-2 rounded-full ${
+                listening
+                  ? "bg-red-600 text-white animate-pulse"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+              }`}
+            >
+              <FaMicrophone />
+            </button>
             <input
-              className="flex-1 border border-gray-300 dark:border-gray-700 rounded px-2 py-1 text-sm bg-transparent focus:outline-none"
+              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
               placeholder="Ask Ochiga..."
+              className="flex-1 mx-2 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white text-sm outline-none"
             />
             <button
-              onClick={sendMessage}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded px-3 py-1"
+              onClick={() => handleSend()}
+              className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full"
             >
-              Send
+              <FaPaperPlane size={14} />
             </button>
           </div>
         </div>
