@@ -214,7 +214,16 @@ export default function OchigaAssistant() {
       )}
 
       {isOpen && (
-        <div className="w-[400px] h-[550px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all animate-slideUp">
+        <div
+          className="
+            w-[400px] max-w-[90vw]
+            h-[550px] max-h-[80vh]
+            bg-white dark:bg-gray-900
+            border border-gray-200 dark:border-gray-700
+            rounded-2xl shadow-2xl flex flex-col
+            overflow-hidden transition-all animate-slideUp
+          "
+        >
           {/* Header */}
           <div className="flex justify-between items-center bg-blue-600 text-white px-4 py-3 shadow-md">
             <div className="flex items-center space-x-2">
