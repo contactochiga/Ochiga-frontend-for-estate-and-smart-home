@@ -13,7 +13,6 @@ export default function OchigaAssistant() {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
-  // ✅ Full dashboard context
   const {
     notifications,
     hasNewNotif,
@@ -73,15 +72,29 @@ export default function OchigaAssistant() {
     setMessages((prev) => [...prev, { from: "user", text }]);
     setInput("");
 
-    // AI response with action execution
+    // AI response with multi-command execution
     setTimeout(() => {
-      const aiResponse = getSmartResponse(text);
+      const aiResponse = processCommands(text);
       setMessages((prev) => [...prev, { from: "ai", text: aiResponse }]);
     }, 300);
   };
 
-  // ✅ Context-aware AI response & action execution
-  const getSmartResponse = (query: string): string => {
+  // ---------------------------
+  // Multi-command processor
+  // ---------------------------
+  const processCommands = (inputText: string): string => {
+    const commands = inputText.split(/,| and /i).map((cmd) => cmd.trim());
+    const responses: string[] = [];
+
+    for (let cmd of commands) {
+      const response = executeSingleCommand(cmd);
+      responses.push(response);
+    }
+
+    return responses.join(" | ");
+  };
+
+  const executeSingleCommand = (query: string): string => {
     const lower = query.toLowerCase();
 
     // --- DEVICE CONTROL ---
