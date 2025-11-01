@@ -19,7 +19,7 @@ import {
   DocumentTextIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { useDashboard } from "../context/DashboardContext";
+import { useDashboard } from "../../context/DashboardContext";
 
 export default function ResidentHeader() {
   const router = useRouter();
