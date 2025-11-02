@@ -9,86 +9,57 @@ export default function AIDashboard() {
     { role: "assistant", content: "Hello! I’m Ochiga AI — how can I assist you today?" },
   ]);
   const [listening, setListening] = useState(false);
-  const [speechReady, setSpeechReady] = useState(false);
+  const [autoListenReady, setAutoListenReady] = useState(false);
   const recognitionRef = useRef<any>(null);
-  const silenceTimer = useRef<any>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
 
-  // --- INIT SPEECH RECOGNITION ---
+  // 🧠 Init speech recognition
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      console.warn("Speech Recognition not supported in this browser.");
-      return;
-    }
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = false;
     recognition.lang = "en-US";
 
-    recognition.onstart = () => {
-      setListening(true);
-      resetSilenceTimer(recognition);
-    };
-
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[event.results.length - 1][0].transcript.trim();
-      if (transcript) {
-        handleSend(transcript, true);
-        resetSilenceTimer(recognition);
-      }
-    };
-
-    recognition.onend = () => {
-      setListening(false);
-      // Restart automatically only when user is speaking again
-      if (speechReady) {
-        setTimeout(() => {
-          try {
-            recognition.start();
-          } catch {}
-        }, 1500);
-      }
-    };
-
-    recognition.onerror = (e: any) => {
-      console.warn("Speech recognition error:", e.error);
-      setListening(false);
+    recognition.onstart = () => setListening(true);
+    recognition.onend = () => setListening(false);
+    recognition.onresult = (e: any) => {
+      const transcript = e.results[e.results.length - 1][0].transcript.trim();
+      if (transcript) handleSend(transcript, true);
     };
 
     recognitionRef.current = recognition;
-    setSpeechReady(true);
+    setAutoListenReady(true);
   }, []);
 
-  // --- SILENCE DETECTOR ---
-  const resetSilenceTimer = (recognition: any) => {
-    clearTimeout(silenceTimer.current);
-    silenceTimer.current = setTimeout(() => {
+  // 🗣️ Auto start once permission granted
+  useEffect(() => {
+    if (autoListenReady && recognitionRef.current) {
       try {
-        recognition.stop();
+        recognitionRef.current.start();
       } catch {}
-    }, 2000); // stop if 2 seconds of silence
-  };
+    }
+  }, [autoListenReady]);
 
-  // --- MIC BUTTON ---
+  // 📜 Auto-scroll chat
+  useEffect(() => {
+    if (chatRef.current)
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+  }, [messages]);
+
   const handleMicClick = () => {
     if (!recognitionRef.current) return;
     try {
-      if (listening) {
-        recognitionRef.current.stop();
-      } else {
-        recognitionRef.current.start();
-      }
-    } catch (err) {
-      console.warn("Mic toggle error", err);
-    }
+      if (listening) recognitionRef.current.stop();
+      else recognitionRef.current.start();
+    } catch {}
   };
 
-  // --- SEND HANDLER ---
   const handleSend = (text?: string, spoken = false) => {
     const message = text ?? input;
     if (!message.trim()) return;
@@ -97,13 +68,11 @@ export default function AIDashboard() {
     setMessages(newMsgs);
     setInput("");
 
-    // Simulated AI reply
     setTimeout(() => {
       const reply = `Got it — processing your request: "${message}".`;
       const updated = [...newMsgs, { role: "assistant", content: reply }];
       setMessages(updated);
 
-      // Speak back if user spoke
       if (spoken) {
         const synth = window.speechSynthesis;
         if (synth && !synth.speaking) {
@@ -127,10 +96,10 @@ export default function AIDashboard() {
   return (
     <div className="relative flex flex-col h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white overflow-hidden">
       {/* MAIN AREA */}
-      <main className="flex-1 flex items-center justify-center relative overflow-hidden">
-        {/* AI ORB */}
+      <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
+        {/* 🌀 Orb (listening animation) */}
         {listening && (
-          <div className="absolute flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center">
             <div className="relative w-44 h-44 rounded-full flex items-center justify-center">
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 via-cyan-400 to-purple-600 opacity-40 blur-2xl animate-pulse" />
               <div className="absolute inset-0 rounded-full border-2 border-cyan-400/40 animate-[spin_6s_linear_infinite]" />
@@ -145,14 +114,35 @@ export default function AIDashboard() {
           </div>
         )}
 
-        {!listening && (
-          <h1 className="text-gray-500 text-sm tracking-widest uppercase transition-opacity duration-500">
-            Ochiga AI Interface
-          </h1>
-        )}
+        {/* 💬 Chat container */}
+        <div
+          ref={chatRef}
+          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
+        >
+          <div className="max-w-3xl mx-auto flex flex-col gap-4">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex ${
+                  msg.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`px-4 py-3 rounded-2xl max-w-[80%] text-sm md:text-base shadow-sm transition-all duration-300 ${
+                    msg.role === "user"
+                      ? "bg-blue-600 text-white rounded-br-none"
+                      : "bg-gray-800 text-gray-100 border border-gray-700 rounded-bl-none"
+                  }`}
+                >
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </main>
 
-      {/* SUGGESTIONS */}
+      {/* 🔘 Suggestions */}
       <div className="w-full flex flex-wrap justify-center gap-2 px-4 mb-2 transition-opacity duration-500">
         {!listening &&
           suggestions.map((s, i) => (
@@ -166,7 +156,7 @@ export default function AIDashboard() {
           ))}
       </div>
 
-      {/* FOOTER CHAT BAR */}
+      {/* 🧠 Footer */}
       <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-700 px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center space-x-3">
           <button
