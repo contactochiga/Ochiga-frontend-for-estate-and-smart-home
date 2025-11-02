@@ -1,5 +1,4 @@
-// components/AssistantPanel.tsx
-"use client";
+// ochiga-frontend/src/app/ai-dashboard/components/AssistantPanel.tsx
 
 import { useEffect, useRef, useState } from "react";
 import { FaMicrophone, FaPaperPlane, FaRobot } from "react-icons/fa";
