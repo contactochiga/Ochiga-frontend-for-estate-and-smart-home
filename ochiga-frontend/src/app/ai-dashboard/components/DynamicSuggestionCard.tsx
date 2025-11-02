@@ -1,70 +1,129 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
+import HamburgerMenu from "./components/HamburgerMenu";
+import DynamicSuggestionCard from "./components/DynamicSuggestionCard"; // 🧠 import smart suggestion card
 
-interface Suggestion {
-  label: string;
-  count: number; // frequency of use
-}
+export default function AIDashboard() {
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
+    { role: "assistant", content: "Hello! I’m Ochiga AI — how can I assist you today?" },
+  ]);
+  const [userActions, setUserActions] = useState<string[]>([]); // 🧩 track all user actions
+  const [listening, setListening] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const chatRef = useRef<HTMLDivElement | null>(null);
 
-export default function DynamicSuggestionCard({
-  userActions,
-  onSelect,
-  isTyping,
-}: {
-  userActions: string[];
-  onSelect: (suggestion: string) => void;
-  isTyping: boolean;
-}) {
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [visible, setVisible] = useState(true);
-
-  // --- Track scroll to hide box ---
+  // --- Auto-scroll ---
   useEffect(() => {
-    const handleScroll = () => setVisible(false);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
+  }, [messages]);
 
-  useEffect(() => {
-    if (isTyping) setVisible(false);
-    else setVisible(true);
-  }, [isTyping]);
+  // --- Voice mic handler (simplified) ---
+  const handleMicClick = () => {
+    const recognition = recognitionRef.current;
+    if (!recognition) return;
+    try {
+      if (listening) recognition.stop();
+      else recognition.start();
+    } catch (err) {
+      console.warn("mic toggle error", err);
+    }
+  };
 
-  // --- Learn user behavior dynamically ---
-  useEffect(() => {
-    if (userActions.length === 0) return;
+  // --- Send message ---
+  const handleSend = (text?: string, spoken = false) => {
+    const message = (text ?? input).trim();
+    if (!message) return;
 
-    const frequencyMap: Record<string, number> = {};
+    // 🧠 store this as a user action
+    setUserActions((prev) => [...prev, message]);
 
-    userActions.forEach((action) => {
-      frequencyMap[action] = (frequencyMap[action] || 0) + 1;
-    });
+    const newMsgs = [...messages, { role: "user", content: message }];
+    setMessages(newMsgs);
+    setInput("");
+    setIsTyping(false);
 
-    const sorted = Object.entries(frequencyMap)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([label, count]) => ({ label, count }));
-
-    setSuggestions(sorted);
-  }, [userActions]);
-
-  if (!visible || suggestions.length === 0) return null;
+    // simple mock reply
+    setTimeout(() => {
+      const reply = `Got it — "${message}" received!`;
+      setMessages([...newMsgs, { role: "assistant", content: reply }]);
+    }, 600);
+  };
 
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 w-[90%] max-w-3xl bg-gray-900/90 backdrop-blur-md border border-gray-800 rounded-2xl shadow-lg p-3 md:p-4 transition-all duration-300 animate-fadeIn">
-      <p className="text-xs text-gray-400 mb-2 px-2">💡 Suggested for you</p>
-      <div className="flex flex-wrap justify-center gap-2">
-        {suggestions.map((s, i) => (
-          <button
-            key={i}
-            onClick={() => onSelect(s.label)}
-            className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs md:text-sm px-3 py-1.5 rounded-full border border-gray-700 transition"
-          >
-            {s.label}
-          </button>
-        ))}
+    <div className="relative flex flex-col h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white overflow-hidden">
+      {/* Topbar */}
+      <HamburgerMenu />
+
+      {/* Chat area */}
+      <div ref={chatRef} className="flex-1 overflow-y-auto px-4 pt-20 pb-36 space-y-4">
+        <div className="max-w-3xl mx-auto flex flex-col gap-4">
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`px-4 py-3 rounded-2xl text-sm md:text-base transition-all duration-300 ${
+                  msg.role === "user"
+                    ? "bg-blue-600 text-white rounded-br-none"
+                    : "bg-gray-800 text-gray-100 border border-gray-700 rounded-bl-none"
+                }`}
+              >
+                {msg.content}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* 🧠 Dynamic Suggestion Card — sits right above footer */}
+      <DynamicSuggestionCard
+        userActions={userActions}
+        onSelect={(s) => handleSend(s, false)}
+        isTyping={isTyping}
+      />
+
+      {/* Footer input */}
+      <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-700 px-4 py-3 fixed bottom-0">
+        <div className="max-w-3xl mx-auto flex items-center space-x-3">
+          {/* Mic */}
+          <button
+            onClick={handleMicClick}
+            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
+              listening
+                ? "bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.5)] scale-110"
+                : "bg-gray-800 hover:bg-gray-700"
+            }`}
+          >
+            <FaMicrophone />
+          </button>
+
+          {/* Input */}
+          <input
+            type="text"
+            placeholder="Ask Ochiga AI anything…"
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setIsTyping(e.target.value.trim().length > 0);
+            }}
+            onKeyDown={(e) => e.key === "Enter" && handleSend(undefined, false)}
+            className="flex-1 bg-gray-800 border border-gray-700 rounded-full px-4 py-2 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          {/* Send */}
+          <button
+            onClick={() => handleSend(undefined, false)}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 transition"
+          >
+            <FaPaperPlane className="text-white text-sm" />
+          </button>
+        </div>
+      </footer>
     </div>
   );
 }
