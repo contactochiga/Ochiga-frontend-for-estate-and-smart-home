@@ -9,45 +9,72 @@ export default function AIDashboard() {
     { role: "assistant", content: "Hello! I’m Ochiga AI — how can I assist you today?" },
   ]);
   const [listening, setListening] = useState(false);
-  const [autoListenReady, setAutoListenReady] = useState(false);
+  const [speechReady, setSpeechReady] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const silenceTimer = useRef<any>(null);
 
-  // --- 🧠 INIT SPEECH RECOGNITION ---
+  // --- INIT SPEECH RECOGNITION ---
   useEffect(() => {
     if (typeof window === "undefined") return;
+
     const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) return;
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      console.warn("Speech Recognition not supported in this browser.");
+      return;
+    }
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = false;
     recognition.lang = "en-US";
 
-    recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
+    recognition.onstart = () => {
+      setListening(true);
+      resetSilenceTimer(recognition);
+    };
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[event.results.length - 1][0].transcript.trim();
-      if (transcript) handleSend(transcript, true);
+      if (transcript) {
+        handleSend(transcript, true);
+        resetSilenceTimer(recognition);
+      }
+    };
+
+    recognition.onend = () => {
+      setListening(false);
+      // Restart automatically only when user is speaking again
+      if (speechReady) {
+        setTimeout(() => {
+          try {
+            recognition.start();
+          } catch {}
+        }, 1500);
+      }
+    };
+
+    recognition.onerror = (e: any) => {
+      console.warn("Speech recognition error:", e.error);
+      setListening(false);
     };
 
     recognitionRef.current = recognition;
-    setAutoListenReady(true);
+    setSpeechReady(true);
   }, []);
 
-  // --- 🗣️ AUTO START LISTENING ---
-  useEffect(() => {
-    if (autoListenReady && recognitionRef.current) {
+  // --- SILENCE DETECTOR ---
+  const resetSilenceTimer = (recognition: any) => {
+    clearTimeout(silenceTimer.current);
+    silenceTimer.current = setTimeout(() => {
       try {
-        recognitionRef.current.start();
-      } catch {
-        // Avoid multiple start errors
-      }
-    }
-  }, [autoListenReady]);
+        recognition.stop();
+      } catch {}
+    }, 2000); // stop if 2 seconds of silence
+  };
 
+  // --- MIC BUTTON ---
   const handleMicClick = () => {
     if (!recognitionRef.current) return;
     try {
@@ -56,12 +83,12 @@ export default function AIDashboard() {
       } else {
         recognitionRef.current.start();
       }
-    } catch {
-      console.warn("Mic error");
+    } catch (err) {
+      console.warn("Mic toggle error", err);
     }
   };
 
-  // --- ✉️ HANDLE SEND ---
+  // --- SEND HANDLER ---
   const handleSend = (text?: string, spoken = false) => {
     const message = text ?? input;
     if (!message.trim()) return;
@@ -70,13 +97,13 @@ export default function AIDashboard() {
     setMessages(newMsgs);
     setInput("");
 
-    // Simulate AI reply
+    // Simulated AI reply
     setTimeout(() => {
       const reply = `Got it — processing your request: "${message}".`;
       const updated = [...newMsgs, { role: "assistant", content: reply }];
       setMessages(updated);
 
-      // 🧏‍♂️ Speak only if it was a spoken input
+      // Speak back if user spoke
       if (spoken) {
         const synth = window.speechSynthesis;
         if (synth && !synth.speaking) {
@@ -101,7 +128,7 @@ export default function AIDashboard() {
     <div className="relative flex flex-col h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white overflow-hidden">
       {/* MAIN AREA */}
       <main className="flex-1 flex items-center justify-center relative overflow-hidden">
-        {/* Animated Orb */}
+        {/* AI ORB */}
         {listening && (
           <div className="absolute flex items-center justify-center">
             <div className="relative w-44 h-44 rounded-full flex items-center justify-center">
