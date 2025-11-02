@@ -157,6 +157,23 @@ export default function OchigaAssistant() {
   };
 
   // ---------------------------
+  // Hold & Tap Detection
+  // ---------------------------
+  const handleMouseDown = () => {
+    holdTimerRef.current = setTimeout(() => startListening(), 800);
+  };
+
+  const handleMouseUp = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+
+    if (!listening) setIsOpen(true);
+    else stopListening();
+  };
+
+  // ---------------------------
   // Context Views
   // ---------------------------
   const DeviceOverview = () => (
@@ -197,27 +214,11 @@ export default function OchigaAssistant() {
   );
 
   // ---------------------------
-  // Hold & Tap Detection
-  // ---------------------------
-  const handleMouseDown = () => {
-    holdTimerRef.current = setTimeout(() => startListening(), 800); // hold for 0.8s
-  };
-
-  const handleMouseUp = () => {
-    if (holdTimerRef.current) {
-      clearTimeout(holdTimerRef.current);
-      holdTimerRef.current = null;
-    }
-    if (!listening) setIsOpen(true);
-    else stopListening();
-  };
-
-  // ---------------------------
   // Main UI (with Portal)
   // ---------------------------
   const chatInterface = (
     <div className="fixed bottom-6 right-6 z-[9999] pointer-events-auto">
-      {/* Siri-style Bubble */}
+      {/* Siri-like Floating Bubble */}
       {!isOpen && (
         <button
           onMouseDown={handleMouseDown}
@@ -241,9 +242,7 @@ export default function OchigaAssistant() {
           )}
 
           {aiSpeaking && (
-            <>
-              <span className="absolute inset-0 rounded-full bg-indigo-400/10 animate-breath"></span>
-            </>
+            <span className="absolute inset-0 rounded-full bg-indigo-400/10 animate-breath"></span>
           )}
         </button>
       )}
