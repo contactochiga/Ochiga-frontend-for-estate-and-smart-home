@@ -19,22 +19,22 @@ export default function OchigaAssistant() {
   ]);
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
+  const [aiSpeaking, setAiSpeaking] = useState(false);
   const [aiTyping, setAiTyping] = useState(false);
   const [contextView, setContextView] = useState<"devices" | "wallet" | null>(null);
   const [mounted, setMounted] = useState(false);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { devices, wallet, toggleDevice, updateWallet } = useDashboard();
 
   // ---------------------------
   // Mount Check for Portal
   // ---------------------------
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   // ---------------------------
-  // Speech Recognition
+  // Speech Recognition Setup
   // ---------------------------
   useEffect(() => {
     if ("webkitSpeechRecognition" in window) {
@@ -53,16 +53,18 @@ export default function OchigaAssistant() {
     }
   }, []);
 
-  const handleMic = () => {
-    if (!recognitionRef.current)
-      return alert("Speech recognition not supported in this browser.");
-    if (listening) {
-      recognitionRef.current.stop();
-      setListening(false);
-    } else {
-      recognitionRef.current.start();
-      setListening(true);
+  const startListening = () => {
+    if (!recognitionRef.current) {
+      alert("Speech recognition not supported in this browser.");
+      return;
     }
+    recognitionRef.current.start();
+    setListening(true);
+  };
+
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    setListening(false);
   };
 
   // ---------------------------
@@ -71,12 +73,14 @@ export default function OchigaAssistant() {
   const speak = (text: string) => {
     const synth = window.speechSynthesis;
     const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = "en-NG"; // Nigerian English accent if supported
+    utter.lang = "en-NG";
+    setAiSpeaking(true);
+    utter.onend = () => setAiSpeaking(false);
     synth.speak(utter);
   };
 
   // ---------------------------
-  // Handle Send
+  // Handle Send (chat or speech)
   // ---------------------------
   const handleSend = async (userInput?: string) => {
     const text = userInput || input;
@@ -112,12 +116,11 @@ export default function OchigaAssistant() {
   };
 
   // ---------------------------
-  // Local Logic
+  // Local Command Logic
   // ---------------------------
   const processCommands = (inputText: string) => {
     const lower = inputText.toLowerCase();
 
-    // Toggle devices
     if (lower.includes("toggle")) {
       const room = Object.keys(devices).find((r) => lower.includes(r.toLowerCase()));
       if (room) {
@@ -130,7 +133,6 @@ export default function OchigaAssistant() {
       return "Please specify the room for the device toggle.";
     }
 
-    // Wallet
     if (lower.includes("wallet")) {
       setContextView("wallet");
       if (lower.includes("balance"))
@@ -146,11 +148,9 @@ export default function OchigaAssistant() {
       }
     }
 
-    // Greetings
     if (lower.includes("hello") || lower.includes("hi"))
       return "👋 Hello! How can I assist you today?";
 
-    // Device Status
     if (lower.includes("status") || lower.includes("devices")) {
       setContextView("devices");
       return "Here’s your device status:";
@@ -160,7 +160,7 @@ export default function OchigaAssistant() {
   };
 
   // ---------------------------
-  // Contextual Components
+  // Context Views
   // ---------------------------
   const DeviceOverview = () => (
     <div className="mt-3 grid grid-cols-2 gap-3 text-sm animate-fadeIn">
@@ -200,31 +200,51 @@ export default function OchigaAssistant() {
   );
 
   // ---------------------------
+  // Hold & Tap Detection
+  // ---------------------------
+  const handleMouseDown = () => {
+    holdTimerRef.current = setTimeout(() => startListening(), 800); // hold for 0.8s
+  };
+  const handleMouseUp = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    if (!listening) setIsOpen(true); // if released before hold time, open chat
+    else stopListening(); // if was listening, stop
+  };
+
+  // ---------------------------
   // Main UI (with Portal)
   // ---------------------------
   const chatInterface = (
     <div className="fixed bottom-6 right-6 z-[9999] pointer-events-auto">
+      {/* Siri-style Bubble */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-2xl transition-transform transform hover:scale-110 focus:outline-none focus:ring-4 focus:ring-blue-300 animate-fadeIn"
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onTouchStart={handleMouseDown}
+          onTouchEnd={handleMouseUp}
+          className={`relative bg-blue-600 text-white p-4 rounded-full shadow-2xl transition-transform transform hover:scale-110 focus:outline-none
+            ${listening ? "animate-pulse ring-4 ring-blue-400" : ""}
+            ${aiSpeaking ? "animate-ping ring-2 ring-indigo-400" : ""}
+          `}
         >
           <FaRobot size={22} />
+          {listening && (
+            <span className="absolute inset-0 rounded-full animate-pulse bg-blue-400/20"></span>
+          )}
         </button>
       )}
 
+      {/* Chat Window */}
       {isOpen && (
         <div
-          className="
-            w-[400px] max-w-[90vw]
-            h-[550px] max-h-[80vh]
-            bg-white dark:bg-gray-900
-            border border-gray-200 dark:border-gray-700
-            rounded-2xl shadow-2xl flex flex-col
-            overflow-hidden transition-all animate-slideUp
-          "
+          className="w-[90vw] max-w-[400px] h-[70vh] max-h-[550px]
+            bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700
+            rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all animate-slideUp"
         >
-          {/* Header */}
           <div className="flex justify-between items-center bg-blue-600 text-white px-4 py-3 shadow-md">
             <div className="flex items-center space-x-2">
               <FaRobot />
@@ -238,7 +258,6 @@ export default function OchigaAssistant() {
             </button>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
             {messages.map((msg, i) => (
               <div
@@ -264,7 +283,6 @@ export default function OchigaAssistant() {
             {contextView === "wallet" && <WalletOverview />}
           </div>
 
-          {/* Input */}
           <div className="flex items-center border-t border-gray-200 dark:border-gray-700 px-3 py-2 bg-gray-50 dark:bg-gray-800">
             <input
               type="text"
@@ -275,7 +293,7 @@ export default function OchigaAssistant() {
               className="flex-1 bg-transparent p-2 text-gray-800 dark:text-gray-100 text-sm outline-none placeholder-gray-500"
             />
             <button
-              onClick={handleMic}
+              onClick={startListening}
               className={`p-2 rounded-full transition ${
                 listening
                   ? "bg-red-600 text-white animate-pulse"
