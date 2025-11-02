@@ -1,4 +1,4 @@
-// components/OrbAssistant.tsx
+// ochiga-frontend/src/app/ai-dashboard/components/OrbAssistant.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
