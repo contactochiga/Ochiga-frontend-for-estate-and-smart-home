@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
 import HamburgerMenu from "./components/HamburgerMenu";
 import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
+import ChatLayout from "./components/ChatLayout";
 
 /* -----------------------------
    Module Panels (placeholders)
