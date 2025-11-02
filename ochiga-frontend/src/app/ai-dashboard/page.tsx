@@ -1,10 +1,8 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
-import HamburgerMenu from "./components/HamburgerMenu";
-import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import ChatLayout from "./components/ChatLayout";
+import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
 
 /* -----------------------------
