@@ -27,22 +27,35 @@ export default function AIDashboard() {
 
   return (
     <div className="relative flex flex-col h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white overflow-hidden">
+      
       {/* MAIN AREA */}
-      <main className="flex-1 flex items-center justify-center relative">
-        {/* AI Orb — appears only when listening */}
+      <main className="flex-1 flex items-center justify-center relative overflow-hidden">
+        {/* Animated Orb — shows only when listening */}
         {listening && (
           <div className="absolute flex items-center justify-center">
-            <div className="relative w-40 h-40 rounded-full bg-gradient-to-br from-blue-500 via-cyan-400 to-purple-600 animate-pulse">
-              {/* Inner glow wave */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-600 via-purple-600 to-cyan-400 opacity-50 blur-2xl animate-ping" />
-              <div className="absolute inset-2 rounded-full bg-gray-950/60 backdrop-blur-sm flex items-center justify-center text-center text-gray-200 text-sm">
-                Listening...
+            <div className="relative w-44 h-44 rounded-full flex items-center justify-center">
+              
+              {/* outer wave layer */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500 via-cyan-400 to-purple-600 opacity-40 blur-2xl animate-pulse" />
+
+              {/* rotating halo */}
+              <div className="absolute inset-0 rounded-full border-2 border-cyan-400/40 animate-[spin_6s_linear_infinite]" />
+
+              {/* breathing orb */}
+              <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-blue-600 via-cyan-500 to-purple-700 
+                              shadow-[0_0_25px_rgba(59,130,246,0.6)] animate-[pulse_3s_ease-in-out_infinite]
+                              flex items-center justify-center text-center text-gray-100 font-light">
+                Listening…
               </div>
+
+              {/* ripple waves */}
+              <div className="absolute w-44 h-44 rounded-full border border-cyan-400/30 animate-[ping_2s_ease-out_infinite]" />
+              <div className="absolute w-40 h-40 rounded-full border border-blue-500/20 animate-[ping_3s_ease-out_infinite]" />
             </div>
           </div>
         )}
 
-        {/* Idle State Text */}
+        {/* Idle Text */}
         {!listening && (
           <h1 className="text-gray-500 text-sm tracking-widest uppercase transition-opacity duration-500">
             Ochiga AI Interface
