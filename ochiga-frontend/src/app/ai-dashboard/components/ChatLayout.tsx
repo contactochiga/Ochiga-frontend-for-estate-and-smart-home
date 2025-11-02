@@ -1,70 +1,77 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
 
-export default function ChatLayout({
-  input,
-  setInput,
-  listening,
-  handleSend,
-  handleMicClick,
-}: any) {
-  const suggestions = [
-    "Turn on living room lights",
-    "Fund my wallet",
-    "View CCTV feed",
-    "Check device status",
-    "Lock all doors",
-  ];
+export default function ChatLayout() {
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<
+    { sender: "user" | "ai"; text: string }[]
+  >([]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+    setMessages((prev) => [...prev, { sender: "user", text: input }]);
+    setInput("");
+    // Simulated AI reply
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "AI response coming soon..." },
+      ]);
+    }, 600);
+  };
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
-    <footer className="fixed bottom-0 left-0 w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-700 px-4 py-3 z-50">
-      <div className="max-w-3xl mx-auto flex flex-col gap-3">
-        {/* Suggestions */}
-        <div className="flex flex-wrap justify-center gap-2">
-          {suggestions.map((s, i) => (
-            <button
-              key={i}
-              onClick={() => handleSend(s, false)}
-              className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs md:text-sm px-3 py-1.5 rounded-full border border-gray-700 transition"
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-800 bg-gray-950/70 backdrop-blur-xl">
+      <div className="mx-auto max-w-5xl px-4 py-3">
+        <div className="h-60 overflow-y-auto space-y-3 pb-3 scrollbar-thin scrollbar-thumb-gray-700">
+          {messages.map((msg, idx) => (
+            <div
+              key={idx}
+              className={`flex ${
+                msg.sender === "user" ? "justify-end" : "justify-start"
+              }`}
             >
-              {s}
-            </button>
+              <div
+                className={`px-4 py-2 rounded-2xl max-w-[80%] text-sm md:text-[15px] ${
+                  msg.sender === "user"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-800 text-gray-200"
+                }`}
+              >
+                {msg.text}
+              </div>
+            </div>
           ))}
+          <div ref={chatEndRef} />
         </div>
 
-        {/* Input Row */}
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={handleMicClick}
-            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
-              listening
-                ? "bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.5)] scale-110"
-                : "bg-gray-800 hover:bg-gray-700"
-            }`}
-          >
-            <FaMicrophone />
-          </button>
-
+        <div className="relative flex items-center gap-3 pt-2">
           <input
             type="text"
-            placeholder="Ask Ochiga AI anything…"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) =>
-              e.key === "Enter" && handleSend(undefined, false)
-            }
-            className="flex-1 bg-gray-800 border border-gray-700 rounded-full px-4 py-2 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onKeyDown={(e) => e.key === "Enter" && handleSend()}
+            placeholder="Ask Ochiga AI..."
+            className="flex-1 bg-gray-900 border border-gray-700 text-gray-200 text-sm md:text-base rounded-full px-4 py-2 focus:outline-none focus:border-blue-600 transition-all"
           />
-
           <button
-            onClick={() => handleSend(undefined, false)}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 transition"
+            onClick={handleSend}
+            className="p-3 bg-blue-600 hover:bg-blue-700 rounded-full text-white transition"
           >
-            <FaPaperPlane className="text-white text-sm" />
+            <FaPaperPlane size={14} />
+          </button>
+          <button className="p-3 bg-gray-800 hover:bg-gray-700 rounded-full text-blue-400 transition">
+            <FaMicrophone size={16} />
           </button>
         </div>
       </div>
-    </footer>
+    </div>
   );
 }
