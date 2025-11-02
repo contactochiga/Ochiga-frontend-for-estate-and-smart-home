@@ -417,14 +417,7 @@ export default function AIDashboard() {
       {/* Footer */}
       <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-700 px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-center space-x-3">
-          <button
-            onClick={handleMicClick}
-            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
-              listening
-                ? "bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.5)] scale-110"
-                : "bg-gray-800 hover:bg-gray-700"
-            }`}
-          >
+          <button onClick={handleMicClick} className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${listening ? "bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.5)] scale-110" : "bg-gray-800 hover:bg-gray-700"}`}>
             <FaMicrophone />
           </button>
 
