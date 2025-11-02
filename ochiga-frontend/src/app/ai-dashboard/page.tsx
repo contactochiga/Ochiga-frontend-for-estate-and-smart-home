@@ -1,8 +1,7 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
-import ChatLayout from "./components/ChatLayout";
-import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
 
 /* -----------------------------
@@ -405,11 +404,14 @@ export default function AIDashboard() {
         </div>
       </main>
 
-      <DynamicSuggestionCard
-  userActions={userActions}
-  onSelect={(s) => handleSend(s)}
-  isTyping={input.length > 0}
-/>
+      {/* Suggestion chips */}
+      <div className="w-full flex flex-wrap justify-center gap-2 px-4 mb-2">
+        {suggestions.map((s, i) => (
+          <button key={i} onClick={() => handleSend(s, false)} className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs md:text-sm px-3 py-1.5 rounded-full border border-gray-700 transition">
+            {s}
+          </button>
+        ))}
+      </div>
 
       {/* Footer */}
       <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-700 px-4 py-3">
