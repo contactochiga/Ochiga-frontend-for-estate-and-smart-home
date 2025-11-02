@@ -1,8 +1,3 @@
-Ochiga dashboard 
-And show user info on the profile section 
-
-On this code please
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
