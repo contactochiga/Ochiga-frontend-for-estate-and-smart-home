@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
+import HamburgerMenu from "./components/HamburgerMenu";
 
 /* -----------------------------
    Module Panels (placeholders)
@@ -350,6 +351,9 @@ export default function AIDashboard() {
 
   return (
     <div className="relative flex flex-col h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white overflow-hidden">
+      {/* Insert Hamburger topbar here (fixed, won't reflow layout) */}
+      <HamburgerMenu />
+
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
         {/* Orb when listening */}
         {listening && (
