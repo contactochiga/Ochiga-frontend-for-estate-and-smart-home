@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
 import HamburgerMenu from "./components/HamburgerMenu";
+import ChatLayout from "./components/ChatLayout"; // ✅ imported chat footer
 
 /* -----------------------------
    Module Panels (placeholders)
