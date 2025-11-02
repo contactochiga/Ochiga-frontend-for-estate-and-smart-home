@@ -28,9 +28,6 @@ export default function OchigaAssistant() {
   const holdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { devices, wallet, toggleDevice, updateWallet } = useDashboard();
 
-  // ---------------------------
-  // Mount Check for Portal
-  // ---------------------------
   useEffect(() => setMounted(true), []);
 
   // ---------------------------
@@ -205,13 +202,14 @@ export default function OchigaAssistant() {
   const handleMouseDown = () => {
     holdTimerRef.current = setTimeout(() => startListening(), 800); // hold for 0.8s
   };
+
   const handleMouseUp = () => {
     if (holdTimerRef.current) {
       clearTimeout(holdTimerRef.current);
       holdTimerRef.current = null;
     }
-    if (!listening) setIsOpen(true); // if released before hold time, open chat
-    else stopListening(); // if was listening, stop
+    if (!listening) setIsOpen(true);
+    else stopListening();
   };
 
   // ---------------------------
@@ -226,14 +224,26 @@ export default function OchigaAssistant() {
           onMouseUp={handleMouseUp}
           onTouchStart={handleMouseDown}
           onTouchEnd={handleMouseUp}
-          className={`relative bg-blue-600 text-white p-4 rounded-full shadow-2xl transition-transform transform hover:scale-110 focus:outline-none
-            ${listening ? "animate-pulse ring-4 ring-blue-400" : ""}
-            ${aiSpeaking ? "animate-ping ring-2 ring-indigo-400" : ""}
+          className={`relative flex items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 
+            text-white p-5 rounded-full shadow-2xl transition-all transform hover:scale-110 active:scale-95 
+            focus:outline-none ring-offset-2 ring-offset-white dark:ring-offset-gray-900
+            ${listening ? "ring-4 ring-blue-400 shadow-blue-400/40" : ""}
+            ${aiSpeaking ? "ring-4 ring-indigo-400 shadow-indigo-400/40 animate-breath" : ""}
           `}
         >
-          <FaRobot size={22} />
+          <FaRobot size={22} className="z-10 relative" />
+
           {listening && (
-            <span className="absolute inset-0 rounded-full animate-pulse bg-blue-400/20"></span>
+            <>
+              <span className="absolute inset-0 rounded-full bg-blue-400/20 animate-ping"></span>
+              <span className="absolute inset-0 rounded-full bg-blue-500/10 animate-pulse"></span>
+            </>
+          )}
+
+          {aiSpeaking && (
+            <>
+              <span className="absolute inset-0 rounded-full bg-indigo-400/10 animate-breath"></span>
+            </>
           )}
         </button>
       )}
