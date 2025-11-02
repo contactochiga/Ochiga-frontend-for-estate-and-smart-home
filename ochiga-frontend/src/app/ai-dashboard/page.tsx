@@ -373,4 +373,60 @@ export default function AIDashboard() {
         {/* Chat area */}
         <div ref={chatRef} className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth">
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            {messages.map((msg, i)
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className="flex flex-col max-w-[80%]">
+                  <div className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm transition-all duration-300 ${msg.role === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-gray-800 text-gray-100 border border-gray-700 rounded-bl-none"}`}>
+                    {msg.content}
+                  </div>
+
+                  {/* dynamic panel */}
+                  {msg.panel === "lights" && <LightControl />}
+                  {msg.panel === "wallet" && <WalletPanel />}
+                  {msg.panel === "cctv" && <CCTVPanel />}
+                  {msg.panel === "estate" && <EstatePanel />}
+                  {msg.panel === "home" && <HomePanel />}
+                  {msg.panel === "room" && <RoomPanel />}
+                  {msg.panel === "visitors" && <VisitorsPanel />}
+                  {msg.panel === "payments" && <PaymentsPanel />}
+                  {msg.panel === "utilities" && <UtilitiesPanel />}
+                  {msg.panel === "community" && <CommunityPanel />}
+                  {msg.panel === "notifications" && <NotificationsPanel />}
+                  {msg.panel === "health" && <HealthPanel />}
+                  {msg.panel === "message" && <MessagePanel />}
+                  {msg.panel === "iot" && <IoTPanel />}
+                  {msg.panel === "assistant" && <AssistantPanel />}
+                  {msg.panel === "ai" && <AiPanel />}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      {/* Suggestion chips */}
+      <div className="w-full flex flex-wrap justify-center gap-2 px-4 mb-2">
+        {suggestions.map((s, i) => (
+          <button key={i} onClick={() => handleSend(s, false)} className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs md:text-sm px-3 py-1.5 rounded-full border border-gray-700 transition">
+            {s}
+          </button>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-700 px-4 py-3">
+        <div className="max-w-3xl mx-auto flex items-center space-x-3">
+          <button onClick={handleMicClick} className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${listening ? "bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.5)] scale-110" : "bg-gray-800 hover:bg-gray-700"}`}>
+            <FaMicrophone />
+          </button>
+
+          <input type="text" placeholder="Ask Ochiga AI anything…" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSend(undefined, false)} className="flex-1 bg-gray-800 border border-gray-700 rounded-full px-4 py-2 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+
+          <button onClick={() => handleSend(undefined, false)} className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 transition">
+            <FaPaperPlane className="text-white text-sm" />
+          </button>
+        </div>
+      </footer>
+    </div>
+  );
+}
