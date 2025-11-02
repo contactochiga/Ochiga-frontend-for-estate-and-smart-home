@@ -50,9 +50,10 @@ const HamburgerMenu: React.FC = () => {
 
   return (
     <>
-      {/* Hamburger Icon */}
+      {/* Hamburger Icon (fixed topbar) */}
       <button
         onClick={toggleMenu}
+        aria-label={open ? "Close menu" : "Open menu"}
         style={{
           position: "fixed",
           top: "1rem",
@@ -63,6 +64,12 @@ const HamburgerMenu: React.FC = () => {
           color: "#fff",
           fontSize: "1.5rem",
           cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 44,
+          height: 44,
+          borderRadius: 10,
         }}
       >
         {open ? <FaTimes /> : <FaBars />}
