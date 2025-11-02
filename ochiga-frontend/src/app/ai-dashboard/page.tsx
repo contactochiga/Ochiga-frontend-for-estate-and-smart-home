@@ -427,7 +427,7 @@ export default function AIDashboard() {
             <FaPaperPlane className="text-white text-sm" />
           </button>
         </div>
-      </footer>
+      <ChatLayout/>
     </div>
   );
 }
