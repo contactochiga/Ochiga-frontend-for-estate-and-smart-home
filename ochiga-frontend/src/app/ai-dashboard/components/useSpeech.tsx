@@ -1,4 +1,4 @@
-// components/useSpeech.tsx
+ochiga-frontend/src/app/ai-dashboard/components
 import { useEffect, useRef, useState } from "react";
 
 declare global {
