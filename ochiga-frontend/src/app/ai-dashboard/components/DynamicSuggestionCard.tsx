@@ -2,21 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
-import HamburgerMenu from "./components/HamburgerMenu";
-import DynamicSuggestionCard from "./components/DynamicSuggestionCard"; // 🧠 import smart suggestion card
+import DynamicSuggestionCard from "./components/DynamicSuggestionCard"; // ✅ only this import remains
 
 export default function AIDashboard() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Hello! I’m Ochiga AI — how can I assist you today?" },
   ]);
-  const [userActions, setUserActions] = useState<string[]>([]); // 🧩 track all user actions
+  const [userActions, setUserActions] = useState<string[]>([]); // 🧠 tracks user patterns
   const [listening, setListening] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const recognitionRef = useRef<any>(null);
   const chatRef = useRef<HTMLDivElement | null>(null);
 
-  // --- Auto-scroll ---
+  // --- Auto-scroll to bottom ---
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages]);
@@ -38,7 +37,7 @@ export default function AIDashboard() {
     const message = (text ?? input).trim();
     if (!message) return;
 
-    // 🧠 store this as a user action
+    // track this as a user action for smart suggestions
     setUserActions((prev) => [...prev, message]);
 
     const newMsgs = [...messages, { role: "user", content: message }];
@@ -46,7 +45,7 @@ export default function AIDashboard() {
     setInput("");
     setIsTyping(false);
 
-    // simple mock reply
+    // mock AI reply
     setTimeout(() => {
       const reply = `Got it — "${message}" received!`;
       setMessages([...newMsgs, { role: "assistant", content: reply }]);
@@ -55,11 +54,8 @@ export default function AIDashboard() {
 
   return (
     <div className="relative flex flex-col h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white overflow-hidden">
-      {/* Topbar */}
-      <HamburgerMenu />
-
       {/* Chat area */}
-      <div ref={chatRef} className="flex-1 overflow-y-auto px-4 pt-20 pb-36 space-y-4">
+      <div ref={chatRef} className="flex-1 overflow-y-auto px-4 pt-10 pb-36 space-y-4">
         <div className="max-w-3xl mx-auto flex flex-col gap-4">
           {messages.map((msg, i) => (
             <div
@@ -80,7 +76,7 @@ export default function AIDashboard() {
         </div>
       </div>
 
-      {/* 🧠 Dynamic Suggestion Card — sits right above footer */}
+      {/* 🧠 Smart Suggestion Card */}
       <DynamicSuggestionCard
         userActions={userActions}
         onSelect={(s) => handleSend(s, false)}
@@ -90,7 +86,6 @@ export default function AIDashboard() {
       {/* Footer input */}
       <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-700 px-4 py-3 fixed bottom-0">
         <div className="max-w-3xl mx-auto flex items-center space-x-3">
-          {/* Mic */}
           <button
             onClick={handleMicClick}
             className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
@@ -102,7 +97,6 @@ export default function AIDashboard() {
             <FaMicrophone />
           </button>
 
-          {/* Input */}
           <input
             type="text"
             placeholder="Ask Ochiga AI anything…"
@@ -115,7 +109,6 @@ export default function AIDashboard() {
             className="flex-1 bg-gray-800 border border-gray-700 rounded-full px-4 py-2 text-gray-100 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
-          {/* Send */}
           <button
             onClick={() => handleSend(undefined, false)}
             className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 transition"
