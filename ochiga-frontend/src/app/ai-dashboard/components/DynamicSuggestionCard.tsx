@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 interface Props {
-  userActions: string[];
+  userActions?: string[]; // made optional ✅
   onSelect: (suggestion: string) => void;
   isTyping: boolean;
 }
@@ -16,7 +16,7 @@ interface Props {
  * - Hides while user is typing (isTyping).
  * - Can flip between suggestions and a lightweight notifications area.
  */
-export default function DynamicSuggestionCard({ userActions, onSelect, isTyping }: Props) {
+export default function DynamicSuggestionCard({ userActions = [], onSelect, isTyping }: Props) {
   const [mode, setMode] = useState<"suggestions" | "notifications">("suggestions");
   const [notifications, setNotifications] = useState<string[]>([]);
   const [dismissedIds, setDismissedIds] = useState<Set<number>>(new Set());
@@ -47,7 +47,6 @@ export default function DynamicSuggestionCard({ userActions, onSelect, isTyping 
       // avoid adding duplicates (case-insensitive)
       const normalized = s.toLowerCase();
       if (recent && recent.toLowerCase().includes(normalized.split(" ")[0])) {
-        // skip if recent already covers similar action
         continue;
       }
       if (!combined.some((c) => c.toLowerCase() === s.toLowerCase())) combined.push(s);
@@ -63,36 +62,33 @@ export default function DynamicSuggestionCard({ userActions, onSelect, isTyping 
     return combined.slice(0, 6);
   }, [userActions, defaultSuggestions]);
 
-  // When user performs actions, add small notification entries (keeps UX lively)
+  // When user performs actions, add small notification entries
   useEffect(() => {
     if (!userActions || userActions.length === 0) return;
     const last = userActions[userActions.length - 1];
-    // push a short notification (keeps last 5)
+
     setNotifications((prev) => {
       const next = [`Executed: ${last}`, ...prev].slice(0, 5);
       return next;
     });
 
-    // briefly show notifications mode for a short time then go back to suggestions
     setMode("notifications");
     const t = setTimeout(() => setMode("suggestions"), 2200);
     return () => clearTimeout(t);
   }, [userActions]);
 
-  // Dismiss a notification
   const dismissNotification = (index: number) => {
     setDismissedIds((prev) => new Set(prev).add(index));
   };
 
-  // If user is typing hide whole card
+  // hide card while typing
   if (isTyping) return null;
 
   return (
     <div className="w-full px-4 mb-2">
       <div className="max-w-3xl mx-auto">
-        {/* Card container */}
         <div className="bg-transparent rounded-lg p-1">
-          {/* Mode toggle / header */}
+          {/* Header / mode toggle */}
           <div className="flex items-center justify-between mb-2 px-1">
             <div className="text-xs text-gray-300 uppercase tracking-wider">Quick actions</div>
 
@@ -152,10 +148,7 @@ export default function DynamicSuggestionCard({ userActions, onSelect, isTyping 
                     <div className="text-xs text-gray-200 truncate">{n}</div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => {
-                          // quick action: clicking the notification can forward it as a command
-                          onSelect(n.replace(/^Executed:\s*/, ""));
-                        }}
+                        onClick={() => onSelect(n.replace(/^Executed:\s*/, ""))}
                         className="text-xs text-cyan-300 hover:underline"
                       >
                         Open
