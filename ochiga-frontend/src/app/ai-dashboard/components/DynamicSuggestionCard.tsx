@@ -1,20 +1,23 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 interface Props {
   suggestions?: string[];
   onSend: (suggestion: string) => void;
+  isTyping?: boolean;
 }
 
 /**
  * DynamicSuggestionCard
- * Clean minimal version:
- * - Displays static suggestion chips only
- * - No labels, headers, or notifications
+ * - Fixed above footer
+ * - Auto-hides when typing or scrolling
+ * - Minimal design
  */
-export default function DynamicSuggestionCard({ suggestions = [], onSend }: Props) {
-  // default static suggestions (if none passed)
+export default function DynamicSuggestionCard({ suggestions = [], onSend, isTyping }: Props) {
+  const [visible, setVisible] = useState(true);
+
+  // default static suggestions
   const defaultSuggestions = useMemo(
     () => [
       "Turn on living room lights",
@@ -28,8 +31,26 @@ export default function DynamicSuggestionCard({ suggestions = [], onSend }: Prop
 
   const displayList = suggestions.length > 0 ? suggestions : defaultSuggestions;
 
+  // hide suggestions when typing
+  useEffect(() => {
+    if (isTyping) {
+      setVisible(false);
+      return;
+    }
+    setVisible(true);
+  }, [isTyping]);
+
+  // hide suggestions on scroll
+  useEffect(() => {
+    const handleScroll = () => setVisible(false);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (!visible) return null;
+
   return (
-    <div className="w-full px-4 mb-2">
+    <div className="fixed bottom-20 left-0 w-full z-30 px-4 transition-opacity duration-300">
       <div className="max-w-3xl mx-auto">
         <div className="w-full flex flex-wrap justify-center gap-2 animate-fadeIn">
           {displayList.map((s, i) => (
