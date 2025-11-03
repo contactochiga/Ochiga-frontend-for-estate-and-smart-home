@@ -1,228 +1,67 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { FaBars, FaTimes, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { useState } from "react";
+import { FaBars } from "react-icons/fa";
 
-const HamburgerMenu: React.FC = () => {
+export default function HamburgerMenu() {
   const [open, setOpen] = useState(false);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-
-  // Fake suggestions for demo
-  useEffect(() => {
-    if (search.length > 1) {
-      setSuggestions(["Building 1", "Estate A", "Device Z"]);
-    } else {
-      setSuggestions([]);
-    }
-  }, [search]);
-
-  const toggleMenu = () => setOpen(!open);
-  const closeMenu = () => setOpen(false);
-
-  const menuButtonStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.75rem",
-    background: "#333",
-    color: "#fff",
-    border: "none",
-    outline: "none",
-    marginBottom: "0.5rem",
-    fontWeight: 500,
-    cursor: "pointer",
-    textAlign: "left",
-    transition: "background 0.25s",
-  };
-
-  const dropdownButtonStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "0.75rem 1rem",
-    background: "none",
-    border: "none",
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    cursor: "pointer",
-    textAlign: "left",
-  };
 
   return (
     <>
-      {/* Hamburger Icon (fixed topbar) */}
-      <button
-        onClick={toggleMenu}
-        aria-label={open ? "Close menu" : "Open menu"}
-        style={{
-          position: "fixed",
-          top: "1rem",
-          left: "1rem",
-          zIndex: 1100,
-          background: "none",
-          border: "none",
-          color: "#fff",
-          fontSize: "1.5rem",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 44,
-          height: 44,
-          borderRadius: 10,
-        }}
-      >
-        {open ? <FaTimes /> : <FaBars />}
-      </button>
-
-      {/* Overlay */}
-      {open && (
-        <div
-          onClick={closeMenu}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            background: "rgba(0,0,0,0.5)",
-            zIndex: 999,
-            transition: "opacity 0.3s ease",
-          }}
-        />
-      )}
-
-      {/* Slide Menu */}
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: open ? 0 : "-92%",
-          width: "92%",
-          height: "100%",
-          background: "#1a1a1a",
-          transition: "left 0.35s ease",
-          display: "flex",
-          flexDirection: "column",
-          padding: "1rem",
-          zIndex: 1000,
-        }}
-      >
-        {/* Search */}
-        <input
-          type="text"
-          placeholder="Search buildings, estates, devices..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            padding: "0.5rem",
-            borderRadius: "1rem",
-            border: "none",
-            marginBottom: "0.5rem",
-            background: "#333",
-            color: "#fff",
-          }}
-        />
-
-        {suggestions.length > 0 && (
-          <div style={{ maxHeight: "150px", overflowY: "auto", marginBottom: "1rem" }}>
-            {suggestions.map((s, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: "0.5rem 1rem",
-                  borderRadius: "0.75rem",
-                  background: "#222",
-                  marginBottom: "0.25rem",
-                  cursor: "pointer",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#0f62fe")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#222")}
-                onClick={() => {
-                  setSearch(s);
-                  setSuggestions([]);
-                }}
-              >
-                {s}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Menu Buttons */}
-        <div style={{ flex: 1 }}>
+      {/* 🔹 Top Bar */}
+      <header className="fixed top-0 left-0 w-full z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          {/* Hamburger button */}
           <button
-            style={menuButtonStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#0f62fe")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#333")}
+            onClick={() => setOpen(!open)}
+            className="p-2 rounded-md hover:bg-gray-800 transition"
+            aria-label="Toggle menu"
           >
-            Buildings
+            <FaBars className="text-white text-xl" />
           </button>
-          <button
-            style={menuButtonStyle}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#0f62fe")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "#333")}
-          >
-            Estates
-          </button>
+
+          {/* Title */}
+          <span className="text-white text-sm md:text-base font-medium tracking-wide">
+            Ochiga AI
+          </span>
         </div>
 
-        {/* Profile at bottom */}
-        <div style={{ marginTop: "auto", position: "relative" }}>
-          <button
-            style={{ ...menuButtonStyle, display: "flex", alignItems: "center" }}
-            onClick={() => setProfileOpen(!profileOpen)}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#0f62fe")}
-            onMouseLeave={(e) => !profileOpen && (e.currentTarget.style.background = "#333")}
-          >
-            <div
-              style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                background: "#0f62fe",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: "0.5rem",
-                fontWeight: "bold",
-              }}
-            >
-              AI
-            </div>
-            Profile
-          </button>
+        {/* Right side placeholder (for future buttons) */}
+        <div className="flex items-center gap-2">
+          {/* e.g. future profile button / settings icon */}
+        </div>
+      </header>
 
-          {profileOpen && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: "50px",
-                left: 0,
-                width: "100%",
-                background: "#222",
-                borderRadius: "0.75rem",
-                overflow: "hidden",
-                boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
-                zIndex: 1001,
-              }}
-            >
-              <div style={{ padding: "0.75rem 1rem", borderBottom: "1px solid #333" }}>
-                <div style={{ fontWeight: "bold" }}>John Doe</div>
-                <div style={{ fontSize: "0.85rem", color: "#aaa" }}>john@example.com</div>
-              </div>
-              <button style={dropdownButtonStyle}>
-                <FaCog style={{ marginRight: "0.5rem" }} /> Settings
-              </button>
-              <button style={dropdownButtonStyle}>
-                <FaSignOutAlt style={{ marginRight: "0.5rem" }} /> Logout
-              </button>
-            </div>
-          )}
+      {/* 🔹 Sliding Menu */}
+      <div
+        className={`fixed top-0 left-0 h-screen w-[94%] bg-gray-900/95 backdrop-blur-xl border-r border-gray-800 shadow-2xl transform transition-transform duration-500 ease-in-out z-40 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Menu Content */}
+        <div className="flex flex-col justify-between h-full py-6 px-6">
+          {/* Upper Menu Section */}
+          <nav className="space-y-5 mt-10 text-gray-300">
+            <button className="block w-full text-left hover:text-white transition">🏠 Buildings</button>
+            <button className="block w-full text-left hover:text-white transition">⚙️ Settings</button>
+          </nav>
+
+          {/* Bottom Section (Profile / Logout) */}
+          <div className="border-t border-gray-800 pt-5 text-gray-400 text-sm">
+            <button className="block w-full text-left hover:text-white transition">
+              👤 Profile / Logout
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Overlay (click to close) */}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-[1px] z-30"
+          onClick={() => setOpen(false)}
+        />
+      )}
     </>
   );
-};
-
-export default HamburgerMenu;
+}
