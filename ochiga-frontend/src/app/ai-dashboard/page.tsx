@@ -364,12 +364,12 @@ export default function AIDashboard() {
       {/* Suggestion + Footer components */}
       <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} />
       <ChatFooter
-        input={input}
-        setInput={setInput}
-        listening={listening}
-        handleMicClick={handleMicClick}
-        handleSend={handleSend}
-      />
+  input={input}
+  setInput={setInput}
+  listening={listening}
+  onMicClick={handleMicClick}
+  onSend={() => handleSend(undefined, false)}
+/>
     </div>
   );
 }
