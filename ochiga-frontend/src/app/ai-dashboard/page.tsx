@@ -6,162 +6,44 @@ import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
 
 /* -----------------------------
-   Module Panels (with interactivity)
+   Module Panels (placeholders)
    ----------------------------- */
 
-const LightControl = () => {
-  const [active, setActive] = useState<"on" | "off" | "dim" | null>(null);
-
-  return (
-    <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
-      <p className="mb-2 text-blue-400 font-semibold">💡 Light Control</p>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setActive("on")}
-          className={`px-3 py-1 rounded-full ${
-            active === "on"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-700 hover:bg-gray-600"
-          }`}
-        >
-          On
-        </button>
-        <button
-          onClick={() => setActive("off")}
-          className={`px-3 py-1 rounded-full ${
-            active === "off"
-              ? "bg-red-600 text-white"
-              : "bg-gray-700 hover:bg-gray-600"
-          }`}
-        >
-          Off
-        </button>
-        <button
-          onClick={() => setActive("dim")}
-          className={`px-3 py-1 rounded-full ${
-            active === "dim"
-              ? "bg-yellow-600 text-white"
-              : "bg-gray-700 hover:bg-gray-600"
-          }`}
-        >
-          Dim
-        </button>
-      </div>
+const LightControl = () => (
+  <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
+    <p className="mb-2 text-blue-400 font-semibold">💡 Light Control</p>
+    <div className="flex items-center gap-2">
+      <button className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded-full text-white">On</button>
+      <button className="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-full">Off</button>
+      <button className="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-full">Dim</button>
     </div>
-  );
-};
+  </div>
+);
 
-const WalletPanel = () => {
-  const [clicked, setClicked] = useState<"add" | "transactions" | null>(null);
-  return (
-    <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
-      <p className="mb-2 text-purple-400 font-semibold">💳 Wallet</p>
-      <div className="flex flex-col gap-2">
-        <div className="flex justify-between">
-          <span>Balance:</span>
-          <span className="font-semibold text-green-400">₦ 0.00</span>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setClicked("add")}
-            className={`px-3 py-1 rounded-full ${
-              clicked === "add"
-                ? "bg-purple-700 text-white"
-                : "bg-purple-600 hover:bg-purple-700 text-white"
-            }`}
-          >
-            Add Funds
-          </button>
-          <button
-            onClick={() => setClicked("transactions")}
-            className={`px-3 py-1 rounded-full ${
-              clicked === "transactions"
-                ? "bg-gray-600 text-white"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            Transactions
-          </button>
-        </div>
+const WalletPanel = () => (
+  <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
+    <p className="mb-2 text-purple-400 font-semibold">💳 Wallet</p>
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-between">
+        <span>Balance:</span>
+        <span className="font-semibold text-green-400">₦ 0.00</span>
       </div>
-    </div>
-  );
-};
-
-const CCTVPanel = () => {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
-      <p className="mb-2 text-red-400 font-semibold">📹 CCTV Feed</p>
-
-      {/* Main Feed */}
-      <div className="aspect-video bg-black flex items-center justify-center text-gray-500 text-xs rounded-md border border-gray-700 mb-2">
-        Main Live Feed (Primary Camera)
-      </div>
-
-      {/* Expandable Feeds */}
-      {expanded && (
-        <div className="grid grid-cols-2 gap-2 animate-fadeIn">
-          <div className="aspect-video bg-black flex items-center justify-center text-gray-500 text-xs rounded-md border border-gray-700">
-            Camera 2
-          </div>
-          <div className="aspect-video bg-black flex items-center justify-center text-gray-500 text-xs rounded-md border border-gray-700">
-            Camera 3
-          </div>
-          <div className="aspect-video bg-black flex items-center justify-center text-gray-500 text-xs rounded-md border border-gray-700">
-            Camera 4
-          </div>
-          <div className="aspect-video bg-black flex items-center justify-center text-gray-500 text-xs rounded-md border border-gray-700">
-            Camera 5
-          </div>
-        </div>
-      )}
-
-      <div className="flex justify-end mt-2">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-blue-400 hover:text-blue-300 text-xs"
-        >
-          {expanded ? "− View Less" : "+ View More"}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-const VisitorsPanel = () => {
-  const [active, setActive] = useState<"allow" | "deny" | null>(null);
-  return (
-    <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
-      <p className="mb-2 text-yellow-300 font-semibold">👥 Visitor Access</p>
       <div className="flex gap-2">
-        <button
-          onClick={() => setActive("allow")}
-          className={`px-3 py-1 rounded-full ${
-            active === "allow"
-              ? "bg-yellow-600 text-white"
-              : "bg-gray-700 hover:bg-gray-600"
-          }`}
-        >
-          Allow
-        </button>
-        <button
-          onClick={() => setActive("deny")}
-          className={`px-3 py-1 rounded-full ${
-            active === "deny"
-              ? "bg-red-600 text-white"
-              : "bg-gray-700 hover:bg-gray-600"
-          }`}
-        >
-          Deny
-        </button>
+        <button className="bg-purple-600 hover:bg-purple-700 px-3 py-1 rounded-full text-white">Add Funds</button>
+        <button className="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-full">Transactions</button>
       </div>
     </div>
-  );
-};
+  </div>
+);
 
-/* ---- Other Panels (Unchanged) ---- */
+const CCTVPanel = () => (
+  <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
+    <p className="mb-2 text-red-400 font-semibold">📹 CCTV Feed</p>
+    <div className="aspect-video bg-black flex items-center justify-center text-gray-500 text-xs rounded-md border border-gray-700">
+      Live Feed Placeholder
+    </div>
+  </div>
+);
 
 const EstatePanel = () => (
   <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
@@ -186,12 +68,20 @@ const HomePanel = () => (
   </div>
 );
 
-/* (Room, Payments, Utilities, etc. remain unchanged) */
-
 const RoomPanel = () => (
   <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
     <p className="mb-2 text-sky-300 font-semibold">🚪 Room Monitoring</p>
     <div className="text-sm">Living Room — Temp: 26°C • Humidity: 48%</div>
+  </div>
+);
+
+const VisitorsPanel = () => (
+  <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
+    <p className="mb-2 text-yellow-300 font-semibold">👥 Visitor Access</p>
+    <div className="flex gap-2">
+      <button className="bg-yellow-600 px-3 py-1 rounded-full">Allow</button>
+      <button className="bg-gray-700 px-3 py-1 rounded-full">Deny</button>
+    </div>
   </div>
 );
 
@@ -262,10 +152,6 @@ const AssistantPanel = () => (
     <div className="text-sm">Smart automations • Shortcuts</div>
   </div>
 );
-
-/* -----------------------------
-   Main Dashboard Component
-   ----------------------------- */
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -427,6 +313,53 @@ export default function AIDashboard() {
       </header>
 
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
+        
+
         {/* Chat area */}
         <div ref={chatRef} className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth">
-          <div class
+          <div className="max-w-3xl mx-auto flex flex-col gap-4">
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className="flex flex-col max-w-[80%]">
+                  <div className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm transition-all duration-300 ${
+                    msg.role === "user"
+                      ? "bg-blue-600 text-white rounded-br-none"
+                      : "bg-gray-800 text-gray-100 border border-gray-700 rounded-bl-none"
+                  }`}>
+                    {msg.content}
+                  </div>
+                  {msg.panel === "lights" && <LightControl />}
+                  {msg.panel === "wallet" && <WalletPanel />}
+                  {msg.panel === "cctv" && <CCTVPanel />}
+                  {msg.panel === "estate" && <EstatePanel />}
+                  {msg.panel === "home" && <HomePanel />}
+                  {msg.panel === "room" && <RoomPanel />}
+                  {msg.panel === "visitors" && <VisitorsPanel />}
+                  {msg.panel === "payments" && <PaymentsPanel />}
+                  {msg.panel === "utilities" && <UtilitiesPanel />}
+                  {msg.panel === "community" && <CommunityPanel />}
+                  {msg.panel === "notifications" && <NotificationsPanel />}
+                  {msg.panel === "health" && <HealthPanel />}
+                  {msg.panel === "message" && <MessagePanel />}
+                  {msg.panel === "iot" && <IoTPanel />}
+                  {msg.panel === "assistant" && <AssistantPanel />}
+                  {msg.panel === "ai" && <AiPanel />}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </main>
+
+      {/* Suggestion + Footer components */}
+      <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} />
+      <ChatFooter
+  input={input}
+  setInput={setInput}
+  listening={listening}
+  onMicClick={handleMicClick}
+  onSend={() => handleSend(undefined, false)}
+/>
+    </div>
+  );
+}
