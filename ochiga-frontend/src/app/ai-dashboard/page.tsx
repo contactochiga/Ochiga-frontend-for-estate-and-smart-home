@@ -22,7 +22,7 @@ import {
   AiPanel,
   AssistantPanel,
 } from "./components/Panels";
-import useSpeechRecognition from "./hooks/useSpeechRecognition";
+import useSpeechRecognition from "./hooks/useSpeechRecognition"; // ✅ default export
 import { detectPanelType } from "./utils/panelDetection";
 import { speak } from "./utils/speak";
 
