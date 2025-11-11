@@ -5,6 +5,7 @@ import ChatFooter from "./components/ChatFooter";
 import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
 import { speak } from "./utils/speak";
+import { detectPanelType } from "./utils/panelDetection";
 import { useSpeechRecognition } from "./hooks/useSpeechRecognition";
 import {
   LightControl,
