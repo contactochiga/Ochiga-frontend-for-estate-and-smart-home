@@ -1,13 +1,31 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import ChatFooter from "./components/ChatFooter";
 import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
 import LayoutWrapper from "./layout/LayoutWrapper";
-// import all Panels and hooks
-import useSpeechRecognition from "./hooks/useSpeechRecognition";
+import useSpeechRecognition from "./hooks/useSpeechRecognition"; // make sure this exists
+
+import {
+  LightControl,
+  WalletPanel,
+  CCTVPanel,
+  EstatePanel,
+  HomePanel,
+  RoomPanel,
+  VisitorsPanel,
+  PaymentsPanel,
+  UtilitiesPanel,
+  CommunityPanel,
+  NotificationsPanel,
+  HealthPanel,
+  MessagePanel,
+  IoTPanel,
+  AiPanel,
+  AssistantPanel,
+} from "./components/Panels";
+
 import { detectPanelType } from "./utils/panelDetection";
 import { speak } from "./utils/speak";
 
@@ -22,13 +40,28 @@ export default function AIDashboard() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: "Hello! I’m Ochiga AI — how can I assist you today?" },
   ]);
-  const [isAtBottom, setIsAtBottom] = useState(true);
-
-  const chatRef = useRef<HTMLDivElement | null>(null);
 
   const { listening, startListening, stopListening } = useSpeechRecognition(handleSend);
 
-  const handleMicClick = () => listening ? stopListening() : startListening();
+  const chatRef = useRef<HTMLDivElement | null>(null);
+  const isAutoScroll = useRef(true); // Track if we should auto-scroll
+
+  // Auto-scroll whenever messages change, but only if user is at bottom
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (chatRef.current && isAutoScroll.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Detect manual scroll
+  const handleScroll = () => {
+    if (!chatRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
+    isAutoScroll.current = scrollTop + clientHeight >= scrollHeight - 20; // 20px tolerance
+  };
+
+  const handleMicClick = () => (listening ? stopListening() : startListening());
 
   function handleSend(text?: string, spoken = false) {
     const message = (text ?? input).trim();
@@ -78,28 +111,6 @@ export default function AIDashboard() {
     "Lock all doors",
   ];
 
-  // Track scroll
-  useEffect(() => {
-    const chatEl = chatRef.current;
-    if (!chatEl) return;
-
-    const handleScroll = () => {
-      const bottomThreshold = 50; 
-      const isBottom = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < bottomThreshold;
-      setIsAtBottom(isBottom);
-    };
-
-    chatEl.addEventListener("scroll", handleScroll);
-    return () => chatEl.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Auto-scroll if at bottom
-  useEffect(() => {
-    const chatEl = chatRef.current;
-    if (!chatEl) return;
-    if (isAtBottom) chatEl.scrollTo({ top: chatEl.scrollHeight, behavior: "smooth" });
-  }, [messages, isAtBottom]);
-
   return (
     <LayoutWrapper>
       <header className="absolute top-4 left-4 z-50">
@@ -107,7 +118,11 @@ export default function AIDashboard() {
       </header>
 
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
-        <div ref={chatRef} className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth">
+        <div
+          ref={chatRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
+        >
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -116,7 +131,7 @@ export default function AIDashboard() {
                     className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm transition-all duration-300 ${
                       msg.role === "user"
                         ? "bg-blue-600 text-white rounded-br-none"
-                        : "bg-gray-800 text-gray-100 border border-gray-700 rounded-bl-none"
+                        : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
                     }`}
                   >
                     {msg.content}
@@ -144,24 +159,6 @@ export default function AIDashboard() {
             ))}
           </div>
         </div>
-
-        {/* Scroll-to-bottom animated button */}
-        <AnimatePresence>
-          {!isAtBottom && (
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
-              onClick={() => {
-                chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
-                setIsAtBottom(true);
-              }}
-              className="absolute bottom-32 right-6 z-50 bg-[#800000] hover:bg-[#a00000] text-white p-3 rounded-full shadow-lg flex items-center justify-center"
-            >
-              ↓
-            </motion.button>
-          )}
-        </AnimatePresence>
       </main>
 
       <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
