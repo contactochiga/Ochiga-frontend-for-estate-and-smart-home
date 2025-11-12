@@ -1,27 +1,22 @@
-// src/lib/firebase.ts
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAnalytics, isSupported } from "firebase/analytics";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { app } from "./firebase";
 
-// ✅ Your Firebase web app configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyA6S8bITcmIteHZtQqT2ymprpvDWnyLDKU",
-  authDomain: "ochiga-estate-and-smart-home.firebaseapp.com",
-  projectId: "ochiga-estate-and-smart-home",
-  storageBucket: "ochiga-estate-and-smart-home.firebasestorage.app",
-  messagingSenderId: "75170521813",
-  appId: "1:75170521813:web:1e61a95961a923c83cf85c",
-  measurementId: "G-XL1GME509P",
+// ✅ Initialize Auth
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
+
+// ✅ Helper functions
+export const signInWithGoogle = async () => {
+  const result = await signInWithPopup(auth, googleProvider);
+  return result.user;
 };
 
-// ✅ Avoid re-initializing Firebase if it's already been done
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+export const loginWithEmail = async (email: string, password: string) => {
+  const result = await signInWithEmailAndPassword(auth, email, password);
+  return result.user;
+};
 
-// ✅ Initialize Analytics only if supported (browser)
-let analytics: any = null;
-if (typeof window !== "undefined") {
-  isSupported().then((yes) => {
-    if (yes) analytics = getAnalytics(app);
-  });
-}
-
-export { app, analytics };
+export const signupWithEmail = async (email: string, password: string) => {
+  const result = await createUserWithEmailAndPassword(auth, email, password);
+  return result.user;
+};
