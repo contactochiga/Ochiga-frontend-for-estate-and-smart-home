@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -11,6 +12,10 @@ export default function CompleteSetupPage() {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
+    if (password !== confirm) {
+      alert("Passwords do not match!");
+      return;
+    }
     setLoading(true);
     setTimeout(() => {
       router.push("/ai-dashboard");
@@ -19,8 +24,10 @@ export default function CompleteSetupPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white px-6">
-      <h2 className="text-2xl font-semibold mb-4">Complete Setup</h2>
-      <p className="text-gray-400 mb-8 text-center">Set your username and password to finalize your home access.</p>
+      <h2 className="text-2xl font-semibold mb-2">Complete Setup</h2>
+      <p className="text-gray-400 mb-8 text-center">
+        Set your username and password to finalize your home access.
+      </p>
 
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
         <input
