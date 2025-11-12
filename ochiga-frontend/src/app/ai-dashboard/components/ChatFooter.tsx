@@ -18,6 +18,7 @@ export default function ChatFooter({
   onSend: () => void;
 }) {
   const [isTyping, setIsTyping] = useState(false);
+  const brandColor = "#e11d48"; // Ochiga Maroon / Red
 
   useEffect(() => {
     setIsTyping(input.trim().length > 0);
@@ -32,7 +33,7 @@ export default function ChatFooter({
             onClick={onMicClick}
             className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
               listening
-                ? "bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.5)] scale-110"
+                ? `bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.5)] scale-110`
                 : "bg-gray-700 hover:bg-gray-600"
             }`}
           >
@@ -49,16 +50,22 @@ export default function ChatFooter({
             className="flex-1 bg-transparent text-gray-100 placeholder-gray-400 outline-none px-2 text-sm"
           />
 
-          {/* Right Dynamic Button */}
+          {/* Right Dynamic Bulb Button */}
           <button
             onClick={onSend}
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 transition"
+            className="flex items-center justify-center w-10 h-10 rounded-full transition-all"
+            style={{
+              backgroundColor: brandColor,
+            }}
           >
             {isTyping ? (
               <FaPaperPlane className="text-white text-sm" />
             ) : (
               <motion.div
-                className="w-5 h-5 bg-blue-400 rounded-full animate-pulse"
+                className="w-5 h-5 rounded-full"
+                style={{ backgroundColor: brandColor }}
+                animate={{ scale: [1, 1.5, 1] }}
+                transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
               />
             )}
           </button>
@@ -71,7 +78,8 @@ export default function ChatFooter({
               {[...Array(10)].map((_, i) => (
                 <motion.span
                   key={i}
-                  className="w-1 bg-blue-400 rounded-full"
+                  className="w-1 rounded-full"
+                  style={{ backgroundColor: brandColor }}
                   animate={{ height: [4, 16, 4] }}
                   transition={{
                     repeat: Infinity,
