@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 interface Props {
   suggestions?: string[];
   onSend: (suggestion: string) => void;
-  isTyping?: boolean;
+  isTyping?: boolean; // true if input is focused or has content
   notification?: {
     type: "alert" | "video" | "access" | "message";
     title: string;
@@ -19,7 +19,7 @@ interface Props {
 export default function DynamicSuggestionCard({
   suggestions = [],
   onSend,
-  isTyping,
+  isTyping = false,
   notification,
 }: Props) {
   const [visible, setVisible] = useState(true);
@@ -39,15 +39,14 @@ export default function DynamicSuggestionCard({
 
   const displayList = suggestions.length > 0 ? suggestions : defaultSuggestions;
 
-  // Hide suggestions while typing
-  useEffect(() => {
-    if (isTyping) setVisible(false);
-    else setVisible(true);
-  }, [isTyping]);
-
-  // Scroll-aware visibility
+  // Scroll-aware visibility + typing-awareness
   useEffect(() => {
     const handleScroll = () => {
+      if (isTyping) {
+        setVisible(false); // Always hide while typing
+        return;
+      }
+
       const currentScrollY = window.scrollY;
       if (currentScrollY > lastScrollY.current) {
         // Scrolling down → hide
@@ -61,7 +60,13 @@ export default function DynamicSuggestionCard({
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isTyping]);
+
+  // Hide when typing / show when input is empty
+  useEffect(() => {
+    if (isTyping) setVisible(false);
+    else setVisible(true);
+  }, [isTyping]);
 
   // Notification auto-hide
   useEffect(() => {
