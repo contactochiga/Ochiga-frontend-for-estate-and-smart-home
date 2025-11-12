@@ -16,7 +16,7 @@ export default function ChatFooter({
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const brandColor = "#e11d48"; // Ochiga Maroon Red
+  const brandColor = "#e11d48"; // Ochiga Maroon
 
   useEffect(() => {
     setIsTyping(input.trim().length > 0);
@@ -29,11 +29,10 @@ export default function ChatFooter({
       setIsRecording(false);
       setIsTranscribing(true);
 
-      // Simulate transcription process
       setTimeout(() => {
-        setInput("Transcribed voice input example...");
+        setInput("Transcribed voice input...");
         setIsTranscribing(false);
-      }, 2500);
+      }, 2000);
     }
   };
 
@@ -42,7 +41,7 @@ export default function ChatFooter({
       <div className="max-w-3xl mx-auto relative">
         <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
 
-          {/* 🎙️ Mic / Stop */}
+          {/* 🎤 Mic / Stop Button */}
           <button
             onClick={handleMicClick}
             className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
@@ -58,7 +57,7 @@ export default function ChatFooter({
             )}
           </button>
 
-          {/* ✏️ Input Field / Dynamic Wave */}
+          {/* ✏️ Input / Waveform Area */}
           <div className="relative flex-1 h-10 flex items-center">
             {!isRecording ? (
               <input
@@ -77,29 +76,33 @@ export default function ChatFooter({
                 }`}
               />
             ) : (
-              // 🌊 Animated Wave inside input
+              // 🌊 Sleek Horizontal Waveform
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden px-2">
                 <motion.div
-                  className="flex gap-[3px]"
-                  animate={{ x: ["0%", "-50%", "0%"] }}
+                  className="flex gap-[2px]"
+                  animate={{ x: ["0%", "-30%", "0%"] }}
                   transition={{
                     repeat: Infinity,
                     duration: 4,
                     ease: "easeInOut",
                   }}
                 >
-                  {[...Array(20)].map((_, i) => (
+                  {[...Array(50)].map((_, i) => (
                     <motion.span
                       key={i}
-                      className="w-[3px] rounded-full bg-gradient-to-t from-gray-500 to-white"
+                      className="w-[3px] h-[12px] rounded-full bg-gradient-to-t from-gray-400 to-white"
                       animate={{
-                        height: [6, Math.random() * 26 + 8, 6],
-                        opacity: [0.6, 1, 0.6],
+                        scaleY: [0.6, 1, 0.6],
+                        backgroundColor: [
+                          "#aaa",
+                          brandColor,
+                          "#ddd",
+                        ],
                       }}
                       transition={{
                         repeat: Infinity,
-                        duration: 0.8 + i * 0.03,
-                        delay: i * 0.05,
+                        duration: 1.2,
+                        delay: i * 0.03,
                         ease: "easeInOut",
                       }}
                     />
@@ -109,7 +112,7 @@ export default function ChatFooter({
             )}
           </div>
 
-          {/* 🚀 Right Button */}
+          {/* 🚀 Send Button */}
           <button
             onClick={onSend}
             disabled={isTranscribing || (!isTyping && !input.trim())}
@@ -133,7 +136,7 @@ export default function ChatFooter({
               <motion.div
                 className="w-5 h-5 rounded-full bg-gray-600"
                 animate={{ scale: [1, 1.5, 1] }}
-                transition={{ repeat: Infinity, duration: 0.8, ease: "easeInOut" }}
+                transition={{ repeat: Infinity, duration: 0.8 }}
               />
             )}
           </button>
