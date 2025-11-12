@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import ChatFooter from "./components/ChatFooter";
 import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
@@ -21,7 +22,7 @@ export default function AIDashboard() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: "Hello! I’m Ochiga AI — how can I assist you today?" },
   ]);
-  const [isAtBottom, setIsAtBottom] = useState(true); // track scroll position
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const chatRef = useRef<HTMLDivElement | null>(null);
 
@@ -77,13 +78,13 @@ export default function AIDashboard() {
     "Lock all doors",
   ];
 
-  // Auto-scroll behavior
+  // Track scroll
   useEffect(() => {
     const chatEl = chatRef.current;
     if (!chatEl) return;
 
     const handleScroll = () => {
-      const bottomThreshold = 50; // px
+      const bottomThreshold = 50; 
       const isBottom = chatEl.scrollHeight - chatEl.scrollTop - chatEl.clientHeight < bottomThreshold;
       setIsAtBottom(isBottom);
     };
@@ -92,13 +93,11 @@ export default function AIDashboard() {
     return () => chatEl.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Scroll to bottom when a new message arrives, only if user is at bottom
+  // Auto-scroll if at bottom
   useEffect(() => {
     const chatEl = chatRef.current;
     if (!chatEl) return;
-    if (isAtBottom) {
-      chatEl.scrollTo({ top: chatEl.scrollHeight, behavior: "smooth" });
-    }
+    if (isAtBottom) chatEl.scrollTo({ top: chatEl.scrollHeight, behavior: "smooth" });
   }, [messages, isAtBottom]);
 
   return (
@@ -146,18 +145,23 @@ export default function AIDashboard() {
           </div>
         </div>
 
-        {/* Scroll to bottom button */}
-        {!isAtBottom && (
-          <button
-            onClick={() => {
-              chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
-              setIsAtBottom(true);
-            }}
-            className="absolute bottom-32 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-lg"
-          >
-            ↓
-          </button>
-        )}
+        {/* Scroll-to-bottom animated button */}
+        <AnimatePresence>
+          {!isAtBottom && (
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              onClick={() => {
+                chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
+                setIsAtBottom(true);
+              }}
+              className="absolute bottom-32 right-6 z-50 bg-[#800000] hover:bg-[#a00000] text-white p-3 rounded-full shadow-lg flex items-center justify-center"
+            >
+              ↓
+            </motion.button>
+          )}
+        </AnimatePresence>
       </main>
 
       <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
