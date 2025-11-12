@@ -5,7 +5,8 @@ import ChatFooter from "./components/ChatFooter";
 import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
 import LayoutWrapper from "./layout/LayoutWrapper";
-import useSpeechRecognition from "./hooks/useSpeechRecognition"; // make sure this exists
+
+import useSpeechRecognition from "./hooks/useSpeechRecognition";
 
 import {
   LightControl,
@@ -28,6 +29,7 @@ import {
 
 import { detectPanelType } from "./utils/panelDetection";
 import { speak } from "./utils/speak";
+import { FaArrowDown } from "react-icons/fa";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -44,21 +46,36 @@ export default function AIDashboard() {
   const { listening, startListening, stopListening } = useSpeechRecognition(handleSend);
 
   const chatRef = useRef<HTMLDivElement | null>(null);
-  const isAutoScroll = useRef(true); // Track if we should auto-scroll
+  const [showScrollDown, setShowScrollDown] = useState(false);
 
-  // Auto-scroll whenever messages change, but only if user is at bottom
+  // Auto-scroll whenever messages change
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (chatRef.current && isAutoScroll.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    if (!chatRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
+
+    if (scrollTop + clientHeight >= scrollHeight - 50) {
+      chatRef.current.scrollTop = scrollHeight;
+      setShowScrollDown(false);
+    } else {
+      setShowScrollDown(true);
     }
   }, [messages]);
 
-  // Detect manual scroll
   const handleScroll = () => {
     if (!chatRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
-    isAutoScroll.current = scrollTop + clientHeight >= scrollHeight - 20; // 20px tolerance
+
+    if (scrollTop + clientHeight < scrollHeight - 50) {
+      setShowScrollDown(true);
+    } else {
+      setShowScrollDown(false);
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (!chatRef.current) return;
+    chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
+    setShowScrollDown(false);
   };
 
   const handleMicClick = () => (listening ? stopListening() : startListening());
@@ -159,6 +176,16 @@ export default function AIDashboard() {
             ))}
           </div>
         </div>
+
+        {/* Scroll to bottom arrow */}
+        {showScrollDown && (
+          <button
+            onClick={scrollToBottom}
+            className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition"
+          >
+            <FaArrowDown />
+          </button>
+        )}
       </main>
 
       <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
