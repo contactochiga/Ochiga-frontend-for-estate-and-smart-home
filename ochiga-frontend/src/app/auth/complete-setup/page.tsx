@@ -1,103 +1,104 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
-// ✅ Lazy-load Google Map component (avoids SSR crash)
-const Map = dynamic(() => import("../components/MapPicker"), { ssr: false });
+const MapPicker = dynamic(() => import("../components/MapPicker"), { ssr: false });
 
-export default function CompleteSetupPage() {
+export default function EstateCompletePage() {
+  const params = useSearchParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const estateId = searchParams.get("estateId");
+  const token = params.get("token");
 
+  const [verified, setVerified] = useState(false);
+  const [emailOwner, setEmailOwner] = useState<string | null>(null);
   const [estateName, setEstateName] = useState("");
   const [address, setAddress] = useState("");
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // ✅ Optional: Reverse geocode when location changes to fill address automatically
+  // On mount, verify token (mock)
+  useEffect(() => {
+    const invites = JSON.parse(localStorage.getItem("ochiga_invites") || "[]");
+    const found = invites.find((i: any) => i.token === token && i.type === "estateInvite" && !i.used);
+    if (found) {
+      setVerified(true);
+      setEmailOwner(found.email);
+    } else {
+      setVerified(false);
+    }
+  }, [token]);
+
+  // reverse geocode when location changes (optional)
   useEffect(() => {
     if (!location) return;
-
-    const fetchAddress = async () => {
+    (async () => {
       try {
-        const res = await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
-        );
+        const res = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`);
         const data = await res.json();
-        if (data.results && data.results[0]) {
-          setAddress(data.results[0].formatted_address);
-        }
-      } catch (err) {
-        console.error("Failed to fetch address:", err);
-      }
-    };
-
-    fetchAddress();
+        if (data?.results?.[0]) setAddress(data.results[0].formatted_address);
+      } catch (err) { console.warn(err); }
+    })();
   }, [location]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!estateName || !address || !location) return;
+    if (!verified) { alert("Invalid or used token"); return; }
+    if (!estateName || !address || !location) { alert("Complete fields"); return; }
+    setSaving(true);
 
-    setLoading(true);
+    // Save estate in localStorage
+    const estates = JSON.parse(localStorage.getItem("ochiga_estates") || "[]");
+    const estateId = `estate_${Date.now()}`;
+    estates.push({ id: estateId, name: estateName, address, location, createdBy: emailOwner });
+    localStorage.setItem("ochiga_estates", JSON.stringify(estates));
 
-    // Simulate saving to backend
-    await new Promise((res) => setTimeout(res, 1200));
+    // mark invite used
+    const invites = JSON.parse(localStorage.getItem("ochiga_invites") || "[]");
+    const idx = invites.findIndex((i: any) => i.token === token);
+    if (idx >= 0) { invites[idx].used = true; localStorage.setItem("ochiga_invites", JSON.stringify(invites)); }
 
-    console.log("✅ Estate Setup Complete:", {
-      estateName,
-      address,
-      coordinates: location,
-    });
+    // attach estate to admin user
+    const users = JSON.parse(localStorage.getItem("ochiga_users") || "[]");
+    const userIdx = users.findIndex((u: any) => u.email === emailOwner);
+    if (userIdx >= 0) {
+      users[userIdx].estates = users[userIdx].estates || [];
+      users[userIdx].estates.push(estateId);
+      localStorage.setItem("ochiga_users", JSON.stringify(users));
+    }
 
-    // Navigate to success page
+    await new Promise((r) => setTimeout(r, 900));
+    setSaving(false);
     router.push(`/auth/success?name=${encodeURIComponent(estateName)}`);
   };
 
+  if (!verified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white">
+        <div className="p-6 bg-gray-900 border border-gray-800 rounded">
+          <h2 className="text-lg font-semibold mb-2">Invalid or expired invite</h2>
+          <p className="text-sm text-gray-400">This invite link is invalid or already used.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-950 text-white p-6">
-      <div className="w-full max-w-md bg-gray-900 rounded-2xl p-6 border border-gray-800">
-        <h1 className="text-xl font-semibold mb-1 text-center">
-          Complete Your Estate Setup
-        </h1>
-        <p className="text-sm text-gray-400 text-center mb-6">
-          You're registering for{" "}
-          <span className="text-emerald-400 font-medium">{estateId || "Your Estate"}</span>
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white p-6">
+      <div className="w-full max-w-2xl bg-gray-900 p-6 rounded-2xl border border-gray-800">
+        <h1 className="text-xl font-semibold mb-2">Complete Estate Registration</h1>
+        <p className="text-sm text-gray-400 mb-4">Owner: <span className="text-emerald-300">{emailOwner}</span></p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Estate Name"
-            value={estateName}
-            onChange={(e) => setEstateName(e.target.value)}
-            required
-            className="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-emerald-500 outline-none"
-          />
-
-          <input
-            type="text"
-            placeholder="Estate Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            required
-            className="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-emerald-500 outline-none"
-          />
-
-          {/* 🌍 Map Picker */}
-          <div className="rounded-xl overflow-hidden border border-gray-800 h-56">
-            <Map setLocation={setLocation} />
+          <input className="w-full p-3 rounded bg-gray-800 border border-gray-700" placeholder="Estate Name" value={estateName} onChange={(e)=>setEstateName(e.target.value)} />
+          <input className="w-full p-3 rounded bg-gray-800 border border-gray-700" placeholder="Address (or choose on map)" value={address} onChange={(e)=>setAddress(e.target.value)} />
+          <div className="h-56 rounded overflow-hidden border border-gray-800">
+            <MapPicker setLocation={setLocation} />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading || !location}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded font-semibold transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? "Saving..." : "Complete Setup"}
+          <button disabled={saving} className="w-full py-3 rounded bg-emerald-600 hover:bg-emerald-700">
+            {saving ? "Saving..." : "Create Estate"}
           </button>
         </form>
       </div>
