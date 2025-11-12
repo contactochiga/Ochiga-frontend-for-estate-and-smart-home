@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 
 // ✅ Lazy-load Google Map component (avoids SSR crash)
-const Map = dynamic(() => import("../components/MapPicker";), { ssr: false });
+const Map = dynamic(() => import("../components/MapPicker"), { ssr: false });
 
 export default function CompleteSetupPage() {
   const router = useRouter();
@@ -17,19 +17,44 @@ export default function CompleteSetupPage() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Optional: Reverse geocode when location changes to fill address automatically
+  useEffect(() => {
+    if (!location) return;
+
+    const fetchAddress = async () => {
+      try {
+        const res = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+        );
+        const data = await res.json();
+        if (data.results && data.results[0]) {
+          setAddress(data.results[0].formatted_address);
+        }
+      } catch (err) {
+        console.error("Failed to fetch address:", err);
+      }
+    };
+
+    fetchAddress();
+  }, [location]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!estateName || !address || !location) return;
+
     setLoading(true);
+
+    // Simulate saving to backend
     await new Promise((res) => setTimeout(res, 1200));
 
-    // Save to Firebase or backend later
-    console.log({
+    console.log("✅ Estate Setup Complete:", {
       estateName,
       address,
       coordinates: location,
     });
 
-    router.push(`/auth/success?name=${estateName}`);
+    // Navigate to success page
+    router.push(`/auth/success?name=${encodeURIComponent(estateName)}`);
   };
 
   return (
@@ -39,7 +64,8 @@ export default function CompleteSetupPage() {
           Complete Your Estate Setup
         </h1>
         <p className="text-sm text-gray-400 text-center mb-6">
-          You're registering for <span className="text-emerald-400 font-medium">{estateId}</span>
+          You're registering for{" "}
+          <span className="text-emerald-400 font-medium">{estateId || "Your Estate"}</span>
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,7 +80,7 @@ export default function CompleteSetupPage() {
 
           <input
             type="text"
-            placeholder="Enter Estate Address"
+            placeholder="Estate Address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             required
@@ -69,7 +95,7 @@ export default function CompleteSetupPage() {
           <button
             type="submit"
             disabled={loading || !location}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded font-semibold transition-all mt-4"
+            className="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded font-semibold transition-all mt-4 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Saving..." : "Complete Setup"}
           </button>
