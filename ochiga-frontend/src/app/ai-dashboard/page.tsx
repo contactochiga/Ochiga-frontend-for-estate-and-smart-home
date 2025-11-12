@@ -4,33 +4,8 @@ import { useRef, useState, useEffect } from "react";
 import ChatFooter from "./components/ChatFooter";
 import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
-import {
-  LightControl,
-  WalletPanel,
-  CCTVPanel,
-  EstatePanel,
-  HomePanel,
-  RoomPanel,
-  VisitorsPanel,
-  PaymentsPanel,
-  UtilitiesPanel,
-  CommunityPanel,
-  NotificationsPanel,
-  HealthPanel,
-  MessagePanel,
-  IoTPanel,
-  AiPanel,
-  AssistantPanel,
-} from "./components/Panels";
-import useSpeechRecognition from "./hooks/useSpeechRecognition"; // ✅ default export
-import { detectPanelType } from "./utils/panelDetection";
-import { speak } from "./utils/speak";
-
-type ChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-  panel?: string | null;
-};
+import LayoutWrapper from "./components/LayoutWrapper";
+// ... import all your Panels and hooks
 
 export default function AIDashboard() {
   const [input, setInput] = useState("");
@@ -47,6 +22,8 @@ export default function AIDashboard() {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
   }, [messages]);
 
+  const handleMicClick = () => listening ? stopListening() : startListening();
+
   function handleSend(text?: string, spoken = false) {
     const message = (text ?? input).trim();
     if (!message) return;
@@ -59,7 +36,6 @@ export default function AIDashboard() {
       const panel = detectPanelType(message);
       let reply = `Okay — I processed: "${message}".`;
 
-      // Predefined panel replies
       const panelReplies: Record<string, string> = {
         lights: "Turning on the lights in the requested area.",
         wallet: "Opening wallet controls for you.",
@@ -88,10 +64,6 @@ export default function AIDashboard() {
     }, 500);
   }
 
-  const handleMicClick = () => {
-    listening ? stopListening() : startListening();
-  };
-
   const suggestions = [
     "Turn on living room lights",
     "Fund my wallet",
@@ -101,13 +73,11 @@ export default function AIDashboard() {
   ];
 
   return (
-    <div className="relative flex flex-col h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white overflow-hidden">
-      {/* Header */}
+    <LayoutWrapper>
       <header className="absolute top-4 left-4 z-50">
         <HamburgerMenu />
       </header>
 
-      {/* Main chat area */}
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
         <div ref={chatRef} className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth">
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
@@ -148,8 +118,7 @@ export default function AIDashboard() {
         </div>
       </main>
 
-      {/* Suggestions + Footer */}
-      <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} />
+      <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
       <ChatFooter
         input={input}
         setInput={setInput}
@@ -157,6 +126,6 @@ export default function AIDashboard() {
         onMicClick={handleMicClick}
         onSend={() => handleSend(undefined, false)}
       />
-    </div>
+    </LayoutWrapper>
   );
 }
