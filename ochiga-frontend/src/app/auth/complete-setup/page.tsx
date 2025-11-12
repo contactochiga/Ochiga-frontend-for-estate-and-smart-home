@@ -1,64 +1,80 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+
+// ✅ Lazy-load Google Map component (avoids SSR crash)
+const Map = dynamic(() => import("../../components/MapPicker"), { ssr: false });
 
 export default function CompleteSetupPage() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
+  const searchParams = useSearchParams();
+  const estateId = searchParams.get("estateId");
+
+  const [estateName, setEstateName] = useState("");
+  const [address, setAddress] = useState("");
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirm) {
-      alert("Passwords do not match!");
-      return;
-    }
     setLoading(true);
-    setTimeout(() => {
-      router.push("/ai-dashboard");
-    }, 2000);
+    await new Promise((res) => setTimeout(res, 1200));
+
+    // Save to Firebase or backend later
+    console.log({
+      estateName,
+      address,
+      coordinates: location,
+    });
+
+    router.push(`/auth/success?name=${estateName}`);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white px-6">
-      <h2 className="text-2xl font-semibold mb-2">Complete Setup</h2>
-      <p className="text-gray-400 mb-8 text-center">
-        Set your username and password to finalize your home access.
-      </p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-950 text-white p-6">
+      <div className="w-full max-w-md bg-gray-900 rounded-2xl p-6 border border-gray-800">
+        <h1 className="text-xl font-semibold mb-1 text-center">
+          Complete Your Estate Setup
+        </h1>
+        <p className="text-sm text-gray-400 text-center mb-6">
+          You're registering for <span className="text-emerald-400 font-medium">{estateId}</span>
+        </p>
 
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-emerald-500 outline-none"
-        />
-        <input
-          type="password"
-          placeholder="New Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-emerald-500 outline-none"
-        />
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          className="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-emerald-500 outline-none"
-        />
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded font-semibold transition-all"
-        >
-          {loading ? "Finalizing..." : "Complete Setup"}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Estate Name"
+            value={estateName}
+            onChange={(e) => setEstateName(e.target.value)}
+            required
+            className="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-emerald-500 outline-none"
+          />
+
+          <input
+            type="text"
+            placeholder="Enter Estate Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+            className="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-emerald-500 outline-none"
+          />
+
+          {/* 🌍 Map Picker */}
+          <div className="rounded-xl overflow-hidden border border-gray-800 h-56">
+            <Map setLocation={setLocation} />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || !location}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded font-semibold transition-all mt-4"
+          >
+            {loading ? "Saving..." : "Complete Setup"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
