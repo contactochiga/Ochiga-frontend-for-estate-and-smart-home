@@ -27,30 +27,6 @@ export default function AuthPage() {
 
       {/* Auth Container */}
       <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 flex flex-col gap-6 shadow-lg">
-        {/* Toggle Login / Sign-Up */}
-        <div className="flex justify-center gap-4">
-          <button
-            onClick={() => setMode("login")}
-            className={`px-4 py-2 rounded-full font-semibold transition-colors ${
-              mode === "login"
-                ? "bg-red-600 text-white"
-                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-            }`}
-          >
-            Login
-          </button>
-          <button
-            onClick={() => setMode("signup")}
-            className={`px-4 py-2 rounded-full font-semibold transition-colors ${
-              mode === "signup"
-                ? "bg-red-600 text-white"
-                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
-
         {/* Social Buttons */}
         <div className="flex flex-col gap-3">
           <button className="flex items-center justify-center gap-3 py-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all">
@@ -96,7 +72,7 @@ export default function AuthPage() {
           </button>
         </form>
 
-        {/* Footer */}
+        {/* Footer for switching */}
         <p className="text-gray-400 text-sm text-center mt-2">
           {mode === "login" ? (
             <>
