@@ -16,7 +16,7 @@ export default function ChatFooter({
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
-  const brandColor = "#e11d48"; // Ochiga Maroon
+  const brandColor = "#e11d48"; // Ochiga Red
 
   useEffect(() => {
     setIsTyping(input.trim().length > 0);
@@ -76,38 +76,32 @@ export default function ChatFooter({
                 }`}
               />
             ) : (
-              // 🌊 Sleek Horizontal Waveform
+              // 🌊 Steady Glowing Waveform (no horizontal motion)
               <div className="absolute inset-0 flex items-center justify-center overflow-hidden px-2">
-                <motion.div
-                  className="flex gap-[2px]"
-                  animate={{ x: ["0%", "-30%", "0%"] }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 4,
-                    ease: "easeInOut",
-                  }}
-                >
-                  {[...Array(50)].map((_, i) => (
+                <div className="flex gap-[2px]">
+                  {[...Array(45)].map((_, i) => (
                     <motion.span
                       key={i}
-                      className="w-[3px] h-[12px] rounded-full bg-gradient-to-t from-gray-400 to-white"
+                      className="w-[3px] rounded-full"
+                      style={{
+                        height: `${Math.random() * 10 + 8}px`,
+                        background: `linear-gradient(to top, ${brandColor}, white)`,
+                        boxShadow: `0 0 8px ${brandColor}`,
+                        filter: "blur(0.6px)",
+                      }}
                       animate={{
-                        scaleY: [0.6, 1, 0.6],
-                        backgroundColor: [
-                          "#aaa",
-                          brandColor,
-                          "#ddd",
-                        ],
+                        scaleY: [0.6, 1.4, 0.7],
+                        opacity: [0.7, 1, 0.7],
                       }}
                       transition={{
                         repeat: Infinity,
                         duration: 1.2,
-                        delay: i * 0.03,
+                        delay: i * 0.04,
                         ease: "easeInOut",
                       }}
                     />
                   ))}
-                </motion.div>
+                </div>
               </div>
             )}
           </div>
