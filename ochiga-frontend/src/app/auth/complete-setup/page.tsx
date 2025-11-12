@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 
 // ✅ Lazy-load Google Map component (avoids SSR crash)
-const Map = dynamic(() => import("../../components/MapPicker"), { ssr: false });
+const Map = dynamic(() => import("../components/MapPicker";), { ssr: false });
 
 export default function CompleteSetupPage() {
   const router = useRouter();
