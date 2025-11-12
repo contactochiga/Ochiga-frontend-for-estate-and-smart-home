@@ -1,11 +1,39 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import LayoutWrapper from "./layout/LayoutWrapper";
 import ChatFooter from "./components/ChatFooter";
 import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
-import LayoutWrapper from "./layout/LayoutWrapper";
-// ... import all your Panels and hooks
+
+import {
+  LightControl,
+  WalletPanel,
+  CCTVPanel,
+  EstatePanel,
+  HomePanel,
+  RoomPanel,
+  VisitorsPanel,
+  PaymentsPanel,
+  UtilitiesPanel,
+  CommunityPanel,
+  NotificationsPanel,
+  HealthPanel,
+  MessagePanel,
+  IoTPanel,
+  AiPanel,
+  AssistantPanel,
+} from "./components/Panels";
+
+import useSpeechRecognition from "./hooks/useSpeechRecognition";
+import { detectPanelType } from "./utils/panelDetection";
+import { speak } from "./utils/speak";
+
+type ChatMessage = {
+  role: "user" | "assistant";
+  content: string;
+  panel?: string | null;
+};
 
 export default function AIDashboard() {
   const [input, setInput] = useState("");
@@ -74,12 +102,17 @@ export default function AIDashboard() {
 
   return (
     <LayoutWrapper>
+      {/* Hamburger / header */}
       <header className="absolute top-4 left-4 z-50">
         <HamburgerMenu />
       </header>
 
+      {/* Main Chat Area */}
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
-        <div ref={chatRef} className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth">
+        <div
+          ref={chatRef}
+          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
+        >
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
@@ -118,7 +151,12 @@ export default function AIDashboard() {
         </div>
       </main>
 
-      <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
+      {/* Suggestions + ChatFooter */}
+      <DynamicSuggestionCard
+        suggestions={suggestions}
+        onSend={handleSend}
+        isTyping={input.length > 0}
+      />
       <ChatFooter
         input={input}
         setInput={setInput}
