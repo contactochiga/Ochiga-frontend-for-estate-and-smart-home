@@ -1,68 +1,89 @@
 "use client";
 
 import { useState } from "react";
-import { FaGoogle, FaApple } from "react-icons/fa";
+import QRPreview from "./QRPreview";
+import { v4 as uuidv4 } from "uuid";
 
 export default function AuthModal({ onClose }: { onClose: () => void }) {
   const [email, setEmail] = useState("");
   const [creating, setCreating] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleCreateEstateInvite = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) { alert("Enter email"); return; }
     setCreating(true);
-    await new Promise((res) => setTimeout(res, 1500));
-    alert("Account created successfully!");
-    onClose();
+
+    // Simulate creating a user account (estate admin) and generating estate invite token
+    await new Promise((r) => setTimeout(r, 700));
+    const token = uuidv4();
+    const tokenObj = {
+      token,
+      type: "estateInvite",
+      email,
+      createdAt: Date.now(),
+      used: false,
+    };
+
+    const invites = JSON.parse(localStorage.getItem("ochiga_invites") || "[]");
+    invites.push(tokenObj);
+    localStorage.setItem("ochiga_invites", JSON.stringify(invites));
+
+    // create basic user record for this admin (no estate yet)
+    const users = JSON.parse(localStorage.getItem("ochiga_users") || "[]");
+    users.push({ id: uuidv4(), email, password: "", role: "estate_admin", estates: [] });
+    localStorage.setItem("ochiga_users", JSON.stringify(users));
+
+    // The link in the email:
+    const link = `${location.origin}/auth/estate-complete?token=${token}`;
+    setGeneratedLink(link);
+    setCreating(false);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-gray-900 rounded-xl p-6 w-full max-w-sm border border-gray-800 relative animate-fadeIn">
-        <button
-          onClick={onClose}
-          className="absolute top-2 right-3 text-gray-500 hover:text-gray-300 text-xl"
-        >
-          ×
-        </button>
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+      <div className="bg-gray-900 rounded-xl w-full max-w-md p-5 border border-gray-800">
+        <button className="absolute top-3 right-4 text-gray-400" onClick={onClose}>×</button>
+        <h2 className="text-lg font-semibold mb-3 text-center">Create Estate (Sign up)</h2>
+        <p className="text-sm text-gray-400 mb-4 text-center">Enter manager email — we'll send a sign-up link to complete estate registration.</p>
 
-        <h2 className="text-xl font-semibold text-center mb-4">Create Account</h2>
+        {!generatedLink ? (
+          <form onSubmit={handleCreateEstateInvite} className="space-y-3">
+            <input
+              type="email"
+              placeholder="Manager's email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 rounded bg-gray-800 border border-gray-700"
+              required
+            />
+            <div className="flex gap-2">
+              <button type="submit" className="flex-1 py-2 rounded bg-emerald-600 hover:bg-emerald-700">
+                {creating ? "Creating..." : "Create Invite"}
+              </button>
+              <button type="button" onClick={onClose} className="py-2 px-3 rounded bg-gray-800 border border-gray-700">Cancel</button>
+            </div>
+          </form>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-sm text-gray-300">Mock email sent. Share this link with manager (demo):</p>
+            <div className="p-3 bg-gray-800 border border-gray-700 rounded">
+              <a className="text-emerald-300 break-all" href={generatedLink}>{generatedLink}</a>
+            </div>
 
-        <div className="flex flex-col space-y-3 mb-5">
-          <button className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 p-3 rounded transition">
-            <FaGoogle className="text-red-500" /> Sign up with Google
-          </button>
-          <button className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 p-3 rounded transition">
-            <FaApple className="text-white" /> Sign up with Apple
-          </button>
-        </div>
+            <div>
+              <p className="text-sm text-gray-300">QR preview (optional):</p>
+              <div className="mt-2"><QRPreview text={generatedLink} /></div>
+            </div>
 
-        <div className="flex items-center gap-2 mb-4">
-          <div className="flex-1 h-px bg-gray-700" />
-          <span className="text-gray-500 text-sm">or use email</span>
-          <div className="flex-1 h-px bg-gray-700" />
-        </div>
-
-        <form onSubmit={handleRegister} className="space-y-3">
-          <input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 rounded bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-emerald-500 outline-none"
-            required
-          />
-          <button
-            type="submit"
-            disabled={creating}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded font-semibold transition-all"
-          >
-            {creating ? "Creating..." : "Register"}
-          </button>
-        </form>
-
-        <p className="text-center text-gray-500 text-xs mt-4">
-          By signing up, you agree to our Terms of Use and Privacy Policy.
-        </p>
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => { navigator.clipboard.writeText(generatedLink); alert("Link copied"); }} className="flex-1 py-2 rounded bg-gray-800 border border-gray-700">
+                Copy Link
+              </button>
+              <button onClick={() => { onClose(); }} className="py-2 px-4 rounded bg-emerald-600">Done</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
