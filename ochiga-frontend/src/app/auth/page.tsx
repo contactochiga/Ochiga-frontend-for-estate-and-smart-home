@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import SlideUnlock from "../components/ui/SlideUnlock";
+import SlideUnlock from "./components/ui/SlideUnlock";
 
 export default function LandingPage() {
   const router = useRouter();
