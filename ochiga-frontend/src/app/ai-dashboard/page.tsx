@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import ChatFooter from "./components/ChatFooter";
 import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
-import LayoutWrapper from "./components/LayoutWrapper";
+import LayoutWrapper from "./layout/LayoutWrapper";
 // ... import all your Panels and hooks
 
 export default function AIDashboard() {
