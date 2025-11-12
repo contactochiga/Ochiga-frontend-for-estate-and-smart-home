@@ -1,157 +1,130 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple, FaEnvelope } from "react-icons/fa";
+import { FaApple, FaGoogle } from "react-icons/fa";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
-  const [showEmail, setShowEmail] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`${mode === "login" ? "Logging in" : "Signing up"} with ${email}`);
+    setLoading(true);
+    await new Promise((res) => setTimeout(res, 1000));
+    // TODO: handle auth logic
+    alert(`${mode === "login" ? "Logged in" : "Signed up"} as ${email}`);
+    setLoading(false);
   };
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-[#050505] text-gray-200 overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0a] via-[#111] to-[#0a0a0a]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,rgba(0,0,0,1)_80%)]" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-950 text-white p-6">
+      {/* Header */}
+      <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white text-center">
+        Ochiga Infrastructure Suite
+      </h1>
 
-      {/* Auth Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
-        className="relative z-10 w-[90%] max-w-md bg-[#111]/70 backdrop-blur-xl border border-[#222] rounded-2xl p-8 shadow-[0_0_25px_rgba(0,0,0,0.4)]"
-      >
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-semibold text-white">
-            Welcome to <span className="text-[#e11d48]">Ochiga</span>
-          </h1>
-          <p className="text-gray-400 mt-1 text-sm">
-            {mode === "login"
-              ? "Access your Smart Estate Dashboard"
-              : "Create your Smart Estate account"}
-          </p>
-        </div>
-
-        {/* Toggle Buttons */}
-        <div className="flex justify-center gap-4 mb-6">
+      {/* Auth Container */}
+      <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-8 flex flex-col gap-6 shadow-lg">
+        {/* Toggle Login / Sign-Up */}
+        <div className="flex justify-center gap-4">
           <button
-            onClick={() => {
-              setMode("login");
-              setShowEmail(false);
-            }}
-            className={`px-4 py-1 rounded-full text-sm font-medium transition-all ${
+            onClick={() => setMode("login")}
+            className={`px-4 py-2 rounded-full font-semibold transition-colors ${
               mode === "login"
-                ? "bg-[#e11d48] text-white"
-                : "text-gray-400 hover:text-white"
+                ? "bg-red-600 text-white"
+                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
             }`}
           >
             Login
           </button>
           <button
-            onClick={() => {
-              setMode("signup");
-              setShowEmail(false);
-            }}
-            className={`px-4 py-1 rounded-full text-sm font-medium transition-all ${
+            onClick={() => setMode("signup")}
+            className={`px-4 py-2 rounded-full font-semibold transition-colors ${
               mode === "signup"
-                ? "bg-[#e11d48] text-white"
-                : "text-gray-400 hover:text-white"
+                ? "bg-red-600 text-white"
+                : "bg-gray-800 text-gray-400 hover:bg-gray-700"
             }`}
           >
             Sign Up
           </button>
         </div>
 
-        {/* Auth Buttons */}
+        {/* Social Buttons */}
         <div className="flex flex-col gap-3">
-          <button className="flex items-center justify-center gap-2 bg-white text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-            <FcGoogle className="text-lg" /> Continue with Google
+          <button className="flex items-center justify-center gap-3 py-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all">
+            <FaGoogle className="text-lg" /> Continue with Google
           </button>
-          <button className="flex items-center justify-center gap-2 bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-900 transition">
+          <button className="flex items-center justify-center gap-3 py-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all">
             <FaApple className="text-lg" /> Continue with Apple
-          </button>
-          <button
-            onClick={() => setShowEmail(!showEmail)}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#e11d48] to-[#7f1d1d] py-3 rounded-lg font-semibold hover:opacity-90 transition"
-          >
-            <FaEnvelope className="text-lg" /> Continue with Email
           </button>
         </div>
 
-        {/* Email Form (Animated) */}
-        <AnimatePresence>
-          {showEmail && (
-            <motion.form
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              onSubmit={handleSubmit}
-              className="mt-5 flex flex-col gap-3"
-            >
-              <input
-                type="email"
-                placeholder="Email Address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm outline-none focus:ring-2 focus:ring-[#e11d48]"
-                required
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-3 rounded-lg bg-[#1a1a1a] border border-[#333] text-sm outline-none focus:ring-2 focus:ring-[#e11d48]"
-                required
-              />
+        {/* Divider */}
+        <div className="flex items-center gap-2 text-gray-400 text-sm">
+          <span className="flex-1 border-t border-gray-700"></span>
+          <span>or continue with email</span>
+          <span className="flex-1 border-t border-gray-700"></span>
+        </div>
 
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                type="submit"
-                className="w-full bg-gradient-to-r from-[#e11d48] to-[#7f1d1d] py-3 rounded-lg font-semibold hover:opacity-90 transition"
-              >
-                {mode === "login" ? "Login" : "Sign Up"}
-              </motion.button>
-            </motion.form>
-          )}
-        </AnimatePresence>
+        {/* Email / Password Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-red-600 outline-none"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:ring-2 focus:ring-red-600 outline-none"
+          />
 
-        {/* Footer Text */}
-        <p className="text-center text-xs text-gray-500 mt-6">
-          {mode === "login"
-            ? "New here? "
-            : "Already have an account? "}
           <button
-            onClick={() => {
-              setMode(mode === "login" ? "signup" : "login");
-              setShowEmail(false);
-            }}
-            className="text-[#e11d48] hover:underline"
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-red-600 hover:bg-red-700 rounded-full font-semibold transition-all"
           >
-            {mode === "login" ? "Create an account" : "Login here"}
+            {loading ? "Processing..." : mode === "login" ? "Login" : "Sign Up"}
           </button>
-        </p>
-      </motion.div>
+        </form>
 
-      {/* Footer */}
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="absolute bottom-6 text-xs text-gray-600"
-      >
+        {/* Footer */}
+        <p className="text-gray-400 text-sm text-center mt-2">
+          {mode === "login" ? (
+            <>
+              Don’t have an account?{" "}
+              <button
+                onClick={() => setMode("signup")}
+                className="text-red-500 font-semibold"
+              >
+                Sign Up
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <button
+                onClick={() => setMode("login")}
+                className="text-red-500 font-semibold"
+              >
+                Login
+              </button>
+            </>
+          )}
+        </p>
+      </div>
+
+      <p className="mt-8 text-gray-600 text-xs text-center">
         © {new Date().getFullYear()} Ochiga Systems — Smart Infrastructure
-      </motion.p>
+      </p>
     </div>
   );
 }
