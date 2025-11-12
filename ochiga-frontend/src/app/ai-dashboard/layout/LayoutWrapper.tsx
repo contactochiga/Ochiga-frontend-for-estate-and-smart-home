@@ -19,7 +19,6 @@ export default function LayoutWrapper({ children }: { children: ReactNode }) {
       );
     }
 
-    // Cleanup
     return () => {
       document.removeEventListener("touchstart", preventZoom);
       if (metaViewport) {
@@ -33,12 +32,14 @@ export default function LayoutWrapper({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className="w-screen h-screen overflow-hidden relative bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white"
+      className="w-screen h-screen relative bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white"
       style={{
-        touchAction: "pan-x pan-y",
+        touchAction: "pan-x pan-y", // allows scroll
         WebkitTouchCallout: "none",
         WebkitUserSelect: "none",
-        msTouchAction: "none",
+        msTouchAction: "pan-y", // vertical scroll allowed
+        overflowY: "auto", // enable scrolling
+        overflowX: "hidden",
       }}
     >
       {children}
