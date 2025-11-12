@@ -14,19 +14,26 @@ export default function AuthPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((res) => setTimeout(res, 1500));
-    router.push("/ai-dashboard"); // redirect after login
+    // Mock login: check localStorage users
+    await new Promise((r) => setTimeout(r, 800));
+    const users = JSON.parse(localStorage.getItem("ochiga_users" ) || "[]");
+    const user = users.find((u: any) => u.email === email && u.password === password);
+    setLoading(false);
+    if (user) {
+      // store session
+      localStorage.setItem("ochiga_current_user", JSON.stringify(user));
+      router.push("/ai-dashboard");
+    } else {
+      alert("Invalid credentials (demo). Try any registered user or register a new estate/user.");
+    }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white relative overflow-hidden">
-      {/* Background Accent */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/10 via-gray-950 to-black" />
-
-      <div className="z-10 w-full max-w-sm px-6">
-        <h1 className="text-2xl font-semibold mb-2 text-center">Welcome to Ochiga</h1>
-        <p className="text-gray-400 mb-8 text-center">
-          Sign in to access your smart home and estate dashboard.
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white px-6">
+      <div className="w-full max-w-sm p-6 rounded-2xl bg-gray-900 border border-gray-800">
+        <h1 className="text-xl font-semibold mb-2 text-center">Welcome to Ochiga</h1>
+        <p className="text-sm text-gray-400 mb-6 text-center">
+          Sign in to access your smart home / estate dashboard.
         </p>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -35,40 +42,36 @@ export default function AuthPage() {
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 rounded bg-gray-800 border border-gray-700 outline-none"
             required
-            className="w-full p-3 rounded bg-gray-900 border border-gray-800 focus:ring-2 focus:ring-emerald-500 outline-none"
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 rounded bg-gray-800 border border-gray-700 outline-none"
             required
-            className="w-full p-3 rounded bg-gray-900 border border-gray-800 focus:ring-2 focus:ring-emerald-500 outline-none"
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 py-3 rounded font-semibold transition-all"
+            className="w-full py-3 rounded bg-emerald-600 hover:bg-emerald-700 font-semibold"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        <div className="flex justify-between mt-5 text-sm text-gray-400">
-          <button
-            onClick={() => router.push("/auth/onboard")}
-            className="hover:text-emerald-400"
-          >
+        <div className="flex items-center justify-between mt-4 text-sm text-gray-400">
+          <button onClick={() => router.push("/auth/onboard")} className="hover:text-emerald-400">
             Scan QR to Access
           </button>
           <button onClick={() => setShowModal(true)} className="hover:text-emerald-400">
-            Create Account
+            Create Estate (Sign up)
           </button>
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && <AuthModal onClose={() => setShowModal(false)} />}
     </div>
   );
