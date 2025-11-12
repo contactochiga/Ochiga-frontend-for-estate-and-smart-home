@@ -1,254 +1,88 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  UserIcon,
-  BuildingOfficeIcon,
-  ArrowRightCircleIcon,
-} from "@heroicons/react/24/solid";
+import { motion } from "framer-motion";
+import { FaLock, FaChevronRight } from "react-icons/fa";
 
-export default function HomePage() {
+export default function LandingPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [scene, setScene] = useState(0);
-  const [loadingText, setLoadingText] = useState("Initializing Ochiga environment...");
-  const [backendStatus, setBackendStatus] = useState<
-    "checking" | "connected" | "failed" | "retrying"
-  >("checking");
+  const [slideProgress, setSlideProgress] = useState(0);
+  const [unlocked, setUnlocked] = useState(false);
 
-  // ✅ Function to check backend connection
-  const checkBackendConnection = async () => {
-    try {
-      setBackendStatus((prev) => (prev === "failed" ? "retrying" : "checking"));
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/health`);
-      const data = await res.json();
-      console.log("✅ Backend connected:", data);
-      setBackendStatus("connected");
-    } catch (err) {
-      console.error("❌ Backend connection failed:", err);
-      setBackendStatus("failed");
+  const handleSlide = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    setSlideProgress(value);
+    if (value >= 100) {
+      setUnlocked(true);
+      setTimeout(() => router.push("/ai-dashboard"), 800);
     }
   };
 
-  // ✅ Auto-check every 10 seconds if failed
-  useEffect(() => {
-    checkBackendConnection();
-    const interval = setInterval(() => {
-      if (backendStatus !== "connected") {
-        checkBackendConnection();
-      }
-    }, 10000); // 10 seconds
-    return () => clearInterval(interval);
-  }, [backendStatus]);
-
-  const scenes = [
-    {
-      caption: "Initializing Network...",
-      logs: [
-        "Connecting to Ochiga Smart Estate Core...",
-        "Verifying node integrity...",
-        "Establishing secure link...",
-      ],
-      bg: "from-[#0a0a0a] via-[#1b0033] to-[#330a4a]",
-      graphic: (
-        <svg
-          viewBox="0 0 800 600"
-          className="absolute inset-0 w-full h-full opacity-25"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M100,300 C200,250 400,350 500,300 S700,350 800,300"
-            stroke="#bb86fc"
-            strokeWidth="3"
-            fill="none"
-            strokeDasharray="8"
-          >
-            <animate
-              attributeName="stroke-dashoffset"
-              values="0;100"
-              dur="3s"
-              repeatCount="indefinite"
-            />
-          </path>
-          <circle cx="150" cy="300" r="8" fill="#ff4081">
-            <animate
-              attributeName="cx"
-              values="150;750;150"
-              dur="6s"
-              repeatCount="indefinite"
-            />
-          </circle>
-        </svg>
-      ),
-    },
-    {
-      caption: "Syncing Smart Home Devices...",
-      logs: [
-        "Pairing home automation nodes...",
-        "Calibrating room sensors...",
-        "Activating device control layer...",
-      ],
-      bg: "from-[#010a13] via-[#001f3f] to-[#012d5e]",
-      graphic: (
-        <svg
-          viewBox="0 0 800 600"
-          className="absolute inset-0 w-full h-full opacity-25"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <rect
-            x="250"
-            y="200"
-            width="300"
-            height="200"
-            rx="20"
-            stroke="#00e0ff"
-            strokeWidth="2"
-            fill="none"
-          />
-          <circle cx="400" cy="220" r="6" fill="#00e0ff">
-            <animate
-              attributeName="r"
-              values="6;10;6"
-              dur="1.5s"
-              repeatCount="indefinite"
-            />
-          </circle>
-          <circle cx="320" cy="320" r="4" fill="#00e0ff" />
-          <circle cx="480" cy="320" r="4" fill="#00e0ff" />
-        </svg>
-      ),
-    },
-    {
-      caption: "System Ready — Seamless Experience Active",
-      logs: [
-        "Finalizing user environment...",
-        "Running optimization checks...",
-        "Ochiga Infrastructure Online ✅",
-      ],
-      bg: "from-[#0b0b0b] via-[#003300] to-[#0f6600]",
-      graphic: (
-        <svg
-          viewBox="0 0 800 600"
-          className="absolute inset-0 w-full h-full opacity-25"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <circle cx="400" cy="300" r="100" stroke="#39ff14" strokeWidth="3" fill="none">
-            <animate attributeName="r" values="90;110;90" dur="3s" repeatCount="indefinite" />
-          </circle>
-          <circle cx="400" cy="300" r="6" fill="#39ff14" />
-        </svg>
-      ),
-    },
-  ];
-
-  const startLoading = (path: string) => {
-    setLoading(true);
-    let step = 0;
-
-    const nextScene = () => {
-      if (step < scenes.length - 1) {
-        step++;
-        setScene(step);
-        let msgIndex = 0;
-        const msgInterval = setInterval(() => {
-          setLoadingText(scenes[step].logs[msgIndex]);
-          msgIndex++;
-          if (msgIndex === scenes[step].logs.length) clearInterval(msgInterval);
-        }, 1000);
-      } else {
-        setTimeout(() => router.push(path), 2000);
-      }
-    };
-
-    const interval = setInterval(nextScene, 3500);
-    return () => clearInterval(interval);
-  };
-
-  if (loading) {
-    const current = scenes[scene];
-    const progressWidth = `${((scene + 1) / scenes.length) * 100}%`;
-
-    return (
-      <div
-        className={`relative flex flex-col items-center justify-center h-screen text-white overflow-hidden bg-gradient-to-br ${current.bg}`}
-      >
-        {current.graphic}
-
-        <div className="relative z-10 text-center px-4">
-          <h2 className="text-xl md:text-3xl font-semibold mb-2 animate-pulse">
-            {current.caption}
-          </h2>
-          <p className="text-sm text-gray-300 mb-4 transition-all">{loadingText}</p>
-
-          <div className="w-64 h-1 bg-gray-800 rounded-full overflow-hidden mx-auto">
-            <div
-              className="bg-gradient-to-r from-red-600 to-orange-500 h-1 transition-all duration-1000"
-              style={{ width: progressWidth }}
-            ></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ Normal landing + backend connection indicator
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-50 to-gray-200 p-6">
-      <h1 className="text-3xl font-bold mb-10 text-gray-800">
-        Welcome to <span className="text-red-700">Ochiga</span>
-      </h1>
+    <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-[#050505] via-[#0c0c0c] to-[#111] text-gray-200 overflow-hidden">
+      {/* Glow Background */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.08)_0%,rgba(0,0,0,1)_70%)]"></div>
 
-      {/* ✅ Live backend connection status */}
-      <p
-        className={`mb-6 px-4 py-2 rounded-full text-sm ${
-          backendStatus === "connected"
-            ? "bg-green-100 text-green-700"
-            : backendStatus === "failed"
-            ? "bg-red-100 text-red-700"
-            : backendStatus === "retrying"
-            ? "bg-yellow-100 text-yellow-700 animate-pulse"
-            : "bg-gray-100 text-gray-700"
-        }`}
+      {/* Ochiga Logo or Text */}
+      <motion.h1
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1 }}
+        className="text-3xl md:text-5xl font-semibold tracking-wide text-white mb-3"
       >
-        {backendStatus === "checking"
-          ? "Checking backend connection..."
-          : backendStatus === "connected"
-          ? "✅ Backend connected successfully!"
-          : backendStatus === "retrying"
-          ? "🔁 Retrying connection..."
-          : "⚠️ Backend not reachable — retrying soon"}
-      </p>
+        Welcome to <span className="text-[#e11d48]">Ochiga</span>
+      </motion.h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-md">
-        <button
-          onClick={() => startLoading("/manager-dashboard")}
-          className="group relative bg-white border border-gray-200 hover:shadow-2xl transition-all duration-300 rounded-2xl p-8 flex flex-col items-center justify-center text-center active:scale-95"
-        >
-          <BuildingOfficeIcon className="w-12 h-12 text-red-700 mb-3 group-hover:scale-110 transition-transform" />
-          <p className="text-lg font-semibold text-gray-800 mb-1">Manager Portal</p>
-          <p className="text-sm text-gray-500">Manage your estate dashboard</p>
-        </button>
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="text-gray-400 text-sm md:text-base mb-16"
+      >
+        Your intelligent infrastructure experience
+      </motion.p>
 
-        <button
-          onClick={() => startLoading("/dashboard")}
-          className="group relative bg-white border border-gray-200 hover:shadow-2xl transition-all duration-300 rounded-2xl p-8 flex flex-col items-center justify-center text-center active:scale-95"
-        >
-          <UserIcon className="w-12 h-12 text-blue-700 mb-3 group-hover:scale-110 transition-transform" />
-          <p className="text-lg font-semibold text-gray-800 mb-1">Resident Portal</p>
-          <p className="text-sm text-gray-500">Access your home dashboard</p>
-        </button>
+      {/* Slide to Enter Bar */}
+      <div className="relative w-72 md:w-96 bg-[#1a1a1a] border border-gray-800 rounded-full overflow-hidden shadow-inner">
+        <motion.div
+          initial={{ width: "0%" }}
+          animate={{ width: unlocked ? "100%" : `${slideProgress}%` }}
+          className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#e11d48] to-[#8b0000] rounded-full"
+        />
+        <div className="relative z-10 flex items-center justify-between px-4 py-3 text-xs md:text-sm">
+          <span className={unlocked ? "opacity-0" : "text-gray-400"}>
+            {unlocked ? "" : "Slide to enter infrastructure"}
+          </span>
+          <FaChevronRight className={`text-gray-400 ${unlocked ? "opacity-0" : ""}`} />
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={slideProgress}
+          onChange={handleSlide}
+          disabled={unlocked}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
       </div>
 
-      <button
-        onClick={() => startLoading("/login")}
-        className="mt-10 flex items-center gap-2 bg-gradient-to-r from-red-700 to-black text-white py-3 px-8 rounded-full font-semibold shadow-lg hover:scale-105 active:scale-95 transition-transform"
-      >
-        Go to Login
-        <ArrowRightCircleIcon className="w-5 h-5" />
-      </button>
+      {/* Unlock Icon Animation */}
+      {unlocked && (
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1.2 }}
+          transition={{ duration: 0.5 }}
+          className="mt-10 text-[#22c55e]"
+        >
+          <FaLock className="text-4xl animate-bounce" />
+        </motion.div>
+      )}
 
-      <p className="mt-8 text-gray-400 text-sm">© 2025 Ochiga Systems</p>
+      {/* Footer */}
+      <p className="absolute bottom-6 text-xs text-gray-500">
+        © {new Date().getFullYear()} Ochiga Systems — Smart Infrastructure
+      </p>
     </div>
   );
 }
