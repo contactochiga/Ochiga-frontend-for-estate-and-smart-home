@@ -1,22 +1,20 @@
-import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+// src/lib/firebaseAuth.ts
+"use client";
+
+import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from "firebase/auth";
 import { app } from "./firebase";
 
-// ✅ Initialize Auth
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-// ✅ Helper functions
-export const signInWithGoogle = async () => {
-  const result = await signInWithPopup(auth, googleProvider);
-  return result.user;
-};
+export async function signInWithGoogle(): Promise<UserCredential> {
+  return signInWithPopup(auth, googleProvider);
+}
 
-export const loginWithEmail = async (email: string, password: string) => {
-  const result = await signInWithEmailAndPassword(auth, email, password);
-  return result.user;
-};
+export async function signupWithEmail(email: string, password: string): Promise<UserCredential> {
+  return createUserWithEmailAndPassword(auth, email, password);
+}
 
-export const signupWithEmail = async (email: string, password: string) => {
-  const result = await createUserWithEmailAndPassword(auth, email, password);
-  return result.user;
-};
+export async function loginWithEmail(email: string, password: string): Promise<UserCredential> {
+  return signInWithEmailAndPassword(auth, email, password);
+}
