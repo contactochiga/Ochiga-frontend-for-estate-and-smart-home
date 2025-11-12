@@ -1,20 +1,24 @@
-// src/lib/firebaseAuth.ts
-"use client";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
-import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from "firebase/auth";
-import { app } from "./firebase";
+const firebaseConfig = {
+  apiKey: "AIzaSyA6S8bITcmIteHZtQqT2ymprpvDWnyLDKU",
+  authDomain: "ochiga-estate-and-smart-home.firebaseapp.com",
+  projectId: "ochiga-estate-and-smart-home",
+  storageBucket: "ochiga-estate-and-smart-home.firebasestorage.app",
+  messagingSenderId: "75170521813",
+  appId: "1:75170521813:web:1e61a95961a923c83cf85c",
+  measurementId: "G-XL1GME509P",
+};
 
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-export async function signInWithGoogle(): Promise<UserCredential> {
-  return signInWithPopup(auth, googleProvider);
+// Analytics (browser only)
+let analytics: any = null;
+if (typeof window !== "undefined") {
+  isSupported().then((yes) => {
+    if (yes) analytics = getAnalytics(app);
+  });
 }
 
-export async function signupWithEmail(email: string, password: string): Promise<UserCredential> {
-  return createUserWithEmailAndPassword(auth, email, password);
-}
-
-export async function loginWithEmail(email: string, password: string): Promise<UserCredential> {
-  return signInWithEmailAndPassword(auth, email, password);
-}
+export { app, analytics };
