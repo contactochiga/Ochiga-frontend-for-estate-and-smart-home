@@ -8,10 +8,12 @@ export default function ChatFooter({
   input,
   setInput,
   onSend,
+  onAction, // 🧠 NEW: Send parsed commands to parent (dashboard/chat)
 }: {
   input: string;
   setInput: (v: string) => void;
   onSend: () => void;
+  onAction?: (actions: Array<{ type: string; action: string; target: string }>) => void;
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -45,15 +47,10 @@ export default function ChatFooter({
     const synth = window.speechSynthesis;
     if (!synth) return;
     const utter = new SpeechSynthesisUtterance(text);
-
-    // 🎙️ Optional: customize accent later (Nigerian English style)
-    utter.lang = "en-NG"; // fallback Nigerian English variant
+    utter.lang = "en-NG"; // Nigerian English style
     utter.rate = 1;
     utter.pitch = 1;
-    utter.voice =
-      synth
-        .getVoices()
-        .find((v) => v.name === selectedVoice) || null;
+    utter.voice = synth.getVoices().find((v) => v.name === selectedVoice) || null;
 
     utter.onend = () => {
       setIsTalking(false);
@@ -62,15 +59,71 @@ export default function ChatFooter({
     synth.speak(utter);
   };
 
-  // 🎧 Start continuous interaction
+  // ⚡ Command Interpreter — parse what the user said into structured actions
+  const handleCommand = (transcript: string) => {
+    const actions: Array<{ type: string; action: string; target: string }> = [];
+    let reply = "I didn’t quite get that. Can you say it again?";
+
+    // 🔌 Light control
+    if (transcript.includes("light")) {
+      actions.push({ type: "device", action: "turn_on", target: "light" });
+      reply = "Okay, the light has been turned on.";
+    }
+
+    // ❄️ AC control
+    if (transcript.includes("ac") || transcript.includes("air conditioner")) {
+      actions.push({ type: "device", action: "turn_on", target: "ac" });
+      reply =
+        actions.length > 1
+          ? "Okay, the light and AC have been turned on."
+          : "Sure, switching on the AC.";
+    }
+
+    // 🚪 Door
+    if (transcript.includes("door")) {
+      actions.push({ type: "device", action: "open", target: "door" });
+      reply = "Opening the door now.";
+    }
+
+    // 🎥 Camera
+    if (transcript.includes("camera")) {
+      actions.push({ type: "device", action: "turn_on", target: "camera" });
+      reply = "Turning on your security cameras now.";
+    }
+
+    // 👥 Visitor scheduling
+    if (transcript.includes("visitor")) {
+      actions.push({ type: "schedule", action: "create", target: "visitor" });
+      reply = "Sure. What time should I schedule your visitor?";
+    }
+
+    // 📊 Status report
+    if (transcript.includes("status")) {
+      actions.push({ type: "info", action: "query", target: "status" });
+      reply = "Your home is secure, power is stable, and the network is strong.";
+    }
+
+    // 💤 Shutdown
+    if (transcript.includes("shut down") || transcript.includes("sleep")) {
+      actions.push({ type: "system", action: "shutdown", target: "assistant" });
+      reply = "Alright. Ochiga Assistant signing off.";
+      setShouldContinue(false);
+    }
+
+    // 🧩 Pass structured actions to parent (dashboard/chat)
+    if (actions.length && onAction) onAction(actions);
+
+    return reply;
+  };
+
+  // 🎧 Start continuous conversation (AI Jelly Mode)
   const startConversation = async () => {
     vibrate(120);
     setIsTalking(true);
     setShouldContinue(true);
 
     const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
       alert("Speech recognition not supported in this browser.");
@@ -83,38 +136,22 @@ export default function ChatFooter({
     recognition.interimResults = false;
     recognitionRef.current = recognition;
 
-    // 🗣️ Greet once
     speak("Hi, this is Ochiga Assistant. How can I help you today?", () => {
       recognition.start();
     });
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript.toLowerCase().trim();
-
-      // Don’t leave residual text
       setInput("");
       console.log("🎤 You said:", transcript);
 
-      // 🔧 Simple intent logic
-      let reply = "I didn’t quite get that. Can you say it again?";
-      if (transcript.includes("light")) reply = "Okay, the light has been turned on.";
-      else if (transcript.includes("visitor"))
-        reply = "Sure. What time should I schedule your visitor?";
-      else if (transcript.includes("status"))
-        reply = "Your home is secure, power is stable, and the network is strong.";
-      else if (transcript.includes("camera"))
-        reply = "Turning on your security cameras now.";
-      else if (transcript.includes("shut down") || transcript.includes("sleep")) {
-        reply = "Alright. Ochiga Assistant signing off.";
-        setShouldContinue(false);
-      }
+      // 🧠 Interpret the transcript
+      const reply = handleCommand(transcript);
 
-      // 🎤 Speak reply then continue listening if not shutting down
+      // 🗣️ Speak reply then continue if not shutting down
       speak(reply, () => {
         if (shouldContinue) {
-          setTimeout(() => {
-            recognition.start();
-          }, 1000);
+          setTimeout(() => recognition.start(), 1000);
         } else {
           recognition.stop();
           vibrate(150);
@@ -125,28 +162,22 @@ export default function ChatFooter({
 
     recognition.onerror = () => {
       recognition.stop();
-      if (shouldContinue) {
-        setTimeout(() => recognition.start(), 1000);
-      } else {
-        setIsTalking(false);
-      }
+      if (shouldContinue) setTimeout(() => recognition.start(), 1000);
+      else setIsTalking(false);
     };
 
     recognition.onend = () => {
-      if (shouldContinue) {
-        recognition.start();
-      }
+      if (shouldContinue) recognition.start();
     };
   };
 
-  // 🎙️ Mic (manual speech-to-text for typing)
+  // 🎙️ Manual mic (Speech → text for typing)
   const handleMicClick = () => {
     vibrate(60);
 
     const SpeechRecognition =
       typeof window !== "undefined" &&
-      ((window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition);
+      ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
 
     if (!SpeechRecognition) {
       alert("Speech recognition not supported in this browser.");
@@ -177,7 +208,7 @@ export default function ChatFooter({
     }
   };
 
-  // 🚀 Main Jelly Button (Talk / Send)
+  // 🚀 Main Jelly Button
   const handleMainButtonClick = () => {
     if (isTyping && input.trim()) {
       vibrate(40);
@@ -196,6 +227,7 @@ export default function ChatFooter({
     localStorage.setItem("ochigaVoice", voiceName);
   };
 
+  // 🧠 NOTE: The rest of the JSX below is unchanged (UI untouched)
   return (
     <>
       {/* 🔊 Voice Selection Modal */}
@@ -230,11 +262,10 @@ export default function ChatFooter({
         </div>
       )}
 
-      {/* 🌊 Chat Footer */}
+      {/* 🌊 Chat Footer UI (UNCHANGED) */}
       <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-800 px-4 py-3 fixed bottom-0 z-50">
         <div className="max-w-3xl mx-auto relative">
           <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
-            {/* 🎤 Mic Button */}
             <button
               onClick={handleMicClick}
               className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
@@ -250,7 +281,6 @@ export default function ChatFooter({
               )}
             </button>
 
-            {/* ✏️ Input / Waveform */}
             <div className="relative flex-1 h-10 flex items-center">
               {!isRecording ? (
                 <input
@@ -299,7 +329,6 @@ export default function ChatFooter({
               )}
             </div>
 
-            {/* 🧠 Jelly Button */}
             <button
               onClick={handleMainButtonClick}
               className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
