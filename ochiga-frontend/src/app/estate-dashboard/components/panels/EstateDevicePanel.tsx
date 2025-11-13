@@ -2,59 +2,40 @@
 
 import { FC } from "react";
 
-interface DeviceAction {
-  id: string;
-  name: string;
-  status: string;
-  type: string;
-}
-
 interface Props {
-  devices: DeviceAction[];
+  devices: { id: string; name: string; status: string }[];
   onAction: (deviceId: string, action: string) => void;
 }
 
 const EstateDevicePanel: FC<Props> = ({ devices, onAction }) => {
-  return (
-    <div className="bg-gray-900 border border-gray-700 rounded-2xl p-4 mt-2 shadow-md flex flex-col gap-3">
-      {devices.length === 0 && (
-        <p className="text-gray-400 text-sm">No estate devices detected.</p>
-      )}
+  const defaultDevices = devices.length
+    ? devices
+    : [
+        { id: "d1", name: "Main Gate", status: "closed" },
+        { id: "d2", name: "Estate Lights", status: "off" },
+        { id: "d3", name: "CCTV", status: "off" },
+        { id: "d4", name: "AC in Lobby", status: "off" },
+      ];
 
-      {devices.map((d) => (
-        <div
-          key={d.id}
-          className="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg"
-        >
-          <span className="text-gray-100 text-sm">{d.name}</span>
-          <div className="flex gap-2">
-            {d.type === "toggle" && (
-              <>
-                <button
-                  onClick={() => onAction(d.id, "ON")}
-                  className="px-2 py-1 text-xs bg-green-600 rounded hover:bg-green-700"
-                >
-                  ON
-                </button>
-                <button
-                  onClick={() => onAction(d.id, "OFF")}
-                  className="px-2 py-1 text-xs bg-red-600 rounded hover:bg-red-700"
-                >
-                  OFF
-                </button>
-              </>
-            )}
-            {d.type === "view" && (
-              <button
-                onClick={() => onAction(d.id, "VIEW")}
-                className="px-2 py-1 text-xs bg-blue-600 rounded hover:bg-blue-700"
-              >
-                VIEW
-              </button>
-            )}
+  return (
+    <div className="bg-gray-800 border border-gray-700 rounded-2xl p-4 mt-2 shadow-md">
+      <h3 className="text-white font-semibold mb-2">Estate Devices</h3>
+      <div className="flex flex-col gap-2">
+        {defaultDevices.map((device) => (
+          <div
+            key={device.id}
+            className="flex justify-between items-center bg-gray-700 p-2 rounded-lg"
+          >
+            <span className="text-gray-200">{device.name}</span>
+            <button
+              onClick={() => onAction(device.id, device.status === "on" ? "off" : "on")}
+              className="bg-red-600 text-white px-3 py-1 rounded-full text-xs"
+            >
+              {device.status === "on" ? "Turn Off" : "Turn On"}
+            </button>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
