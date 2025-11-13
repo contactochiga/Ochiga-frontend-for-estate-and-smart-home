@@ -23,103 +23,95 @@ type ChatMessage = {
 };
 
 export default function EstateDashboard() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      content: "Welcome, Estate Admin! How can I assist you today?",
-      id: "welcome",
-      panel: null,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    },
-  ]);
-
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const chatRef = useRef<HTMLDivElement | null>(null);
 
   const createId = () => Math.random().toString(36).substring(2, 9);
 
   // ======================================================
-  // Handle Chat + Panel Reuse Logic
+  // Handle Chat + Panel REPLACEMENT Logic
   // ======================================================
   const handleSend = (text?: string) => {
     const message = (text ?? input).trim();
     if (!message) return;
 
-    const userMsg: ChatMessage = {
-      role: "user",
-      content: message,
-      panel: null,
-      id: createId(),
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    };
+    const panel = detectEstatePanelType(message);
 
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
+    // ======================================================
+    // PANEL REQUEST LOGIC — clean replacement
+    // ======================================================
+    if (panel) {
+      setMessages((prev) => {
+        // Remove ANY previous message involving this panel
+        const cleaned = prev.filter((m) => m.panel !== panel);
 
-    setTimeout(() => {
-      const panel = detectEstatePanelType(message);
-
-      // If message is for a panel
-      const existingIndex = messages.findIndex((m) => m.panel === panel);
-
-      if (existingIndex !== -1 && panel) {
-        const existingMessage = messages[existingIndex];
-
-        // ✨ Update timestamp only
-        const updatedMessage = {
-          ...existingMessage,
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        // Insert one fresh assistant + panel
+        const newAssistant: ChatMessage = {
+          role: "assistant",
+          content: "", // No chat bubble text — only panel
+          panel,
+          id: createId(),
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
         };
 
-        // ✨ Move message to bottom (latest)
-        setMessages((prev) => {
-          const newList = prev.filter((m) => m.id !== existingMessage.id);
-          newList.push(updatedMessage);
-          return newList;
-        });
+        return [...cleaned, newAssistant];
+      });
 
-        // ✨ Bounce & scroll to updated panel
-        setTimeout(() => {
-          const el = document.querySelector(`[data-id='${existingMessage.id}']`);
-          if (el) {
-            el.classList.add("bounce-panel");
-            setTimeout(() => el.classList.remove("bounce-panel"), 700);
+      setInput("");
 
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-        }, 80);
-
-        return;
-      }
-
-      // Otherwise create NEW PANEL MESSAGE
-      let reply = `Okay — I processed: "${message}".`;
-      if (panel === "estate_devices") reply = "Estate device panel opened.";
-      if (panel === "estate_power") reply = "Estate power control panel opened.";
-      if (panel === "estate_accounting") reply = "Estate accounting panel opened.";
-      if (panel === "estate_community") reply = "Estate community panel opened.";
-
-      const assistantMsg: ChatMessage = {
-        role: "assistant",
-        content: reply,
-        panel,
-        id: createId(),
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
-
+      // Smooth scroll into view
       setTimeout(() => {
         chatRef.current?.scrollTo({
           top: chatRef.current.scrollHeight,
           behavior: "smooth",
         });
-      }, 200);
-    }, 250);
+      }, 100);
+
+      return;
+    }
+
+    // ======================================================
+    // NORMAL NON-PANEL MESSAGE
+    // ======================================================
+    const userMsg: ChatMessage = {
+      role: "user",
+      content: message,
+      panel: null,
+      id: createId(),
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setInput("");
   };
 
   // ======================================================
-  // RENDER
+  // RENDER PANELS
+  // ======================================================
+  const renderPanel = (panel: string | null | undefined) => {
+    switch (panel) {
+      case "estate_devices":
+        return <EstateDevicePanel />;
+      case "estate_power":
+        return <EstatePowerPanel />;
+      case "estate_accounting":
+        return <EstateAccountingPanel />;
+      case "estate_community":
+        return <EstateCommunityPanel />;
+      default:
+        return null;
+    }
+  };
+
+  // ======================================================
+  // UI RENDER
   // ======================================================
   return (
     <LayoutWrapper>
@@ -135,45 +127,47 @@ export default function EstateDashboard() {
               <div
                 key={msg.id}
                 data-id={msg.id}
-                data-panel={msg.panel || ""}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div className="flex flex-col max-w-[80%]">
-                  {/* CHAT BUBBLE */}
-                  <div
-                    className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
-                      msg.role === "user"
-                        ? "bg-blue-600 text-white rounded-br-none"
-                        : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
 
-                  {/* TIMESTAMP */}
-                  <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">
-                    {msg.time}
-                  </div>
+                  {/* CHAT BUBBLE (Panel messages have NO bubble) */}
+                  {msg.panel == null && (
+                    <>
+                      <div
+                        className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
+                          msg.role === "user"
+                            ? "bg-blue-600 text-white rounded-br-none"
+                            : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
 
-                  {/* PANEL RENDERING */}
-                  {msg.panel === "estate_devices" && <EstateDevicePanel />}
-                  {msg.panel === "estate_power" && <EstatePowerPanel />}
-                  {msg.panel === "estate_accounting" && <EstateAccountingPanel />}
-                  {msg.panel === "estate_community" && <EstateCommunityPanel />}
+                      <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">
+                        {msg.time}
+                      </div>
+                    </>
+                  )}
+
+                  {/* PANEL (Only for assistant messages with panel) */}
+                  {msg.role === "assistant" && msg.panel && (
+                    <div className="mt-1">{renderPanel(msg.panel)}</div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Suggestion Card */}
+        {/* Suggestion Panel */}
         <DynamicSuggestionCard
           suggestions={[]}
           isTyping={input.trim().length > 0}
           onSend={handleSend}
         />
 
-        {/* Footer */}
+        {/* Footer Input */}
         <EstateChatFooter input={input} setInput={setInput} onSend={handleSend} />
       </main>
     </LayoutWrapper>
