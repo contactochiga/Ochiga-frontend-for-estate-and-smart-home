@@ -48,7 +48,7 @@ interface Props {
 
 /**
  * DynamicSuggestionCard
- * ChatGPT-style white cards with icons and smart visibility
+ * ChatGPT-style suggestion cards + notification overlay
  */
 export default function DynamicSuggestionCard({
   suggestions,
@@ -63,8 +63,9 @@ export default function DynamicSuggestionCard({
   const [showNotification, setShowNotification] = useState(false);
   const lastY = useRef<number>(typeof window !== "undefined" ? window.scrollY : 0);
   const hideTimer = useRef<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // ---------- Contextual suggestions ----------
+  // ---------- Base & Contextual Suggestions ----------
   const baseSuggestions = useMemo<Suggestion[]>(
     () => [
       { id: "s1", title: "Unlock Main Gate", subtitle: "for visitor entry", payload: "unlock_gate" },
@@ -76,80 +77,9 @@ export default function DynamicSuggestionCard({
     []
   );
 
-  const devicesSuggestions = useMemo<Suggestion[]>(
-    () => [
-      { id: "d1", title: "View CCTV Feed", subtitle: "entrance camera", payload: "view_cctv_entrance" },
-      { id: "d2", title: "Turn on Corridor Lights", subtitle: "Block A corridors", payload: "turn_on_corridor_lights" },
-      { id: "d3", title: "Check Device Status", subtitle: "control room", payload: "check_device_status" },
-      { id: "d4", title: "Lock Admin Door", subtitle: "night mode", payload: "lock_admin_door" },
-      { id: "d5", title: "Restart Access Panel", subtitle: "main gate", payload: "restart_access_panel" },
-    ],
-    []
-  );
-
-  const powerSuggestions = useMemo<Suggestion[]>(
-    () => [
-      { id: "p1", title: "Switch to Backup Power", subtitle: "during outage", payload: "switch_backup_power" },
-      { id: "p2", title: "Check Generator", subtitle: "generator status", payload: "check_generator" },
-      { id: "p3", title: "Turn off Generator", subtitle: "stop backup", payload: "turn_off_generator" },
-      { id: "p4", title: "View Electricity Usage", subtitle: "this week", payload: "view_electricity_usage" },
-      { id: "p5", title: "Reset Smart Meter", subtitle: "house 14B", payload: "reset_smart_meter_14B" },
-    ],
-    []
-  );
-
-  const accountingSuggestions = useMemo<Suggestion[]>(
-    () => [
-      { id: "a1", title: "View Unpaid Invoices", subtitle: "residents", payload: "view_unpaid_invoices" },
-      { id: "a2", title: "Fund Estate Wallet", subtitle: "for utilities", payload: "fund_wallet" },
-      { id: "a3", title: "Send Payment Reminder", subtitle: "to residents", payload: "send_payment_reminder" },
-      { id: "a4", title: "Check Service Charge", subtitle: "summary", payload: "check_service_charge" },
-      { id: "a5", title: "Generate Report", subtitle: "treasurer", payload: "generate_financial_report" },
-    ],
-    []
-  );
-
-  const communitySuggestions = useMemo<Suggestion[]>(
-    () => [
-      { id: "c1", title: "Post Announcement", subtitle: "to residents", payload: "post_announcement" },
-      { id: "c2", title: "Approve Visitor", subtitle: "house 5A", payload: "approve_visitor_5A" },
-      { id: "c3", title: "View Resident List", subtitle: "alphabetical", payload: "view_residents" },
-      { id: "c4", title: "Schedule Event", subtitle: "estate weekend", payload: "schedule_event" },
-      { id: "c5", title: "Message Security", subtitle: "urgent", payload: "message_security" },
-    ],
-    []
-  );
-
-  // pick which list to show
-  const displayList: Suggestion[] = useMemo(() => {
-    if (suggestions?.length) return suggestions.slice(0, 5);
-
-    if (estateStatus) {
-      const dyn: Suggestion[] = [];
-      if (estateStatus.power === "off")
-        dyn.push({ id: "dyn1", title: "Switch to Backup Power", subtitle: "power is down", payload: "switch_backup_power" });
-      if (estateStatus.gate === "open")
-        dyn.push({ id: "dyn2", title: "Lock Estate Gate", subtitle: "gate is open", payload: "lock_estate_gate" });
-      if (estateStatus.waterLevel === "low")
-        dyn.push({ id: "dyn3", title: "Activate Borehole Pump", subtitle: "water low", payload: "activate_pump" });
-      if (estateStatus.maintenance)
-        dyn.push({ id: "dyn4", title: "View Maintenance Tasks", subtitle: "ongoing tasks", payload: "view_maintenance" });
-      if (dyn.length) return dyn.slice(0, 5);
-    }
-
-    switch (activePanel) {
-      case "devices":
-        return devicesSuggestions.slice(0, 5);
-      case "power":
-        return powerSuggestions.slice(0, 5);
-      case "accounting":
-        return accountingSuggestions.slice(0, 5);
-      case "community":
-        return communitySuggestions.slice(0, 5);
-      default:
-        return baseSuggestions.slice(0, 5);
-    }
-  }, [suggestions, estateStatus, activePanel, devicesSuggestions, powerSuggestions, accountingSuggestions, communitySuggestions, baseSuggestions]);
+  const displayList: Suggestion[] = suggestions?.length
+    ? suggestions.slice(0, 5)
+    : baseSuggestions;
 
   // ---------- Scroll visibility ----------
   useEffect(() => {
@@ -200,7 +130,7 @@ export default function DynamicSuggestionCard({
     onSend(payload);
   };
 
-  // icon resolver
+  // ---------- Icons ----------
   const getIcon = (s: Suggestion) => {
     const key = s.payload?.toLowerCase() ?? "";
     if (key.includes("light") || key.includes("device")) return <FiCpu size={16} className="text-gray-500" />;
@@ -214,9 +144,39 @@ export default function DynamicSuggestionCard({
     return <FiKey size={16} className="text-gray-500" />;
   };
 
+  // ---------- Auto-scroll slow drift ----------
+  useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    if (!scrollContainer) return;
+
+    let scrollDirection = 1; // 1 = right, -1 = left
+    const scrollSpeed = 0.4; // px per frame
+    let rafId: number;
+
+    const animateScroll = () => {
+      if (!scrollContainer) return;
+
+      scrollContainer.scrollLeft += scrollSpeed * scrollDirection;
+
+      if (
+        scrollContainer.scrollLeft + scrollContainer.clientWidth >=
+        scrollContainer.scrollWidth - 2
+      ) {
+        scrollDirection = -1;
+      } else if (scrollContainer.scrollLeft <= 0) {
+        scrollDirection = 1;
+      }
+
+      rafId = requestAnimationFrame(animateScroll);
+    };
+
+    rafId = requestAnimationFrame(animateScroll);
+    return () => cancelAnimationFrame(rafId);
+  }, [visible, isTyping]);
+
   return (
     <>
-      {/* Notification */}
+      {/* 🔔 Notification Overlay */}
       <AnimatePresence>
         {showNotification && notification && (
           <motion.div
@@ -237,7 +197,7 @@ export default function DynamicSuggestionCard({
                 {notification.actionLabel && (
                   <button
                     onClick={notification.onAction}
-                    className="px-3 py-1 rounded-full bg-red-600 text-white text-sm shadow-sm hover:bg-red-700"
+                    className="px-3 py-1 rounded-full bg-blue-600 text-white text-sm shadow-sm hover:bg-blue-700"
                   >
                     {notification.actionLabel}
                   </button>
@@ -248,7 +208,7 @@ export default function DynamicSuggestionCard({
         )}
       </AnimatePresence>
 
-      {/* Suggestion cards */}
+      {/* 💡 Suggestion Cards - Horizontal Scroll */}
       <AnimatePresence>
         {visible && displayList.length > 0 && !isTyping && (
           <motion.div
@@ -256,16 +216,23 @@ export default function DynamicSuggestionCard({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 18 }}
             transition={{ duration: 0.28 }}
-            className="fixed bottom-16 left-0 w-full z-30 flex justify-center px-4 pointer-events-none"
+            className="fixed bottom-16 left-0 right-0 z-30 px-4 pointer-events-none"
           >
-            <div className="w-full max-w-3xl pointer-events-auto flex flex-wrap gap-3 justify-center items-center">
+            <div
+              ref={scrollRef}
+              className="w-full pointer-events-auto flex overflow-x-auto gap-3 hide-scrollbar"
+              style={{
+                scrollSnapType: "x mandatory",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
               {displayList.map((s) => (
                 <motion.button
                   key={s.id}
                   onClick={() => handleClick(s)}
                   whileHover={{ y: -3, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  className={`w-full sm:w-auto max-w-[46%] md:max-w-[30%] lg:max-w-[22%] bg-white rounded-2xl shadow-sm border border-gray-200 p-3 text-left flex items-start gap-2 transition`}
+                  className="flex-none min-w-[220px] bg-white rounded-2xl shadow-sm border border-gray-200 p-3 text-left flex items-start gap-2 transition scroll-snap-align-start"
                   style={{
                     opacity: assistantActive ? 0.6 : 1,
                   }}
