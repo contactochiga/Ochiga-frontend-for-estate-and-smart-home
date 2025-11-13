@@ -25,7 +25,7 @@ import {
   IoTPanel,
   AiPanel,
   AssistantPanel,
-  DeviceDiscoveryPanel, // ✅ NEW
+  DeviceDiscoveryPanel,
 } from "./components/Panels";
 
 import { detectPanelType } from "./utils/panelDetection";
@@ -44,7 +44,7 @@ export default function AIDashboard() {
     { role: "assistant", content: "Hello! I’m Ochiga AI — how can I assist you today?" },
   ]);
 
-  const [activePanel, setActivePanel] = useState<string | null>(null); // 🆕 Track panel from voice commands
+  const [activePanel, setActivePanel] = useState<string | null>(null);
   const { listening, startListening, stopListening } = useSpeechRecognition(handleSend);
   const chatRef = useRef<HTMLDivElement | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
@@ -53,19 +53,12 @@ export default function AIDashboard() {
   useEffect(() => {
     if (!chatRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
-
-    if (scrollTop + clientHeight >= scrollHeight - 50) {
-      chatRef.current.scrollTop = scrollHeight;
-      setShowScrollDown(false);
-    } else {
-      setShowScrollDown(true);
-    }
+    setShowScrollDown(scrollTop + clientHeight < scrollHeight - 50);
   }, [messages]);
 
   const handleScroll = () => {
     if (!chatRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
-
     setShowScrollDown(scrollTop + clientHeight < scrollHeight - 50);
   };
 
@@ -77,71 +70,115 @@ export default function AIDashboard() {
 
   const handleMicClick = () => (listening ? stopListening() : startListening());
 
-  // 🆕 Handler to receive structured actions from ChatFooter
-  const handleAction = (actions: Array<{ type: string; action: string; target: string }>) => {
+  // Unified action handler
+  const handleAction = (actions: Array<{ type: string; action: string; target: string }>, userMessage?: string) => {
+    const newMessages: ChatMessage[] = [];
+
     actions.forEach((a) => {
-      if (a.type === "device" && a.action === "discover" && a.target === "devices") {
-        setActivePanel("devices");
-        const msg: ChatMessage = {
-          role: "assistant",
-          content: "Scanning for nearby devices…",
-          panel: "devices",
-        };
-        setMessages((prev) => [...prev, msg]);
+      let reply = "I didn’t quite get that. Can you say it again?";
+      let panel: string | null = null;
+
+      switch (a.type) {
+        case "device":
+          if (a.action === "turn_on" && a.target === "light") {
+            reply = "Turning on the lights.";
+            panel = "lights";
+          }
+          if (a.action === "turn_on" && a.target === "ac") {
+            reply = "Switching on the AC.";
+            panel = "lights"; // Or AC panel if separate
+          }
+          if (a.action === "open" && a.target === "door") {
+            reply = "Opening the door now.";
+            panel = null;
+          }
+          if (a.action === "turn_on" && a.target === "camera") {
+            reply = "Turning on your security cameras.";
+            panel = "cctv";
+          }
+          if (a.action === "discover" && a.target === "devices") {
+            reply = "Scanning for nearby devices…";
+            panel = "devices";
+          }
+          break;
+
+        case "schedule":
+          if (a.action === "create" && a.target === "visitor") {
+            reply = "Sure. What time should I schedule your visitor?";
+            panel = "visitors";
+          }
+          break;
+
+        case "info":
+          if (a.action === "query" && a.target === "status") {
+            reply = "Your home is secure, power is stable, and the network is strong.";
+            panel = null;
+          }
+          break;
+
+        case "system":
+          if (a.action === "shutdown" && a.target === "assistant") {
+            reply = "Alright. Ochiga Assistant signing off.";
+            panel = null;
+          }
+          break;
       }
-      // You can handle other structured actions here similarly
+
+      if (userMessage) {
+        newMessages.push({ role: "user", content: userMessage });
+      }
+
+      newMessages.push({ role: "assistant", content: reply, panel });
+
+      if (panel) setActivePanel(panel);
     });
+
+    setMessages((prev) => [...prev, ...newMessages]);
+
+    if (newMessages.length > 0) speak(newMessages[newMessages.length - 1].content);
   };
 
+  // Unified send handler for typed and spoken messages
   function handleSend(text?: string, spoken = false) {
     const message = (text ?? input).trim();
     if (!message) return;
 
-    const userMsgs = [...messages, { role: "user", content: message }];
-    setMessages(userMsgs);
     setInput("");
 
-    setTimeout(() => {
-      const panel = detectPanelType(message);
-      let reply = `Okay — I processed: "${message}".`;
+    // Detect panel type for simple commands
+    const panel = detectPanelType(message);
 
-      const panelReplies: Record<string, string> = {
-        lights: "Turning on the lights in the requested area.",
-        wallet: "Opening wallet controls for you.",
-        cctv: "Loading CCTV preview for the requested camera.",
-        visitors: "Opening visitor access controls.",
-        estate: "Showing estate overview and status.",
-        home: "Showing home controls and scenes.",
-        room: "Here is the room monitoring panel.",
-        payments: "Payments panel ready.",
-        utilities: "Utilities dashboard opened.",
-        community: "Community hub opened.",
-        notifications: "Notifications panel opened.",
-        health: "Health monitoring panel opened.",
-        message: "Messaging panel opened.",
-        iot: "IoT devices panel ready.",
-        assistant: "Assistant configuration panel opened.",
-        ai: "Assistant configuration panel opened.",
-        devices: "Scanning for nearby devices...", // ✅ NEW
-      };
+    // Map simple text commands to structured actions
+    const actions: Array<{ type: string; action: string; target: string }> = [];
 
-      if (panel && panelReplies[panel]) reply = panelReplies[panel];
+    if (message.toLowerCase().includes("light")) actions.push({ type: "device", action: "turn_on", target: "light" });
+    if (message.toLowerCase().includes("ac") || message.toLowerCase().includes("air conditioner"))
+      actions.push({ type: "device", action: "turn_on", target: "ac" });
+    if (message.toLowerCase().includes("door")) actions.push({ type: "device", action: "open", target: "door" });
+    if (message.toLowerCase().includes("camera")) actions.push({ type: "device", action: "turn_on", target: "camera" });
+    if (message.toLowerCase().includes("visitor")) actions.push({ type: "schedule", action: "create", target: "visitor" });
+    if (message.toLowerCase().includes("status")) actions.push({ type: "info", action: "query", target: "status" });
+    if (message.toLowerCase().includes("shut down") || message.toLowerCase().includes("sleep"))
+      actions.push({ type: "system", action: "shutdown", target: "assistant" });
+    if (
+      message.toLowerCase().includes("connect device") ||
+      message.toLowerCase().includes("add device") ||
+      message.toLowerCase().includes("scan devices") ||
+      message.toLowerCase().includes("discover device") ||
+      message.toLowerCase().includes("pair device") ||
+      message.toLowerCase().includes("new device")
+    )
+      actions.push({ type: "device", action: "discover", target: "devices" });
 
-      // Scroll to last message of same panel
-      if (panel) {
-        const lastIndex = userMsgs.findIndex((m) => m.panel === panel);
-        if (lastIndex !== -1 && messageRefs.current[lastIndex]) {
-          messageRefs.current[lastIndex]?.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-
-      const assistantMsg: ChatMessage = { role: "assistant", content: reply, panel };
-      setMessages((prev) => [...prev, assistantMsg]);
-      if (spoken) speak(reply);
-
-      // Update active panel if detected
+    if (actions.length) {
+      handleAction(actions, message);
+    } else {
+      // Fallback reply if no structured action
+      const replyMsg: ChatMessage = { role: "assistant", content: `Okay — I processed: "${message}".`, panel };
+      setMessages((prev) => [...prev, { role: "user", content: message }, replyMsg]);
+      if (spoken) speak(replyMsg.content);
       if (panel) setActivePanel(panel);
-    }, 500);
+    }
   }
 
   const suggestions = [
@@ -150,7 +187,7 @@ export default function AIDashboard() {
     "View CCTV feed",
     "Check device status",
     "Lock all doors",
-    "Connect new device", // ✅ NEW
+    "Connect new device",
   ];
 
   return (
@@ -201,7 +238,7 @@ export default function AIDashboard() {
                   {msg.panel === "iot" && <IoTPanel />}
                   {msg.panel === "assistant" && <AssistantPanel />}
                   {msg.panel === "ai" && <AiPanel />}
-                  {msg.panel === "devices" && <DeviceDiscoveryPanel />} {/* ✅ NEW */}
+                  {msg.panel === "devices" && <DeviceDiscoveryPanel />}
                 </div>
               </div>
             ))}
@@ -225,7 +262,7 @@ export default function AIDashboard() {
         listening={listening}
         onMicClick={handleMicClick}
         onSend={() => handleSend(undefined, false)}
-        onAction={handleAction} // 🆕 Pass structured actions to dashboard
+        onAction={handleAction} // Unified action handler
       />
     </LayoutWrapper>
   );
