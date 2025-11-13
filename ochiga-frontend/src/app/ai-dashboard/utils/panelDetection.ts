@@ -1,19 +1,36 @@
-export const detectPanelType = (text: string) => {
-  const t = text.toLowerCase();
-  if (t.includes("cctv") || t.includes("camera")) return "cctv";
-  if (t.includes("light")) return "lights";
-  if (t.includes("wallet") || t.includes("fund")) return "wallet";
-  if (t.includes("visitor")) return "visitors";
-  if (t.includes("estate")) return "estate";
-  if (t.includes("home")) return "home";
-  if (t.includes("room")) return "room";
-  if (t.includes("payment")) return "payments";
-  if (t.includes("utility")) return "utilities";
-  if (t.includes("community")) return "community";
-  if (t.includes("notification")) return "notifications";
-  if (t.includes("health")) return "health";
-  if (t.includes("message")) return "message";
-  if (t.includes("iot")) return "iot";
-  if (t.includes("assistant") || t.includes("ai")) return "assistant";
+export function detectPanelType(message: string): string | null {
+  const msg = message.toLowerCase().trim();
+
+  // 🔹 Map common keywords/phrases to panel names
+  if (msg.includes("light")) return "lights";
+  if (msg.includes("wallet") || msg.includes("fund")) return "wallet";
+  if (msg.includes("cctv") || msg.includes("camera")) return "cctv";
+  if (msg.includes("visitor")) return "visitors";
+  if (msg.includes("estate")) return "estate";
+  if (msg.includes("home")) return "home";
+  if (msg.includes("room")) return "room";
+  if (msg.includes("payment")) return "payments";
+  if (msg.includes("utility")) return "utilities";
+  if (msg.includes("community")) return "community";
+  if (msg.includes("notification")) return "notifications";
+  if (msg.includes("health")) return "health";
+  if (msg.includes("message")) return "message";
+  if (msg.includes("iot")) return "iot";
+  if (msg.includes("assistant")) return "assistant";
+  if (msg.includes("ai")) return "ai";
+
+  // 🔹 New: device discovery triggers
+  if (
+    msg.includes("connect device") ||
+    msg.includes("add device") ||
+    msg.includes("scan devices") ||
+    msg.includes("discover device") ||
+    msg.includes("pair device") ||
+    msg.includes("new device")
+  ) {
+    return "devices";
+  }
+
+  // Default: no panel detected
   return null;
-};
+}
