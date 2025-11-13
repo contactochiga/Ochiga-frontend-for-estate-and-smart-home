@@ -48,6 +48,9 @@ export default function AIDashboard() {
   const chatRef = useRef<HTMLDivElement | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
 
+  // 🔍 store refs for quick scroll targeting
+  const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   // Auto-scroll whenever messages change
   useEffect(() => {
     if (!chatRef.current) return;
@@ -113,8 +116,26 @@ export default function AIDashboard() {
 
       if (panel && panelReplies[panel]) reply = panelReplies[panel];
 
+      // 🧠 Check if similar command exists → scroll to it
+      if (panel) {
+        const lastIndex = userMsgs.findIndex((m) => m.panel === panel);
+        if (lastIndex !== -1 && messageRefs.current[lastIndex]) {
+          messageRefs.current[lastIndex]?.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }
+
       const assistantMsg: ChatMessage = { role: "assistant", content: reply, panel };
-      setMessages([...userMsgs, assistantMsg]);
+      setMessages((prev) => [...prev, assistantMsg]);
+
+      // 🖥️ Trigger visual dashboard (panel) auto-popup simulation
+      if (panel && chatRef.current) {
+        setTimeout(() => {
+          const el = chatRef.current?.querySelector(`[data-panel="${panel}"]`);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 300);
+      }
 
       if (spoken) speak(reply);
     }, 500);
@@ -142,7 +163,12 @@ export default function AIDashboard() {
         >
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
             {messages.map((msg, i) => (
-              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              <div
+                key={i}
+                ref={(el) => (messageRefs.current[i] = el)}
+                data-panel={msg.panel || ""}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
                 <div className="flex flex-col max-w-[80%]">
                   <div
                     className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm transition-all duration-300 ${
@@ -177,7 +203,6 @@ export default function AIDashboard() {
           </div>
         </div>
 
-        {/* Scroll to bottom arrow */}
         {showScrollDown && (
           <button
             onClick={scrollToBottom}
