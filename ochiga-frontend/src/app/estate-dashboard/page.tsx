@@ -1,11 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import LayoutWrapper from "../ai-dashboard/layout/LayoutWrapper"; // reuse same layout
 import CreateHomePanel from "./components/panels/CreateHomePanel";
 import AssignResidentPanel from "./components/panels/AssignResidentPanel";
-import { detectPanelType } from "../ai-dashboard/utils/panelDetection";
-import { FaArrowDown } from "react-icons/fa";
+import EstateDevicePanel from "./components/panels/EstateDevicePanel";
+import EstateCCTVPanel from "./components/panels/EstateCCTVPanel";
+import EstateLightingPanel from "./components/panels/EstateLightingPanel";
+import EstatePowerPanel from "./components/panels/EstatePowerPanel";
+import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
+import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
+import { detectEstatePanelType } from "./utils/estatePanelDetection"; // updated detection
 import { motion, AnimatePresence } from "framer-motion";
 
 type ChatMessage = {
@@ -19,14 +24,36 @@ export default function EstateDashboard() {
     { role: "assistant", content: "Welcome, Estate Admin! How can I assist you today?" },
   ]);
   const [input, setInput] = useState("");
+
+  // Sample estate data
   const [homes, setHomes] = useState<{ id: string; name: string }[]>([]);
   const [users, setUsers] = useState<{ id: string; name: string }[]>([
     { id: "u1", name: "Alice" },
     { id: "u2", name: "Bob" },
   ]);
+  const [devices, setDevices] = useState([
+    { id: "d1", name: "Main Gate", type: "toggle", status: "OFF" },
+    { id: "d2", name: "Lobby Lights", type: "toggle", status: "ON" },
+  ]);
+  const [cameras, setCameras] = useState([
+    { id: "c1", name: "Gate Camera", feedUrl: "" },
+    { id: "c2", name: "Lobby Camera", feedUrl: "" },
+  ]);
+  const [lights, setLights] = useState([
+    { id: "l1", location: "Street 1", status: "ON" },
+    { id: "l2", location: "Street 2", status: "OFF" },
+  ]);
+  const [powerDevices, setPowerDevices] = useState([
+    { id: "p1", name: "Water Pump", type: "water", status: "ON" },
+    { id: "p2", name: "Main Power", type: "power", status: "OFF" },
+  ]);
+  const [residents, setResidents] = useState([
+    { id: "r1", name: "Alice", balance: 1000 },
+    { id: "r2", name: "Bob", balance: 0 },
+  ]);
 
-  const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const chatRef = useRef<HTMLDivElement | null>(null);
+  const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // =======================
   // Panel Handlers
@@ -43,27 +70,84 @@ export default function EstateDashboard() {
     handleSend(`Resident "${user}" has been assigned to home "${home}".`);
   };
 
+  const handleDeviceAction = (deviceId: string, action: string) => {
+    setDevices((prev) =>
+      prev.map((d) =>
+        d.id === deviceId ? { ...d, status: action === "TOGGLE" ? (d.status === "ON" ? "OFF" : "ON") : action } : d
+      )
+    );
+    handleSend(`Device "${deviceId}" set to ${action}`);
+  };
+
+  const handleLightAction = (lightId: string, action: string) => {
+    setLights((prev) =>
+      prev.map((l) => (l.id === lightId ? { ...l, status: action } : l))
+    );
+    handleSend(`Light "${lightId}" set to ${action}`);
+  };
+
+  const handlePowerAction = (deviceId: string, action: string) => {
+    setPowerDevices((prev) =>
+      prev.map((p) =>
+        p.id === deviceId ? { ...p, status: action === "TOGGLE" ? (p.status === "ON" ? "OFF" : "ON") : action } : p
+      )
+    );
+    handleSend(`Power/Water device "${deviceId}" toggled`);
+  };
+
+  const handleAccountingAction = (residentId: string, action: string) => {
+    if (action === "SEND_REMINDER") handleSend(`Reminder sent to resident "${residentId}"`);
+  };
+
+  const handleCommunityAction = (residentId: string, action: string) => {
+    if (action === "MESSAGE") handleSend(`Message sent to resident "${residentId}"`);
+  };
+
   // =======================
   // Chat Handling
   // =======================
   const handleSend = (text?: string) => {
     const message = (text ?? input).trim();
     if (!message) return;
+
     const userMsgs = [...messages, { role: "user", content: message }];
     setMessages(userMsgs);
     setInput("");
 
     setTimeout(() => {
-      const panel = detectPanelType(message);
+      const panel = detectEstatePanelType(message); // updated detection
       let reply = `Okay — I processed: "${message}".`;
 
-      if (panel === "create_home") reply = "Opening Create Home panel...";
-      if (panel === "assign_resident") reply = "Opening Assign Resident panel...";
+      switch (panel) {
+        case "create_home":
+          reply = "Opening Create Home panel...";
+          break;
+        case "assign_resident":
+          reply = "Opening Assign Resident panel...";
+          break;
+        case "estate_devices":
+          reply = "Opening Estate Devices panel...";
+          break;
+        case "estate_cctv":
+          reply = "Opening CCTV panel...";
+          break;
+        case "estate_lighting":
+          reply = "Opening Lighting panel...";
+          break;
+        case "estate_power":
+          reply = "Opening Power/Water panel...";
+          break;
+        case "estate_accounting":
+          reply = "Opening Accounting panel...";
+          break;
+        case "estate_community":
+          reply = "Opening Community panel...";
+          break;
+      }
 
       const assistantMsg: ChatMessage = { role: "assistant", content: reply, panel };
       setMessages((prev) => [...prev, assistantMsg]);
 
-      // scroll to bottom
       setTimeout(() => {
         chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
       }, 300);
@@ -100,6 +184,24 @@ export default function EstateDashboard() {
                   {msg.panel === "create_home" && <CreateHomePanel onCreate={handleCreateHome} />}
                   {msg.panel === "assign_resident" && (
                     <AssignResidentPanel homes={homes} users={users} onAssign={handleAssignResident} />
+                  )}
+                  {msg.panel === "estate_devices" && (
+                    <EstateDevicePanel devices={devices} onAction={handleDeviceAction} />
+                  )}
+                  {msg.panel === "estate_cctv" && (
+                    <EstateCCTVPanel cameras={cameras} onAction={(id) => handleSend(`Viewing camera ${id}`)} />
+                  )}
+                  {msg.panel === "estate_lighting" && (
+                    <EstateLightingPanel lights={lights} onAction={handleLightAction} />
+                  )}
+                  {msg.panel === "estate_power" && (
+                    <EstatePowerPanel powerDevices={powerDevices} onAction={handlePowerAction} />
+                  )}
+                  {msg.panel === "estate_accounting" && (
+                    <EstateAccountingPanel residents={residents} onAction={handleAccountingAction} />
+                  )}
+                  {msg.panel === "estate_community" && (
+                    <EstateCommunityPanel residents={users} onAction={handleCommunityAction} />
                   )}
                 </div>
               </div>
