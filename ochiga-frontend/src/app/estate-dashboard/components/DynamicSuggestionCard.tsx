@@ -223,7 +223,7 @@ export default function DynamicSuggestionCard({
             transition={{ duration: 0.28 }}
             // place directly above the footer (64px) + safe-area inset, and ensure it's ABOVE the footer z-index
             style={{
-              bottom: `calc(64px + env(safe-area-inset-bottom))`,
+              bottom: `calc(74px + env(safe-area-inset-bottom))`,
               zIndex: 60,
             } as React.CSSProperties}
             className="fixed left-0 right-0 px-4 pointer-events-none"
