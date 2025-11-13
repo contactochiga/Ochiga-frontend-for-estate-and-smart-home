@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaMicrophone, FaStop, FaPaperPlane, FaRobot } from "react-icons/fa";
+import { FaMicrophone, FaStop, FaPaperPlane } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 export default function ChatFooter({
   input,
   setInput,
   onSend,
-  onVoiceAssist, // 🔊 new callback for talk-back mode
+  onVoiceAssist, // 🔊 callback for talk-back mode
 }: {
   input: string;
   setInput: (v: string) => void;
@@ -44,7 +44,7 @@ export default function ChatFooter({
     } else {
       // 🎧 Trigger talk-back assistant mode
       setIsTalking(true);
-      onVoiceAssist?.(); // optional callback
+      onVoiceAssist?.();
       setTimeout(() => {
         setIsTalking(false);
       }, 3000);
@@ -147,13 +147,43 @@ export default function ChatFooter({
             ) : isTyping ? (
               <FaPaperPlane className="text-white text-sm" />
             ) : isTalking ? (
+              // 🧠 Jelly-like talking blob
               <motion.div
-                className="w-5 h-5 rounded-full bg-red-600"
-                animate={{ scale: [1, 1.4, 1] }}
-                transition={{ repeat: Infinity, duration: 0.8 }}
+                className="w-6 h-6 bg-gradient-to-r from-[#e11d48] to-[#b91c1c] rounded-full"
+                animate={{
+                  borderRadius: [
+                    "60% 40% 30% 70% / 60% 30% 70% 40%",
+                    "40% 60% 70% 30% / 50% 60% 30% 60%",
+                    "70% 30% 50% 50% / 60% 40% 60% 40%",
+                    "50% 50% 30% 70% / 40% 60% 40% 60%",
+                    "60% 40% 30% 70% / 60% 30% 70% 40%",
+                  ],
+                  scale: [1, 1.2, 1],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.5,
+                  ease: "easeInOut",
+                }}
               />
             ) : (
-              <FaRobot className="text-gray-300 text-lg" />
+              // 🫧 Idle blob (still, soft jelly look)
+              <motion.div
+                className="w-5 h-5 bg-gradient-to-r from-[#9ca3af] to-[#6b7280] rounded-full"
+                animate={{
+                  borderRadius: [
+                    "60% 40% 30% 70% / 60% 30% 70% 40%",
+                    "50% 50% 70% 30% / 60% 50% 40% 50%",
+                    "70% 30% 50% 50% / 50% 60% 40% 60%",
+                    "60% 40% 30% 70% / 60% 30% 70% 40%",
+                  ],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 6,
+                  ease: "easeInOut",
+                }}
+              />
             )}
           </button>
         </div>
