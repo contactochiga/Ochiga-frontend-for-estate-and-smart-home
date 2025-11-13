@@ -1,7 +1,7 @@
 // ochiga-frontend/src/app/components/TopBar.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -19,15 +19,9 @@ import {
   DocumentTextIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
+import { useDashboard } from "../../context/DashboardContext";
 
 export default function ResidentHeader() {
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [notifications, setNotifications] = useState<string[]>([]);
-  const [hasNewNotif, setHasNewNotif] = useState(false);
-
   const router = useRouter();
   const pathname = usePathname() || "";
 
@@ -35,16 +29,30 @@ export default function ResidentHeader() {
   const searchRef = useRef<HTMLDivElement | null>(null);
   const notifPanelRef = useRef<HTMLDivElement | null>(null);
 
+  // ✅ Use DashboardContext
+  const {
+    notifications,
+    hasNewNotif,
+    sidebarOpen,
+    profileOpen,
+    searchOpen,
+    addNotification,
+    markNotifRead,
+    toggleSidebar,
+    toggleProfile,
+    toggleSearch,
+  } = useDashboard();
+
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       const t = e.target as Node;
-      if (profileRef.current && !profileRef.current.contains(t)) setProfileOpen(false);
-      if (searchRef.current && !searchRef.current.contains(t)) setSearchOpen(false);
-      if (notifPanelRef.current && !notifPanelRef.current.contains(t)) setNotifOpen(false);
+      if (profileRef.current && !profileRef.current.contains(t) && profileOpen) toggleProfile();
+      if (searchRef.current && !searchRef.current.contains(t) && searchOpen) toggleSearch();
+      if (notifPanelRef.current && !notifPanelRef.current.contains(t) && hasNewNotif) markNotifRead();
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [profileOpen, searchOpen, hasNewNotif, toggleProfile, toggleSearch, markNotifRead]);
 
   const menuItems = [
     { name: "Maintenance", href: "/dashboard/maintenance", icon: WrenchScrewdriverIcon },
@@ -56,12 +64,7 @@ export default function ResidentHeader() {
   ];
 
   const openNotifPanel = () => {
-    setNotifOpen(true);
-    setHasNewNotif(false);
-  };
-
-  const closeNotifPanel = () => {
-    setNotifOpen(false);
+    markNotifRead();
   };
 
   return (
@@ -69,7 +72,7 @@ export default function ResidentHeader() {
       <div className="flex items-center justify-between px-4 py-3">
         {/* Left */}
         <div className="flex items-center space-x-3">
-          <button onClick={() => setSidebarOpen(true)} className="flex items-center justify-center">
+          <button onClick={toggleSidebar} className="flex items-center justify-center">
             <Bars3Icon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
           </button>
           <h1 className="text-lg font-bold text-black dark:text-white">Ochiga</h1>
@@ -79,10 +82,7 @@ export default function ResidentHeader() {
         <div className="flex items-center space-x-5">
           {/* SEARCH */}
           <div ref={searchRef} className="relative flex items-center">
-            <button
-              onClick={() => setSearchOpen((s) => !s)}
-              className="flex items-center justify-center"
-            >
+            <button onClick={toggleSearch} className="flex items-center justify-center">
               <MagnifyingGlassIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
             </button>
             {searchOpen && (
@@ -108,7 +108,7 @@ export default function ResidentHeader() {
 
           {/* NOTIFICATIONS */}
           <div className="relative flex items-center justify-center" ref={notifPanelRef}>
-            <button onClick={() => openNotifPanel()} aria-label="Notifications">
+            <button onClick={openNotifPanel} aria-label="Notifications">
               <BellIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
               {hasNewNotif && (
                 <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#800000] ring-2 ring-white dark:ring-gray-800 animate-ping" />
@@ -116,14 +116,14 @@ export default function ResidentHeader() {
             </button>
 
             <AnimatePresence>
-              {notifOpen && (
+              {hasNewNotif && (
                 <>
                   <motion.div
                     className="fixed inset-0 backdrop-blur-sm z-40"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    onClick={() => closeNotifPanel()}
+                    onClick={openNotifPanel}
                   />
                   <motion.div
                     className="fixed top-0 right-0 h-full w-80 bg-white dark:bg-gray-900 shadow-xl z-50"
@@ -136,21 +136,16 @@ export default function ResidentHeader() {
                       <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                         Notifications
                       </h3>
-                      <button onClick={() => closeNotifPanel()}>
+                      <button onClick={openNotifPanel}>
                         <XMarkIcon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
                       </button>
                     </div>
                     <div className="p-4 space-y-3 overflow-y-auto max-h-full">
                       {notifications.length === 0 ? (
-                        <p className="text-sm text-gray-600 dark:text-gray-300">
-                          No notifications.
-                        </p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">No notifications.</p>
                       ) : (
                         notifications.map((n, i) => (
-                          <div
-                            key={i}
-                            className="py-2 border-b border-gray-100 dark:border-gray-800"
-                          >
+                          <div key={i} className="py-2 border-b border-gray-100 dark:border-gray-800">
                             <p className="text-sm text-gray-700 dark:text-gray-200">{n}</p>
                           </div>
                         ))
@@ -164,7 +159,7 @@ export default function ResidentHeader() {
 
           {/* PROFILE */}
           <div className="relative flex items-center justify-center" ref={profileRef}>
-            <button onClick={() => setProfileOpen((p) => !p)}>
+            <button onClick={toggleProfile}>
               <UserCircleIcon className="w-7 h-7 text-gray-700 dark:text-gray-200" />
             </button>
 
@@ -197,7 +192,7 @@ export default function ResidentHeader() {
         </div>
       </div>
 
-      {/* ✅ Animated SIDEBAR using Framer Motion */}
+      {/* ✅ Sidebar */}
       <AnimatePresence>
         {sidebarOpen && (
           <>
@@ -206,7 +201,7 @@ export default function ResidentHeader() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSidebarOpen(false)}
+              onClick={toggleSidebar}
             />
             <motion.div
               className="fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-50 p-4"
@@ -219,7 +214,7 @@ export default function ResidentHeader() {
                 <h2 className="text-lg font-bold text-[#800000] dark:text-[#ffcccc]">
                   Resident Tools
                 </h2>
-                <button onClick={() => setSidebarOpen(false)}>
+                <button onClick={toggleSidebar}>
                   <XMarkIcon className="w-6 h-6 text-gray-700 dark:text-gray-200" />
                 </button>
               </div>
@@ -231,7 +226,7 @@ export default function ResidentHeader() {
                     <li
                       key={item.name}
                       onClick={() => {
-                        setSidebarOpen(false);
+                        toggleSidebar();
                         router.push(item.href);
                       }}
                       className={`flex items-center space-x-3 cursor-pointer p-2 rounded-md ${

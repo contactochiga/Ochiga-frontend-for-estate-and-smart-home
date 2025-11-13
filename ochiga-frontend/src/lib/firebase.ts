@@ -1,8 +1,6 @@
-// src/lib/firebase.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
-// ✅ Your Firebase web app configuration
 const firebaseConfig = {
   apiKey: "AIzaSyA6S8bITcmIteHZtQqT2ymprpvDWnyLDKU",
   authDomain: "ochiga-estate-and-smart-home.firebaseapp.com",
@@ -13,10 +11,9 @@ const firebaseConfig = {
   measurementId: "G-XL1GME509P",
 };
 
-// ✅ Avoid re-initializing Firebase if it's already been done
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// ✅ Initialize Analytics only if supported (browser)
+// Analytics (browser only)
 let analytics: any = null;
 if (typeof window !== "undefined") {
   isSupported().then((yes) => {
