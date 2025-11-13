@@ -18,52 +18,100 @@ type ChatMessage = {
   role: "user" | "assistant";
   content: string;
   panel?: string | null;
+  id: string;
 };
 
 export default function EstateDashboard() {
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "assistant", content: "Welcome, Estate Admin! How can I assist you today?" },
+    {
+      role: "assistant",
+      content: "Welcome, Estate Admin! How can I assist you today?",
+      id: "welcome",
+    },
   ]);
+
   const [input, setInput] = useState("");
   const chatRef = useRef<HTMLDivElement | null>(null);
 
-  // =======================
-  // Chat Handling
-  // =======================
+  const createId = () => Math.random().toString(36).substring(2, 10);
+
+  // ======================================================
+  // Handle Chat + No Duplicate Panel Logic
+  // ======================================================
   const handleSend = (text?: string) => {
     const message = (text ?? input).trim();
     if (!message) return;
 
-    const newMessages = [...messages, { role: "user", content: message }];
-    setMessages(newMessages);
+    const userMsg: ChatMessage = {
+      role: "user",
+      content: message,
+      panel: null,
+      id: createId(),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
     setInput("");
 
     setTimeout(() => {
       const panel = detectEstatePanelType(message);
-      let reply = `Okay — I processed: "${message}".`;
 
+      if (panel) {
+        // ================
+        // 1️⃣ Check if panel already exists
+        // ================
+        const existingIndex = messages.findIndex((m) => m.panel === panel);
+
+        if (existingIndex !== -1) {
+          // Bounce + scroll to existing panel
+          const existingId = messages[existingIndex].id;
+
+          const el = document.querySelector(`[data-id='${existingId}']`);
+          if (el) {
+            el.classList.add("bounce-panel");
+            setTimeout(() => el.classList.remove("bounce-panel"), 700);
+
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+
+          return;
+        }
+      }
+
+      // ================
+      // 2️⃣ Otherwise create NEW panel message
+      // ================
+      let reply = `Okay — I processed: "${message}".`;
       if (panel === "estate_devices") reply = "Estate device panel opened.";
       if (panel === "estate_power") reply = "Estate power control panel opened.";
       if (panel === "estate_accounting") reply = "Estate accounting panel opened.";
       if (panel === "estate_community") reply = "Estate community panel opened.";
 
-      const assistantMsg: ChatMessage = { role: "assistant", content: reply, panel };
+      const assistantMsg: ChatMessage = {
+        role: "assistant",
+        content: reply,
+        panel,
+        id: createId(),
+      };
+
       setMessages((prev) => [...prev, assistantMsg]);
 
-      // Scroll to bottom
       setTimeout(() => {
-        chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "smooth" });
+        chatRef.current?.scrollTo({
+          top: chatRef.current.scrollHeight,
+          behavior: "smooth",
+        });
       }, 300);
     }, 300);
   };
 
+  // ======================================================
+  // RENDER
+  // ======================================================
   return (
     <LayoutWrapper>
-      {/* Hamburger Menu */}
       <HamburgerMenu />
 
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
-        {/* Chat Messages */}
         <div
           ref={chatRef}
           className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
@@ -71,7 +119,8 @@ export default function EstateDashboard() {
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
             {messages.map((msg, i) => (
               <div
-                key={i}
+                key={msg.id}
+                data-id={msg.id}
                 data-panel={msg.panel || ""}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
@@ -86,7 +135,7 @@ export default function EstateDashboard() {
                     {msg.content}
                   </div>
 
-                  {/* Panels */}
+                  {/* PANEL RENDERING */}
                   {msg.panel === "estate_devices" && <EstateDevicePanel />}
                   {msg.panel === "estate_power" && <EstatePowerPanel />}
                   {msg.panel === "estate_accounting" && <EstateAccountingPanel />}
@@ -97,14 +146,12 @@ export default function EstateDashboard() {
           </div>
         </div>
 
-        {/* Dynamic Suggestions */}
         <DynamicSuggestionCard
           suggestions={[]}
           isTyping={input.trim().length > 0}
           onSend={handleSend}
         />
 
-        {/* Estate Chat Footer */}
         <EstateChatFooter input={input} setInput={setInput} onSend={handleSend} />
       </main>
     </LayoutWrapper>
