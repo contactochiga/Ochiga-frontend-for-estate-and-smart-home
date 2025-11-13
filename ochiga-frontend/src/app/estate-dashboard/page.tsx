@@ -19,6 +19,7 @@ type ChatMessage = {
   content: string;
   panel?: string | null;
   id: string;
+  time: string;
 };
 
 export default function EstateDashboard() {
@@ -27,16 +28,18 @@ export default function EstateDashboard() {
       role: "assistant",
       content: "Welcome, Estate Admin! How can I assist you today?",
       id: "welcome",
+      panel: null,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     },
   ]);
 
   const [input, setInput] = useState("");
   const chatRef = useRef<HTMLDivElement | null>(null);
 
-  const createId = () => Math.random().toString(36).substring(2, 10);
+  const createId = () => Math.random().toString(36).substring(2, 9);
 
   // ======================================================
-  // Handle Chat + No Duplicate Panel Logic
+  // Handle Chat + Panel Reuse Logic
   // ======================================================
   const handleSend = (text?: string) => {
     const message = (text ?? input).trim();
@@ -47,6 +50,7 @@ export default function EstateDashboard() {
       content: message,
       panel: null,
       id: createId(),
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -55,31 +59,36 @@ export default function EstateDashboard() {
     setTimeout(() => {
       const panel = detectEstatePanelType(message);
 
+      // If message triggers a panel
       if (panel) {
-        // ================
-        // 1️⃣ Check if panel already exists
-        // ================
         const existingIndex = messages.findIndex((m) => m.panel === panel);
 
         if (existingIndex !== -1) {
-          // Bounce + scroll to existing panel
+          // EXISTING PANEL FOUND → BOUNCE IT + UPDATE TIME
           const existingId = messages[existingIndex].id;
 
-          const el = document.querySelector(`[data-id='${existingId}']`);
-          if (el) {
-            el.classList.add("bounce-panel");
-            setTimeout(() => el.classList.remove("bounce-panel"), 700);
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === existingId
+                ? { ...m, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
+                : m
+            )
+          );
 
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
+          const element = document.querySelector(`[data-id='${existingId}']`);
+
+          if (element) {
+            element.classList.add("bounce-panel");
+            setTimeout(() => element.classList.remove("bounce-panel"), 700);
+
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
           }
 
           return;
         }
       }
 
-      // ================
-      // 2️⃣ Otherwise create NEW panel message
-      // ================
+      // Otherwise create NEW PANEL MESSAGE
       let reply = `Okay — I processed: "${message}".`;
       if (panel === "estate_devices") reply = "Estate device panel opened.";
       if (panel === "estate_power") reply = "Estate power control panel opened.";
@@ -91,6 +100,7 @@ export default function EstateDashboard() {
         content: reply,
         panel,
         id: createId(),
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -100,8 +110,8 @@ export default function EstateDashboard() {
           top: chatRef.current.scrollHeight,
           behavior: "smooth",
         });
-      }, 300);
-    }, 300);
+      }, 200);
+    }, 250);
   };
 
   // ======================================================
@@ -112,12 +122,13 @@ export default function EstateDashboard() {
       <HamburgerMenu />
 
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
+
         <div
           ref={chatRef}
           className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
         >
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            {messages.map((msg, i) => (
+            {messages.map((msg) => (
               <div
                 key={msg.id}
                 data-id={msg.id}
@@ -125,6 +136,8 @@ export default function EstateDashboard() {
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div className="flex flex-col max-w-[80%]">
+
+                  {/* CHAT BUBBLE */}
                   <div
                     className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
                       msg.role === "user"
@@ -135,7 +148,12 @@ export default function EstateDashboard() {
                     {msg.content}
                   </div>
 
-                  {/* PANEL RENDERING */}
+                  {/* TIMESTAMP */}
+                  <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">
+                    {msg.time}
+                  </div>
+
+                  {/* PANELS */}
                   {msg.panel === "estate_devices" && <EstateDevicePanel />}
                   {msg.panel === "estate_power" && <EstatePowerPanel />}
                   {msg.panel === "estate_accounting" && <EstateAccountingPanel />}
@@ -146,12 +164,14 @@ export default function EstateDashboard() {
           </div>
         </div>
 
+        {/* Suggestion Card */}
         <DynamicSuggestionCard
           suggestions={[]}
           isTyping={input.trim().length > 0}
           onSend={handleSend}
         />
 
+        {/* Footer */}
         <EstateChatFooter input={input} setInput={setInput} onSend={handleSend} />
       </main>
     </LayoutWrapper>
