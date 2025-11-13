@@ -1,6 +1,8 @@
 @import "tailwindcss"; /* v4 style import */
 
-/* ─── Custom Animations ─────────────────────────────── */
+/* ──────────────────────────────────────────────── */
+/* ─── Custom Animations ─────────────────────────── */
+/* ──────────────────────────────────────────────── */
 
 /* Pulse for icons and buttons */
 @keyframes pulse {
@@ -46,7 +48,32 @@
   }
 }
 
-/* ─── Tailwind Utility Extensions ───────────────────── */
+/* ──────────────────────────────────────────────── */
+/* ─── NEW: Bounce Highlight for Existing Panel ───── */
+/* ──────────────────────────────────────────────── */
+
+@keyframes bounceFlash {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0px #3b82f6;
+  }
+  50% {
+    transform: scale(1.03);
+    box-shadow: 0 0 14px #3b82f6;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0px #3b82f6;
+  }
+}
+
+.bounce-panel {
+  animation: bounceFlash 0.6s ease-in-out;
+}
+
+/* ──────────────────────────────────────────────── */
+/* ─── Tailwind Utility Extensions ───────────────── */
+/* ──────────────────────────────────────────────── */
 @layer utilities {
   /* Custom pulse animation */
   .animate-pulse-custom {
@@ -63,7 +90,7 @@
     animation: fadeIn 0.4s ease-out forwards;
   }
 
-  /* Auto scroll horizontal for dynamic suggestion row */
+  /* Auto scroll horizontal for suggestion row */
   .animate-auto-scroll {
     animation: scroll-horizontal 20s linear infinite;
   }
@@ -72,13 +99,16 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 }
 
-/* ─── Test Utility ──────────────────────────────────── */
+/* ──────────────────────────────────────────────── */
+/* ─── Test Utility ──────────────────────────────── */
+/* ──────────────────────────────────────────────── */
 .test-bg {
   @apply bg-purple-500 text-white p-10 text-3xl;
 }
