@@ -76,35 +76,32 @@ export default function ChatFooter({
                 }`}
               />
             ) : (
-              // 🌊 Smooth Continuous Horizontal Flow
+              // 🎧 Calm, Straight Linear Flow (like a voice note)
               <div className="absolute inset-0 flex items-center overflow-hidden px-2">
                 <motion.div
-                  className="flex gap-[3px]"
-                  animate={{ x: ["0%", "-100%"] }}
-                  transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+                  className="flex gap-[2px]"
+                  animate={{ x: ["0%", "-50%"] }}
+                  transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
                 >
-                  {[...Array(80)].map((_, i) => (
+                  {[...Array(120)].map((_, i) => (
                     <div
                       key={i}
-                      className="w-[3px] rounded-full"
+                      className="w-[2px] rounded-full"
                       style={{
-                        height: `${8 + (i % 6) * 4}px`, // static wave variation
-                        background: `linear-gradient(to top, ${brandColor}, #ffffff)`,
-                        opacity: 0.9,
-                        boxShadow: `0 0 6px ${brandColor}`,
+                        height: `${8 + ((i % 8) - 4) * 0.5}px`, // very subtle variation
+                        backgroundColor: brandColor,
+                        opacity: 0.7,
                       }}
                     />
                   ))}
-                  {/* duplicate for seamless loop */}
-                  {[...Array(80)].map((_, i) => (
+                  {[...Array(120)].map((_, i) => (
                     <div
                       key={`loop-${i}`}
-                      className="w-[3px] rounded-full"
+                      className="w-[2px] rounded-full"
                       style={{
-                        height: `${8 + (i % 6) * 4}px`,
-                        background: `linear-gradient(to top, ${brandColor}, #ffffff)`,
-                        opacity: 0.9,
-                        boxShadow: `0 0 6px ${brandColor}`,
+                        height: `${8 + ((i % 8) - 4) * 0.5}px`,
+                        backgroundColor: brandColor,
+                        opacity: 0.7,
                       }}
                     />
                   ))}
