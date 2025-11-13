@@ -47,8 +47,8 @@ interface Props {
 }
 
 /**
- * DynamicSuggestionCard
- * ChatGPT-style suggestion cards + notification overlay
+ * DynamicSuggestionCard — AI prediction box
+ * Matches estate dark theme; disappears on scroll or typing
  */
 export default function DynamicSuggestionCard({
   suggestions,
@@ -94,19 +94,16 @@ export default function DynamicSuggestionCard({
     const onScroll = () => {
       const currentY = window.scrollY || 0;
       const delta = currentY - (lastY.current || 0);
+
       if (delta > 10) setVisible(false);
       else if (delta < -10) setVisible(true);
-      else {
-        const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 220;
-        if (nearBottom) setVisible(true);
-      }
+
       lastY.current = currentY;
 
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
       hideTimer.current = window.setTimeout(() => {
-        const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 220;
-        if (nearBottom && !isTyping && !assistantActive) setVisible(true);
-      }, 220);
+        if (!isTyping && !assistantActive) setVisible(true);
+      }, 280);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -133,46 +130,19 @@ export default function DynamicSuggestionCard({
   // ---------- Icons ----------
   const getIcon = (s: Suggestion) => {
     const key = s.payload?.toLowerCase() ?? "";
-    if (key.includes("light") || key.includes("device")) return <FiCpu size={16} className="text-gray-500" />;
-    if (key.includes("power") || key.includes("generator") || key.includes("meter")) return <FiZap size={16} className="text-gray-500" />;
-    if (key.includes("wallet") || key.includes("invoice") || key.includes("payment")) return <FiDollarSign size={16} className="text-gray-500" />;
-    if (key.includes("resident") || key.includes("visitor") || key.includes("announcement")) return <FiUsers size={16} className="text-gray-500" />;
-    if (key.includes("camera") || key.includes("cctv")) return <FiCamera size={16} className="text-gray-500" />;
-    if (key.includes("gate") || key.includes("lock")) return <FiLock size={16} className="text-gray-500" />;
-    if (key.includes("security")) return <FiShield size={16} className="text-gray-500" />;
-    if (key.includes("home")) return <FiHome size={16} className="text-gray-500" />;
-    return <FiKey size={16} className="text-gray-500" />;
+    if (key.includes("light") || key.includes("device")) return <FiCpu size={16} className="text-gray-400" />;
+    if (key.includes("power") || key.includes("generator") || key.includes("meter")) return <FiZap size={16} className="text-gray-400" />;
+    if (key.includes("wallet") || key.includes("invoice") || key.includes("payment")) return <FiDollarSign size={16} className="text-gray-400" />;
+    if (key.includes("resident") || key.includes("visitor") || key.includes("announcement")) return <FiUsers size={16} className="text-gray-400" />;
+    if (key.includes("camera") || key.includes("cctv")) return <FiCamera size={16} className="text-gray-400" />;
+    if (key.includes("gate") || key.includes("lock")) return <FiLock size={16} className="text-gray-400" />;
+    if (key.includes("security")) return <FiShield size={16} className="text-gray-400" />;
+    if (key.includes("home")) return <FiHome size={16} className="text-gray-400" />;
+    return <FiKey size={16} className="text-gray-400" />;
   };
 
-  // ---------- Auto-scroll slow drift ----------
-  useEffect(() => {
-    const scrollContainer = scrollRef.current;
-    if (!scrollContainer) return;
-
-    let scrollDirection = 1; // 1 = right, -1 = left
-    const scrollSpeed = 0.4; // px per frame
-    let rafId: number;
-
-    const animateScroll = () => {
-      if (!scrollContainer) return;
-
-      scrollContainer.scrollLeft += scrollSpeed * scrollDirection;
-
-      if (
-        scrollContainer.scrollLeft + scrollContainer.clientWidth >=
-        scrollContainer.scrollWidth - 2
-      ) {
-        scrollDirection = -1;
-      } else if (scrollContainer.scrollLeft <= 0) {
-        scrollDirection = 1;
-      }
-
-      rafId = requestAnimationFrame(animateScroll);
-    };
-
-    rafId = requestAnimationFrame(animateScroll);
-    return () => cancelAnimationFrame(rafId);
-  }, [visible, isTyping]);
+  // ---------- Auto-scroll removed (manual only) ----------
+  // No drifting, only manual scroll
 
   return (
     <>
@@ -184,25 +154,24 @@ export default function DynamicSuggestionCard({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 18 }}
             transition={{ duration: 0.32 }}
-            // position above suggestion bar and above footer: use safe-area calc
             style={{
               bottom: `calc(96px + env(safe-area-inset-bottom))`,
               zIndex: 70,
             } as React.CSSProperties}
             className="fixed left-0 w-full flex justify-center px-4 pointer-events-auto"
           >
-            <div className="max-w-3xl w-full bg-white rounded-2xl p-4 shadow-lg border border-gray-200 text-gray-800">
+            <div className="max-w-3xl w-full bg-gray-900 text-gray-100 rounded-2xl p-4 shadow-[0_0_20px_rgba(255,255,255,0.05)] border border-gray-700 backdrop-blur-sm">
               <div className="flex items-start gap-3">
                 <div className="flex-1">
-                  <div className="font-semibold">{notification.title}</div>
+                  <div className="font-semibold text-sm">{notification.title}</div>
                   {notification.description && (
-                    <div className="text-sm text-gray-500 mt-1">{notification.description}</div>
+                    <div className="text-xs text-gray-400 mt-1">{notification.description}</div>
                   )}
                 </div>
                 {notification.actionLabel && (
                   <button
                     onClick={notification.onAction}
-                    className="px-3 py-1 rounded-full bg-blue-600 text-white text-sm shadow-sm hover:bg-blue-700"
+                    className="px-3 py-1 rounded-full bg-blue-600 text-white text-xs shadow hover:bg-blue-700 transition"
                   >
                     {notification.actionLabel}
                   </button>
@@ -221,7 +190,6 @@ export default function DynamicSuggestionCard({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 18 }}
             transition={{ duration: 0.28 }}
-            // place directly above the footer (64px) + safe-area inset, and ensure it's ABOVE the footer z-index
             style={{
               bottom: `calc(84px + env(safe-area-inset-bottom))`,
               zIndex: 60,
@@ -242,15 +210,15 @@ export default function DynamicSuggestionCard({
                   onClick={() => handleClick(s)}
                   whileHover={{ y: -3, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  className="flex-none min-w-[220px] bg-white rounded-2xl shadow-sm border border-gray-200 p-3 text-left flex items-start gap-2 transition scroll-snap-align-start"
+                  className="flex-none min-w-[220px] bg-gray-800 text-gray-100 rounded-2xl shadow-[0_0_15px_rgba(255,255,255,0.06)] border border-gray-700 p-3 text-left flex items-start gap-2 transition scroll-snap-align-start hover:bg-gray-750"
                   style={{
                     opacity: assistantActive ? 0.6 : 1,
                   }}
                 >
                   {getIcon(s)}
                   <div className="flex flex-col">
-                    <div className="font-medium text-sm text-gray-900 leading-tight">{s.title}</div>
-                    {s.subtitle && <div className="text-xs text-gray-500 mt-0.5">{s.subtitle}</div>}
+                    <div className="font-medium text-sm leading-tight">{s.title}</div>
+                    {s.subtitle && <div className="text-xs text-gray-400 mt-0.5">{s.subtitle}</div>}
                   </div>
                 </motion.button>
               ))}
