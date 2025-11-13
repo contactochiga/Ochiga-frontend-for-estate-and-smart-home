@@ -4,11 +4,11 @@ import { useEffect, useState, useRef } from "react";
 import { FaMicrophone, FaStop, FaPaperPlane } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-export default function ChatFooter({
+export default function EstateChatFooter({
   input,
   setInput,
   onSend,
-  onAction, // 🧠 Send parsed commands to dashboard
+  onAction, // For estate commands (devices, power, accounting, community)
 }: {
   input: string;
   setInput: (v: string) => void;
@@ -23,53 +23,48 @@ export default function ChatFooter({
   const recognitionRef = useRef<any>(null);
   const brandColor = "#e11d48";
 
-  // 🧠 Load stored voice
   useEffect(() => {
     const savedVoice = localStorage.getItem("ochigaVoice");
     if (savedVoice) setSelectedVoice(savedVoice);
   }, []);
 
-  // ✍🏽 Detect typing
   useEffect(() => {
     setIsTyping(input.trim().length > 0);
   }, [input]);
 
-  // 📱 Vibration helper
   const vibrate = (duration = 80) => {
     if (navigator.vibrate) navigator.vibrate(duration);
   };
 
-  // ⚡ Command Interpreter — parse transcript → structured actions
+  // Estate-specific command parser
   const handleCommand = (transcript: string) => {
     const actions: Array<{ type: string; action: string; target: string }> = [];
-
     const msg = transcript.toLowerCase();
 
-    if (msg.includes("light")) actions.push({ type: "device", action: "turn_on", target: "light" });
-    if (msg.includes("ac") || msg.includes("air conditioner"))
-      actions.push({ type: "device", action: "turn_on", target: "ac" });
-    if (msg.includes("door")) actions.push({ type: "device", action: "open", target: "door" });
-    if (msg.includes("camera")) actions.push({ type: "device", action: "turn_on", target: "camera" });
-    if (msg.includes("visitor")) actions.push({ type: "schedule", action: "create", target: "visitor" });
-    if (msg.includes("status")) actions.push({ type: "info", action: "query", target: "status" });
-    if (msg.includes("shut down") || msg.includes("sleep"))
-      actions.push({ type: "system", action: "shutdown", target: "assistant" });
-    if (
-      msg.includes("connect device") ||
-      msg.includes("add device") ||
-      msg.includes("scan devices") ||
-      msg.includes("discover device") ||
-      msg.includes("pair device") ||
-      msg.includes("new device")
-    )
-      actions.push({ type: "device", action: "discover", target: "devices" });
+    // Devices
+    if (msg.includes("light") || msg.includes("gate") || msg.includes("door") || msg.includes("camera") || msg.includes("cctv") || msg.includes("ac") || msg.includes("security")) {
+      actions.push({ type: "device", action: "control", target: "estate_devices" });
+    }
+
+    // Power/Utilities
+    if (msg.includes("power") || msg.includes("electricity") || msg.includes("water") || msg.includes("utility")) {
+      actions.push({ type: "power", action: "control", target: "estate_power" });
+    }
+
+    // Accounting
+    if (msg.includes("account") || msg.includes("billing") || msg.includes("payment") || msg.includes("service charge") || msg.includes("invoice") || msg.includes("debt")) {
+      actions.push({ type: "accounting", action: "query", target: "estate_accounting" });
+    }
+
+    // Community
+    if (msg.includes("community") || msg.includes("resident") || msg.includes("visitor") || msg.includes("announcement") || msg.includes("event")) {
+      actions.push({ type: "community", action: "view", target: "estate_community" });
+    }
 
     if (actions.length && onAction) onAction(actions, transcript);
-
     return actions;
   };
 
-  // 🎧 Start voice conversation
   const startConversation = () => {
     vibrate(120);
     setIsTalking(true);
@@ -79,6 +74,7 @@ export default function ChatFooter({
 
     if (!SpeechRecognition) {
       alert("Speech recognition not supported in this browser.");
+      setIsTalking(false);
       return;
     }
 
@@ -93,11 +89,7 @@ export default function ChatFooter({
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript.toLowerCase().trim();
       setInput(transcript);
-      console.log("🎤 You said:", transcript);
-
-      // 🧠 Parse transcript → actions
       handleCommand(transcript);
-
       setIsTalking(false);
     };
 
@@ -105,7 +97,6 @@ export default function ChatFooter({
     recognition.onend = () => setIsTalking(false);
   };
 
-  // 🎙️ Manual mic click → voice input
   const handleMicClick = () => {
     vibrate(60);
     if (!isRecording) {
@@ -117,7 +108,6 @@ export default function ChatFooter({
     }
   };
 
-  // 🚀 Main button → send text or start voice
   const handleMainButtonClick = () => {
     if (isTyping && input.trim()) {
       vibrate(40);
@@ -139,7 +129,6 @@ export default function ChatFooter({
 
   return (
     <>
-      {/* 🔊 Voice Selection Modal */}
       {showVoiceModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[999]">
           <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-80 text-center">
@@ -150,9 +139,7 @@ export default function ChatFooter({
                   key={voice}
                   onClick={() => handleVoiceSelect(voice)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedVoice === voice
-                      ? "bg-red-600 text-white"
-                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    selectedVoice === voice ? "bg-red-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                   }`}
                 >
                   {voice}
@@ -169,7 +156,7 @@ export default function ChatFooter({
         </div>
       )}
 
-      {/* 🌊 Chat Footer */}
+      {/* Estate Chat Footer */}
       <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-800 px-4 py-3 fixed bottom-0 z-50">
         <div className="max-w-3xl mx-auto relative">
           <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
@@ -186,7 +173,7 @@ export default function ChatFooter({
               {!isRecording ? (
                 <input
                   type="text"
-                  placeholder="Ask Ochiga AI anything…"
+                  placeholder="Ask estate AI assistant…"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && onSend()}
