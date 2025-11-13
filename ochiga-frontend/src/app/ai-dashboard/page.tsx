@@ -25,6 +25,7 @@ import {
   IoTPanel,
   AiPanel,
   AssistantPanel,
+  DeviceDiscoveryPanel, // ✅ NEW
 } from "./components/Panels";
 
 import { detectPanelType } from "./utils/panelDetection";
@@ -112,6 +113,7 @@ export default function AIDashboard() {
         iot: "IoT devices panel ready.",
         assistant: "Assistant configuration panel opened.",
         ai: "Assistant configuration panel opened.",
+        devices: "Scanning for nearby devices...", // ✅ NEW
       };
 
       if (panel && panelReplies[panel]) reply = panelReplies[panel];
@@ -147,6 +149,7 @@ export default function AIDashboard() {
     "View CCTV feed",
     "Check device status",
     "Lock all doors",
+    "Connect new device", // ✅ NEW
   ];
 
   return (
@@ -197,6 +200,7 @@ export default function AIDashboard() {
                   {msg.panel === "iot" && <IoTPanel />}
                   {msg.panel === "assistant" && <AssistantPanel />}
                   {msg.panel === "ai" && <AiPanel />}
+                  {msg.panel === "devices" && <DeviceDiscoveryPanel />} {/* ✅ NEW */}
                 </div>
               </div>
             ))}
