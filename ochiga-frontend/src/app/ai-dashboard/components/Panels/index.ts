@@ -14,3 +14,4 @@ export { default as MessagePanel } from "./MessagePanel";
 export { default as IoTPanel } from "./IoTPanel";
 export { default as AiPanel } from "./AiPanel";
 export { default as AssistantPanel } from "./AssistantPanel";
+export { default as DeviceDiscoveryPanel } from "./DeviceDiscoveryPanel"; // ✅ added
