@@ -1,45 +1,56 @@
-// src/app/estate-dashboard/utils/estatePanelDetection.ts
+// Detect which estate panel should open based on user message
 export function detectEstatePanelType(message: string): string | null {
   const lower = message.toLowerCase();
 
-  // ===== Estate Home & Resident Management =====
-  const homeKeywords = ["create home", "new home", "add home", "register home"];
-  const assignKeywords = ["assign resident", "add resident", "attach user", "link user", "assign user"];
+  // Estate devices (security, access, lights, CCTV, AC, gates, doors)
+  if (
+    lower.includes("light") ||
+    lower.includes("lights") ||
+    lower.includes("gate") ||
+    lower.includes("boom gate") ||
+    lower.includes("door") ||
+    lower.includes("camera") ||
+    lower.includes("cctv") ||
+    lower.includes("ac") ||
+    lower.includes("air conditioner") ||
+    lower.includes("security")
+  ) {
+    return "estate_devices";
+  }
 
-  if (homeKeywords.some((kw) => lower.includes(kw))) return "create_home";
-  if (assignKeywords.some((kw) => lower.includes(kw))) return "assign_resident";
+  // Estate power controls (water, electricity, general utilities)
+  if (
+    lower.includes("power") ||
+    lower.includes("electricity") ||
+    lower.includes("water") ||
+    lower.includes("utility")
+  ) {
+    return "estate_power";
+  }
 
-  // ===== Estate Devices / Infrastructure =====
-  const deviceKeywords = ["device", "gate", "boom gate", "door", "ac", "air conditioner"];
-  if (deviceKeywords.some((kw) => lower.includes(kw))) return "estate_devices";
+  // Estate accounting (payments, debts, service charges)
+  if (
+    lower.includes("account") ||
+    lower.includes("billing") ||
+    lower.includes("payment") ||
+    lower.includes("service charge") ||
+    lower.includes("invoice") ||
+    lower.includes("debt")
+  ) {
+    return "estate_accounting";
+  }
 
-  // ===== CCTV / Security =====
-  const cctvKeywords = ["cctv", "camera", "surveillance", "monitor security"];
-  if (cctvKeywords.some((kw) => lower.includes(kw))) return "estate_cctv";
+  // Estate community (residents, visitor management, announcements)
+  if (
+    lower.includes("community") ||
+    lower.includes("resident") ||
+    lower.includes("visitors") ||
+    lower.includes("announcement") ||
+    lower.includes("event")
+  ) {
+    return "estate_community";
+  }
 
-  // ===== Estate Lighting =====
-  const lightingKeywords = ["light", "lights", "streetlight", "turn on light", "turn off light"];
-  if (lightingKeywords.some((kw) => lower.includes(kw))) return "estate_lighting";
-
-  // ===== Power / Water =====
-  const powerKeywords = ["power", "electric", "generator", "water", "pump", "electricity"];
-  if (powerKeywords.some((kw) => lower.includes(kw))) return "estate_power";
-
-  // ===== Accounting / Billing =====
-  const accountingKeywords = [
-    "billing",
-    "account",
-    "payment",
-    "arrears",
-    "reminder",
-    "send invoice",
-    "check dues",
-  ];
-  if (accountingKeywords.some((kw) => lower.includes(kw))) return "estate_accounting";
-
-  // ===== Community / Messaging =====
-  const communityKeywords = ["community", "message", "notify", "announcement", "broadcast"];
-  if (communityKeywords.some((kw) => lower.includes(kw))) return "estate_community";
-
+  // Default: no panel detected
   return null;
 }
