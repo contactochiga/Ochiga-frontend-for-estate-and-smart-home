@@ -3,19 +3,26 @@
 import { FC } from "react";
 
 interface Props {
-  devices: { id: string; name: string; status: string }[];
-  onAction: (deviceId: string, action: string) => void;
+  devices?: { id: string; name: string; status: string }[]; // optional now
+  onAction?: (deviceId: string, action: string) => void; // optional now
 }
 
-const EstateDevicePanel: FC<Props> = ({ devices, onAction }) => {
-  const defaultDevices = devices.length
-    ? devices
-    : [
-        { id: "d1", name: "Main Gate", status: "closed" },
-        { id: "d2", name: "Estate Lights", status: "off" },
-        { id: "d3", name: "CCTV", status: "off" },
-        { id: "d4", name: "AC in Lobby", status: "off" },
-      ];
+const EstateDevicePanel: FC<Props> = ({ devices = [], onAction = () => {} }) => {
+  // Use fallback default devices if none provided
+  const defaultDevices =
+    devices && devices.length
+      ? devices
+      : [
+          { id: "d1", name: "Main Gate", status: "closed" },
+          { id: "d2", name: "Estate Lights", status: "off" },
+          { id: "d3", name: "CCTV", status: "off" },
+          { id: "d4", name: "AC in Lobby", status: "off" },
+        ];
+
+  const handleAction = (deviceId: string, currentStatus: string) => {
+    const newAction = currentStatus === "on" ? "off" : "on";
+    onAction(deviceId, newAction);
+  };
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-2xl p-4 mt-2 shadow-md">
@@ -28,8 +35,12 @@ const EstateDevicePanel: FC<Props> = ({ devices, onAction }) => {
           >
             <span className="text-gray-200">{device.name}</span>
             <button
-              onClick={() => onAction(device.id, device.status === "on" ? "off" : "on")}
-              className="bg-red-600 text-white px-3 py-1 rounded-full text-xs"
+              onClick={() => handleAction(device.id, device.status)}
+              className={`${
+                device.status === "on"
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-red-600 hover:bg-red-700"
+              } text-white px-3 py-1 rounded-full text-xs transition-colors`}
             >
               {device.status === "on" ? "Turn Off" : "Turn On"}
             </button>
