@@ -29,7 +29,7 @@ export default function EstateDashboard() {
       content: "Welcome, Estate Admin! How can I assist you today?",
       id: "welcome",
       panel: null,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
 
@@ -50,7 +50,7 @@ export default function EstateDashboard() {
       content: message,
       panel: null,
       id: createId(),
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -59,33 +59,37 @@ export default function EstateDashboard() {
     setTimeout(() => {
       const panel = detectEstatePanelType(message);
 
-      // If message triggers a panel
-      if (panel) {
-        const existingIndex = messages.findIndex((m) => m.panel === panel);
+      // If message is for a panel
+      const existingIndex = messages.findIndex((m) => m.panel === panel);
 
-        if (existingIndex !== -1) {
-          // EXISTING PANEL FOUND → BOUNCE IT + UPDATE TIME
-          const existingId = messages[existingIndex].id;
+      if (existingIndex !== -1 && panel) {
+        const existingMessage = messages[existingIndex];
 
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === existingId
-                ? { ...m, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
-                : m
-            )
-          );
+        // ✨ Update timestamp only
+        const updatedMessage = {
+          ...existingMessage,
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        };
 
-          const element = document.querySelector(`[data-id='${existingId}']`);
+        // ✨ Move message to bottom (latest)
+        setMessages((prev) => {
+          const newList = prev.filter((m) => m.id !== existingMessage.id);
+          newList.push(updatedMessage);
+          return newList;
+        });
 
-          if (element) {
-            element.classList.add("bounce-panel");
-            setTimeout(() => element.classList.remove("bounce-panel"), 700);
+        // ✨ Bounce & scroll to updated panel
+        setTimeout(() => {
+          const el = document.querySelector(`[data-id='${existingMessage.id}']`);
+          if (el) {
+            el.classList.add("bounce-panel");
+            setTimeout(() => el.classList.remove("bounce-panel"), 700);
 
-            element.scrollIntoView({ behavior: "smooth", block: "center" });
+            el.scrollIntoView({ behavior: "smooth", block: "center" });
           }
+        }, 80);
 
-          return;
-        }
+        return;
       }
 
       // Otherwise create NEW PANEL MESSAGE
@@ -100,7 +104,7 @@ export default function EstateDashboard() {
         content: reply,
         panel,
         id: createId(),
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -122,7 +126,6 @@ export default function EstateDashboard() {
       <HamburgerMenu />
 
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
-
         <div
           ref={chatRef}
           className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
@@ -136,7 +139,6 @@ export default function EstateDashboard() {
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div className="flex flex-col max-w-[80%]">
-
                   {/* CHAT BUBBLE */}
                   <div
                     className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
@@ -153,7 +155,7 @@ export default function EstateDashboard() {
                     {msg.time}
                   </div>
 
-                  {/* PANELS */}
+                  {/* PANEL RENDERING */}
                   {msg.panel === "estate_devices" && <EstateDevicePanel />}
                   {msg.panel === "estate_power" && <EstatePowerPanel />}
                   {msg.panel === "estate_accounting" && <EstateAccountingPanel />}
