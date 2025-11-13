@@ -24,8 +24,7 @@ export default function DynamicSuggestionCard({
 }: Props) {
   const [visible, setVisible] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
-  const lastScrollY = useRef(0);
-  const idleTimeout = useRef<NodeJS.Timeout | null>(null);
+  const idleTimer = useRef<NodeJS.Timeout | null>(null);
 
   const defaultSuggestions = useMemo(
     () => [
@@ -40,38 +39,43 @@ export default function DynamicSuggestionCard({
 
   const displayList = suggestions.length > 0 ? suggestions : defaultSuggestions;
 
-  // Scroll-aware visibility
+  // ----------------------------
+  // Smart idle detection
+  // ----------------------------
+  const checkIdle = () => {
+    if (isTyping) return setVisible(false);
+
+    const scrollBottom =
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
+
+    // Only show when user is near the bottom of the page (idle)
+    if (scrollBottom) setVisible(true);
+    else setVisible(false);
+  };
+
   useEffect(() => {
     const handleScroll = () => {
-      if (isTyping) {
-        setVisible(false);
-        return;
-      }
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      setVisible(false); // hide while scrolling
 
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY.current) {
-        // Scrolling down → hide
-        setVisible(false);
-      } else if (currentScrollY < lastScrollY.current) {
-        // Scrolling up → hide suggestions temporarily
-        setVisible(false);
-        if (idleTimeout.current) clearTimeout(idleTimeout.current);
-        idleTimeout.current = setTimeout(() => setVisible(true), 1500);
-      }
-      lastScrollY.current = currentScrollY;
+      idleTimer.current = setTimeout(checkIdle, 1500); // show after idle
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
   }, [isTyping]);
 
-  // Hide suggestions while typing
   useEffect(() => {
     if (isTyping) setVisible(false);
-    else setVisible(true);
+    else checkIdle();
   }, [isTyping]);
 
+  // ----------------------------
   // Notification auto-hide
+  // ----------------------------
   useEffect(() => {
     if (notification) {
       setShowNotification(true);
@@ -92,7 +96,7 @@ export default function DynamicSuggestionCard({
             transition={{ duration: 0.4 }}
             className="fixed bottom-28 left-0 w-full z-40 flex justify-center px-4 pointer-events-auto"
           >
-            <div className="max-w-xs w-full bg-gray-900/90 border border-gray-800 backdrop-blur-md rounded-2xl p-4 shadow-lg flex flex-col items-start text-gray-200">
+            <div className="max-w-3xl w-full bg-gray-900/90 border border-gray-800 backdrop-blur-md rounded-2xl p-4 shadow-lg flex flex-col items-start text-gray-200">
               <span className="text-sm font-semibold mb-1">{notification.title}</span>
               {notification.description && (
                 <p className="text-xs text-gray-400 mb-2">{notification.description}</p>
@@ -118,16 +122,16 @@ export default function DynamicSuggestionCard({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 15 }}
             transition={{ duration: 0.3 }}
-            className="fixed bottom-20 left-0 w-full z-30 flex justify-center px-4 pointer-events-none"
+            className="fixed bottom-16 left-0 w-full z-30 flex justify-center px-4 pointer-events-none"
           >
-            <div className="max-w-xs w-full bg-gray-900/80 backdrop-blur-md border border-gray-800 rounded-2xl p-3 shadow-lg flex flex-wrap justify-center gap-2 text-gray-200 pointer-events-auto">
+            <div className="w-full max-w-3xl bg-gray-900/80 backdrop-blur-md border border-gray-800 rounded-2xl p-3 shadow-lg flex flex-wrap justify-center gap-2 text-gray-200 pointer-events-auto">
               {displayList.map((s, i) => (
                 <motion.button
                   key={`${s}-${i}`}
                   onClick={() => onSend(s)}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs px-3 py-1.5 rounded-full border border-gray-700 transition"
+                  className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs md:text-sm px-3 py-1.5 rounded-full border border-gray-700 transition"
                   title={s}
                 >
                   {s}
