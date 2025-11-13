@@ -44,15 +44,12 @@ export default function AIDashboard() {
     { role: "assistant", content: "Hello! I’m Ochiga AI — how can I assist you today?" },
   ]);
 
+  const [activePanel, setActivePanel] = useState<string | null>(null); // 🆕 Track panel from voice commands
   const { listening, startListening, stopListening } = useSpeechRecognition(handleSend);
-
   const chatRef = useRef<HTMLDivElement | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
-
-  // 🔍 store refs for quick scroll targeting
   const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Auto-scroll whenever messages change
   useEffect(() => {
     if (!chatRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
@@ -69,11 +66,7 @@ export default function AIDashboard() {
     if (!chatRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
 
-    if (scrollTop + clientHeight < scrollHeight - 50) {
-      setShowScrollDown(true);
-    } else {
-      setShowScrollDown(false);
-    }
+    setShowScrollDown(scrollTop + clientHeight < scrollHeight - 50);
   };
 
   const scrollToBottom = () => {
@@ -83,6 +76,22 @@ export default function AIDashboard() {
   };
 
   const handleMicClick = () => (listening ? stopListening() : startListening());
+
+  // 🆕 Handler to receive structured actions from ChatFooter
+  const handleAction = (actions: Array<{ type: string; action: string; target: string }>) => {
+    actions.forEach((a) => {
+      if (a.type === "device" && a.action === "discover" && a.target === "devices") {
+        setActivePanel("devices");
+        const msg: ChatMessage = {
+          role: "assistant",
+          content: "Scanning for nearby devices…",
+          panel: "devices",
+        };
+        setMessages((prev) => [...prev, msg]);
+      }
+      // You can handle other structured actions here similarly
+    });
+  };
 
   function handleSend(text?: string, spoken = false) {
     const message = (text ?? input).trim();
@@ -118,7 +127,7 @@ export default function AIDashboard() {
 
       if (panel && panelReplies[panel]) reply = panelReplies[panel];
 
-      // 🧠 Check if similar command exists → scroll to it
+      // Scroll to last message of same panel
       if (panel) {
         const lastIndex = userMsgs.findIndex((m) => m.panel === panel);
         if (lastIndex !== -1 && messageRefs.current[lastIndex]) {
@@ -128,18 +137,10 @@ export default function AIDashboard() {
 
       const assistantMsg: ChatMessage = { role: "assistant", content: reply, panel };
       setMessages((prev) => [...prev, assistantMsg]);
-
-      // 🖥️ Trigger visual dashboard (panel) auto-popup simulation
-      if (panel && chatRef.current) {
-        setTimeout(() => {
-          const el = chatRef.current?.querySelector(`[data-panel="${panel}"]`);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-        }, 300);
-      }
-
       if (spoken) speak(reply);
+
+      // Update active panel if detected
+      if (panel) setActivePanel(panel);
     }, 500);
   }
 
@@ -224,6 +225,7 @@ export default function AIDashboard() {
         listening={listening}
         onMicClick={handleMicClick}
         onSend={() => handleSend(undefined, false)}
+        onAction={handleAction} // 🆕 Pass structured actions to dashboard
       />
     </LayoutWrapper>
   );
