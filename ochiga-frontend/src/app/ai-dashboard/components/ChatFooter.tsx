@@ -8,7 +8,7 @@ export default function ChatFooter({
   input,
   setInput,
   onSend,
-  onVoiceAssist, // 🔊 callback for talk-back mode
+  onVoiceAssist,
 }: {
   input: string;
   setInput: (v: string) => void;
@@ -25,29 +25,73 @@ export default function ChatFooter({
     setIsTyping(input.trim().length > 0);
   }, [input]);
 
+  // 🎤 Speech Recognition
   const handleMicClick = () => {
+    const SpeechRecognition =
+      typeof window !== "undefined" &&
+      ((window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition);
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition not supported in this browser.");
+      return;
+    }
+
     if (!isRecording) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.start();
       setIsRecording(true);
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        setIsRecording(false);
+
+        // Auto-send after voice input
+        setTimeout(() => {
+          onSend();
+          // 🗣️ Optional voice feedback (speak the transcript)
+          const synth = window.speechSynthesis;
+          const utter = new SpeechSynthesisUtterance(transcript);
+          utter.lang = "en-US";
+          utter.rate = 1;
+          synth.speak(utter);
+        }, 500);
+      };
+
+      recognition.onerror = () => {
+        setIsRecording(false);
+      };
     } else {
       setIsRecording(false);
-      setIsTranscribing(true);
-      setTimeout(() => {
-        setInput("Transcribed voice input...");
-        setIsTranscribing(false);
-      }, 2000);
     }
   };
 
+  // 🚀 Dual-purpose Send / Talk button
   const handleMainButtonClick = () => {
     if (isTyping && input.trim()) {
       onSend();
     } else {
-      // 🎧 Trigger talk-back assistant mode
       setIsTalking(true);
       onVoiceAssist?.();
+
+      // 🗣️ Speak back the last response if needed
+      const synth = window.speechSynthesis;
+      const utter = new SpeechSynthesisUtterance(
+        "Hello! I’m Ochiga Assistant. How can I help you today?"
+      );
+      utter.lang = "en-US";
+      utter.pitch = 1;
+      utter.rate = 1;
+      synth.speak(utter);
+
       setTimeout(() => {
         setIsTalking(false);
-      }, 3000);
+      }, 4000);
     }
   };
 
@@ -91,6 +135,7 @@ export default function ChatFooter({
                 }`}
               />
             ) : (
+              // Smooth horizontal waveform animation
               <div className="absolute inset-0 flex items-center overflow-hidden px-2">
                 <motion.div
                   className="flex gap-[2px]"
@@ -167,7 +212,7 @@ export default function ChatFooter({
                 }}
               />
             ) : (
-              // 🫧 Idle blob (still, soft jelly look)
+              // 🫧 Idle blob (soft jelly look)
               <motion.div
                 className="w-5 h-5 bg-gradient-to-r from-[#9ca3af] to-[#6b7280] rounded-full"
                 animate={{
