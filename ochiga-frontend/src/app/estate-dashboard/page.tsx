@@ -8,8 +8,11 @@ import EstatePowerPanel from "./components/panels/EstatePowerPanel";
 import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
 import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
 
+import HamburgerMenu from "./components/HamburgerMenu";
+import EstateChatFooter from "./components/EstateChatFooter";
+import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
+
 import { detectEstatePanelType } from "./utils/estatePanelDetection";
-import { motion, AnimatePresence } from "framer-motion";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -56,6 +59,9 @@ export default function EstateDashboard() {
 
   return (
     <LayoutWrapper>
+      {/* Hamburger Menu */}
+      <HamburgerMenu />
+
       <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
         {/* Chat Messages */}
         <div
@@ -91,25 +97,15 @@ export default function EstateDashboard() {
           </div>
         </div>
 
-        {/* Chat Input */}
-        <footer className="fixed bottom-0 w-full z-50 bg-gray-900/80 backdrop-blur-lg border-t border-gray-800 px-4 py-3">
-          <div className="max-w-3xl mx-auto flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              className="flex-1 bg-gray-800 text-white px-4 py-3 rounded-full outline-none"
-              placeholder="Type a command or message..."
-            />
-            <button
-              onClick={() => handleSend()}
-              className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full text-white font-medium"
-            >
-              Send
-            </button>
-          </div>
-        </footer>
+        {/* Dynamic Suggestions */}
+        <DynamicSuggestionCard
+          suggestions={[]}
+          isTyping={input.trim().length > 0}
+          onSend={handleSend}
+        />
+
+        {/* Estate Chat Footer */}
+        <EstateChatFooter input={input} setInput={setInput} onSend={handleSend} />
       </main>
     </LayoutWrapper>
   );
