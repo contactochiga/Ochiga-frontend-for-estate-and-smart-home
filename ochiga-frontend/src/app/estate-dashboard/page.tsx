@@ -1,179 +1,148 @@
 "use client";
 
-import { useState, useRef } from "react";
-import LayoutWrapper from "./layout/LayoutWrapper";
+import { useEffect, useRef, useState } from "react";
+import { FaMicrophone, FaPaperPlane } from "react-icons/fa";
 
-import EstateDevicePanel from "./components/panels/EstateDevicePanel";
-import EstatePowerPanel from "./components/panels/EstatePowerPanel";
-import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
-import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
+/* ----------------------------------------------------
+   MODULE PLACEHOLDERS — Replace with real components later
+---------------------------------------------------- */
 
-import HamburgerMenu from "./components/HamburgerMenu";
-import EstateChatFooter from "./components/EstateChatFooter";
-import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
+const LightControl = () => (
+  <div className="p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
+    <p className="font-semibold text-gray-300">Lighting Module</p>
+    <p className="mt-1 text-gray-400">
+      Controls for room lights, dimmers, ambience.
+    </p>
+  </div>
+);
 
-import { detectEstatePanelType } from "./utils/estatePanelDetection";
+const SecurityControl = () => (
+  <div className="p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
+    <p className="font-semibold text-gray-300">Security System</p>
+    <p className="mt-1 text-gray-400">
+      Door locks, sensors, perimeter scan info.
+    </p>
+  </div>
+);
 
-type ChatMessage = {
-  role: "user" | "assistant";
-  content: string;
-  panel?: string | null;
-  id: string;
-  time: string;
-};
+const EnvironmentMonitor = () => (
+  <div className="p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn">
+    <p className="font-semibold text-gray-300">Environment Monitor</p>
+    <p className="mt-1 text-gray-400">
+      Temperature, humidity, air quality readings.
+    </p>
+  </div>
+);
 
-export default function EstateDashboard() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      content: "Welcome, Estate Admin! How can I assist you today?",
-      id: "welcome",
-      panel: null,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    },
-  ]);
+/* ----------------------------------------------------
+   MAIN DASHBOARD COMPONENT
+---------------------------------------------------- */
 
+export default function AIHomeDashboard() {
   const [input, setInput] = useState("");
-  const chatRef = useRef<HTMLDivElement | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const createId = () => Math.random().toString(36).substring(2, 9);
+  // Scroll to bottom when new messages come in
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  // ======================================================
-  // Handle Chat + Panel Reuse Logic
-  // ======================================================
-  const handleSend = (text?: string) => {
-    const message = (text ?? input).trim();
-    if (!message) return;
+  const sendMessage = () => {
+    if (!input.trim()) return;
 
-    const userMsg: ChatMessage = {
-      role: "user",
-      content: message,
-      panel: null,
-      id: createId(),
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    };
+    const userMessage = { role: "user", content: input };
 
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
+    setMessages((prev) => [...prev, userMessage]);
 
+    // TODO: Replace with real backend call to AI agent
     setTimeout(() => {
-      const panel = detectEstatePanelType(message);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Your AI response will appear here soon...",
+        },
+      ]);
+    }, 600);
 
-      // If message triggers a panel
-      if (panel) {
-        const existingIndex = messages.findIndex((m) => m.panel === panel);
-
-        if (existingIndex !== -1) {
-          // EXISTING PANEL FOUND → BOUNCE IT + UPDATE TIME
-          const existingId = messages[existingIndex].id;
-
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.id === existingId
-                ? { ...m, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }
-                : m
-            )
-          );
-
-          const element = document.querySelector(`[data-id='${existingId}']`);
-
-          if (element) {
-            element.classList.add("bounce-panel");
-            setTimeout(() => element.classList.remove("bounce-panel"), 700);
-
-            element.scrollIntoView({ behavior: "smooth", block: "center" });
-          }
-
-          return;
-        }
-      }
-
-      // Otherwise create NEW PANEL MESSAGE
-      let reply = `Okay — I processed: "${message}".`;
-      if (panel === "estate_devices") reply = "Estate device panel opened.";
-      if (panel === "estate_power") reply = "Estate power control panel opened.";
-      if (panel === "estate_accounting") reply = "Estate accounting panel opened.";
-      if (panel === "estate_community") reply = "Estate community panel opened.";
-
-      const assistantMsg: ChatMessage = {
-        role: "assistant",
-        content: reply,
-        panel,
-        id: createId(),
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-      };
-
-      setMessages((prev) => [...prev, assistantMsg]);
-
-      setTimeout(() => {
-        chatRef.current?.scrollTo({
-          top: chatRef.current.scrollHeight,
-          behavior: "smooth",
-        });
-      }, 200);
-    }, 250);
+    setInput("");
   };
 
-  // ======================================================
-  // RENDER
-  // ======================================================
   return (
-    <LayoutWrapper>
-      <HamburgerMenu />
+    <div className="flex flex-col h-screen bg-black text-white">
 
-      <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
+      {/* TOP BAR */}
+      <div className="p-4 border-b border-gray-800 flex items-center justify-between bg-gray-950">
+        <h1 className="text-xl font-bold tracking-wide">Ochiga AI Home Control</h1>
+        <span className="text-sm text-gray-400">v1.0</span>
+      </div>
 
-        <div
-          ref={chatRef}
-          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
-        >
-          <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            {messages.map((msg) => (
+      <div className="flex flex-1 overflow-hidden">
+
+        {/* LEFT: CHAT PANEL */}
+        <div className="w-full md:w-7/12 flex flex-col border-r border-gray-800">
+
+          {/* CHAT STREAM */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+            {messages.map((msg, index) => (
               <div
-                key={msg.id}
-                data-id={msg.id}
-                data-panel={msg.panel || ""}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                key={index}
+                className={`p-3 rounded-xl max-w-[85%] ${
+                  msg.role === "user"
+                    ? "ml-auto bg-blue-600"
+                    : "mr-auto bg-gray-800"
+                }`}
               >
-                <div className="flex flex-col max-w-[80%]">
-
-                  {/* CHAT BUBBLE */}
-                  <div
-                    className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
-                      msg.role === "user"
-                        ? "bg-blue-600 text-white rounded-br-none"
-                        : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
-
-                  {/* TIMESTAMP */}
-                  <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">
-                    {msg.time}
-                  </div>
-
-                  {/* PANELS */}
-                  {msg.panel === "estate_devices" && <EstateDevicePanel />}
-                  {msg.panel === "estate_power" && <EstatePowerPanel />}
-                  {msg.panel === "estate_accounting" && <EstateAccountingPanel />}
-                  {msg.panel === "estate_community" && <EstateCommunityPanel />}
-                </div>
+                {msg.content}
               </div>
             ))}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* INPUT AREA */}
+          <div className="p-4 border-t border-gray-800 bg-gray-950 flex items-center gap-3">
+
+            <button
+              className="p-3 bg-gray-800 hover:bg-gray-700 rounded-full transition"
+            >
+              <FaMicrophone size={17} />
+            </button>
+
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              placeholder="Ask your AI to control or check anything…"
+              className="flex-1 p-3 rounded-xl bg-gray-900 border border-gray-700 text-sm focus:outline-none"
+            />
+
+            <button
+              onClick={sendMessage}
+              className="p-3 bg-blue-600 hover:bg-blue-700 rounded-xl transition"
+            >
+              <FaPaperPlane size={15} />
+            </button>
           </div>
         </div>
 
-        {/* Suggestion Card */}
-        <DynamicSuggestionCard
-          suggestions={[]}
-          isTyping={input.trim().length > 0}
-          onSend={handleSend}
-        />
+        {/* RIGHT: MODULES PANEL */}
+        <div className="hidden md:flex w-5/12 flex-col overflow-y-auto p-4 bg-gray-950">
 
-        {/* Footer */}
-        <EstateChatFooter input={input} setInput={setInput} onSend={handleSend} />
-      </main>
-    </LayoutWrapper>
+          <h2 className="text-lg font-semibold mb-3 text-gray-300">System Modules</h2>
+
+          <div className="space-y-4">
+
+            <LightControl />
+            <SecurityControl />
+            <EnvironmentMonitor />
+
+          </div>
+        </div>
+
+      </div>
+    </div>
   );
 }
