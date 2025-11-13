@@ -1,8 +1,18 @@
-// ochiga-frontend/src/app/estate-dashboard/components/DynamicSuggestionCard.tsx
 "use client";
 
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  FiZap,
+  FiCpu,
+  FiUsers,
+  FiDollarSign,
+  FiCamera,
+  FiLock,
+  FiHome,
+  FiShield,
+  FiKey,
+} from "react-icons/fi";
 
 type PanelKey = "devices" | "power" | "accounting" | "community" | null;
 
@@ -18,11 +28,11 @@ interface Suggestion {
   id: string;
   title: string;
   subtitle?: string;
-  payload?: string; // what gets sent to assistant/back-end (defaults to title)
+  payload?: string;
 }
 
 interface Props {
-  suggestions?: Suggestion[]; // if present, overrides contextual suggestions
+  suggestions?: Suggestion[];
   onSend: (payload: string) => void;
   isTyping?: boolean;
   notification?: EstateNotification | null;
@@ -32,16 +42,13 @@ interface Props {
     waterLevel?: "low" | "normal";
     maintenance?: boolean;
   };
-  activePanel?: PanelKey; // current panel context (devices / power / accounting / community)
-  assistantActive?: boolean; // if assistant is currently speaking/listening -> dim suggestions
+  activePanel?: PanelKey;
+  assistantActive?: boolean;
 }
 
 /**
- * DynamicSuggestionCard (ChatGPT-style white suggestion cards)
- * - Shows up to 5 two-line cards
- * - Context-aware via activePanel or estateStatus
- * - Hides when typing or when user scrolls down; shows on scroll up or near bottom
- * - Notification overlay support (floating)
+ * DynamicSuggestionCard
+ * ChatGPT-style white cards with icons and smart visibility
  */
 export default function DynamicSuggestionCard({
   suggestions,
@@ -54,14 +61,10 @@ export default function DynamicSuggestionCard({
 }: Props) {
   const [visible, setVisible] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
-
-  // scroll direction detection
   const lastY = useRef<number>(typeof window !== "undefined" ? window.scrollY : 0);
   const hideTimer = useRef<number | null>(null);
 
-  // ----------------------------
-  // Contextual suggestion generation
-  // ----------------------------
+  // ---------- Contextual suggestions ----------
   const baseSuggestions = useMemo<Suggestion[]>(
     () => [
       { id: "s1", title: "Unlock Main Gate", subtitle: "for visitor entry", payload: "unlock_gate" },
@@ -76,10 +79,10 @@ export default function DynamicSuggestionCard({
   const devicesSuggestions = useMemo<Suggestion[]>(
     () => [
       { id: "d1", title: "View CCTV Feed", subtitle: "entrance camera", payload: "view_cctv_entrance" },
-      { id: "d2", title: "Turn on corridor lights", subtitle: "Block A corridors", payload: "turn_on_corridor_lights" },
-      { id: "d3", title: "Check device status", subtitle: "control room", payload: "check_device_status" },
-      { id: "d4", title: "Lock admin door", subtitle: "night mode", payload: "lock_admin_door" },
-      { id: "d5", title: "Restart access panel", subtitle: "main gate", payload: "restart_access_panel" },
+      { id: "d2", title: "Turn on Corridor Lights", subtitle: "Block A corridors", payload: "turn_on_corridor_lights" },
+      { id: "d3", title: "Check Device Status", subtitle: "control room", payload: "check_device_status" },
+      { id: "d4", title: "Lock Admin Door", subtitle: "night mode", payload: "lock_admin_door" },
+      { id: "d5", title: "Restart Access Panel", subtitle: "main gate", payload: "restart_access_panel" },
     ],
     []
   );
@@ -117,24 +120,23 @@ export default function DynamicSuggestionCard({
     []
   );
 
-  // choose which suggestion list to display
+  // pick which list to show
   const displayList: Suggestion[] = useMemo(() => {
-    if (suggestions && suggestions.length > 0) {
-      return suggestions.slice(0, 5);
-    }
+    if (suggestions?.length) return suggestions.slice(0, 5);
 
-    // estateStatus priorities (if present)
     if (estateStatus) {
-      const dynamic: Suggestion[] = [];
-      if (estateStatus.power === "off") dynamic.push({ id: "dyn-power", title: "Switch to Backup Power", subtitle: "power is down", payload: "switch_backup_power" });
-      if (estateStatus.gate === "open") dynamic.push({ id: "dyn-gate", title: "Lock Estate Gate", subtitle: "gate is open", payload: "lock_estate_gate" });
-      if (estateStatus.waterLevel === "low") dynamic.push({ id: "dyn-water", title: "Activate Borehole Pump", subtitle: "water level low", payload: "activate_pump" });
-      if (estateStatus.maintenance) dynamic.push({ id: "dyn-maint", title: "View Maintenance Tasks", subtitle: "ongoing tasks", payload: "view_maintenance" });
-
-      if (dynamic.length > 0) return dynamic.slice(0, 5);
+      const dyn: Suggestion[] = [];
+      if (estateStatus.power === "off")
+        dyn.push({ id: "dyn1", title: "Switch to Backup Power", subtitle: "power is down", payload: "switch_backup_power" });
+      if (estateStatus.gate === "open")
+        dyn.push({ id: "dyn2", title: "Lock Estate Gate", subtitle: "gate is open", payload: "lock_estate_gate" });
+      if (estateStatus.waterLevel === "low")
+        dyn.push({ id: "dyn3", title: "Activate Borehole Pump", subtitle: "water low", payload: "activate_pump" });
+      if (estateStatus.maintenance)
+        dyn.push({ id: "dyn4", title: "View Maintenance Tasks", subtitle: "ongoing tasks", payload: "view_maintenance" });
+      if (dyn.length) return dyn.slice(0, 5);
     }
 
-    // panel-based suggestions
     switch (activePanel) {
       case "devices":
         return devicesSuggestions.slice(0, 5);
@@ -147,17 +149,14 @@ export default function DynamicSuggestionCard({
       default:
         return baseSuggestions.slice(0, 5);
     }
-  }, [suggestions, estateStatus, activePanel, baseSuggestions, devicesSuggestions, powerSuggestions, accountingSuggestions, communitySuggestions]);
+  }, [suggestions, estateStatus, activePanel, devicesSuggestions, powerSuggestions, accountingSuggestions, communitySuggestions, baseSuggestions]);
 
-  // ----------------------------
-  // Visibility logic: scroll up = show, scroll down = hide; also hide while typing
-  // ----------------------------
+  // ---------- Scroll visibility ----------
   useEffect(() => {
     if (isTyping || assistantActive) {
       setVisible(false);
       return;
     }
-    // else keep visible check
     setVisible(true);
   }, [isTyping, assistantActive]);
 
@@ -165,25 +164,16 @@ export default function DynamicSuggestionCard({
     const onScroll = () => {
       const currentY = window.scrollY || 0;
       const delta = currentY - (lastY.current || 0);
-
-      // user scrolling down -> hide
-      if (delta > 10) {
-        setVisible(false);
-      } else if (delta < -10) {
-        // user scrolling up -> show
-        setVisible(true);
-      } else {
-        // minimal movement: if near bottom show
+      if (delta > 10) setVisible(false);
+      else if (delta < -10) setVisible(true);
+      else {
         const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 220;
         if (nearBottom) setVisible(true);
       }
-
       lastY.current = currentY;
 
-      // debounce small movements
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
       hideTimer.current = window.setTimeout(() => {
-        // if user stopped scrolling and is at bottom, ensure visible
         const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 220;
         if (nearBottom && !isTyping && !assistantActive) setVisible(true);
       }, 220);
@@ -196,9 +186,7 @@ export default function DynamicSuggestionCard({
     };
   }, [isTyping, assistantActive]);
 
-  // ----------------------------
-  // Notification auto-hide
-  // ----------------------------
+  // ---------- Notification ----------
   useEffect(() => {
     if (notification) {
       setShowNotification(true);
@@ -207,15 +195,28 @@ export default function DynamicSuggestionCard({
     }
   }, [notification]);
 
-  // small helper to call onSend with payload string
   const handleClick = (s: Suggestion) => {
     const payload = s.payload ?? s.title;
     onSend(payload);
   };
 
+  // icon resolver
+  const getIcon = (s: Suggestion) => {
+    const key = s.payload?.toLowerCase() ?? "";
+    if (key.includes("light") || key.includes("device")) return <FiCpu size={16} className="text-gray-500" />;
+    if (key.includes("power") || key.includes("generator") || key.includes("meter")) return <FiZap size={16} className="text-gray-500" />;
+    if (key.includes("wallet") || key.includes("invoice") || key.includes("payment")) return <FiDollarSign size={16} className="text-gray-500" />;
+    if (key.includes("resident") || key.includes("visitor") || key.includes("announcement")) return <FiUsers size={16} className="text-gray-500" />;
+    if (key.includes("camera") || key.includes("cctv")) return <FiCamera size={16} className="text-gray-500" />;
+    if (key.includes("gate") || key.includes("lock")) return <FiLock size={16} className="text-gray-500" />;
+    if (key.includes("security")) return <FiShield size={16} className="text-gray-500" />;
+    if (key.includes("home")) return <FiHome size={16} className="text-gray-500" />;
+    return <FiKey size={16} className="text-gray-500" />;
+  };
+
   return (
     <>
-      {/* Notification overlay (floating) */}
+      {/* Notification */}
       <AnimatePresence>
         {showNotification && notification && (
           <motion.div
@@ -234,14 +235,12 @@ export default function DynamicSuggestionCard({
                   )}
                 </div>
                 {notification.actionLabel && (
-                  <div className="ml-4">
-                    <button
-                      onClick={notification.onAction}
-                      className="px-3 py-1 rounded-full bg-red-600 text-white text-sm shadow-sm hover:bg-red-700"
-                    >
-                      {notification.actionLabel}
-                    </button>
-                  </div>
+                  <button
+                    onClick={notification.onAction}
+                    className="px-3 py-1 rounded-full bg-red-600 text-white text-sm shadow-sm hover:bg-red-700"
+                  >
+                    {notification.actionLabel}
+                  </button>
                 )}
               </div>
             </div>
@@ -259,24 +258,23 @@ export default function DynamicSuggestionCard({
             transition={{ duration: 0.28 }}
             className="fixed bottom-16 left-0 w-full z-30 flex justify-center px-4 pointer-events-none"
           >
-            <div
-              className={`w-full max-w-3xl pointer-events-auto flex flex-wrap gap-3 justify-center items-center`}
-            >
+            <div className="w-full max-w-3xl pointer-events-auto flex flex-wrap gap-3 justify-center items-center">
               {displayList.map((s) => (
                 <motion.button
                   key={s.id}
                   onClick={() => handleClick(s)}
-                  whileHover={{ y: -4, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`w-full sm:w-auto max-w-[46%] md:max-w-[30%] lg:max-w-[22%] bg-white rounded-2xl shadow-sm border border-gray-200 p-3 text-left transition`}
+                  whileHover={{ y: -3, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className={`w-full sm:w-auto max-w-[46%] md:max-w-[30%] lg:max-w-[22%] bg-white rounded-2xl shadow-sm border border-gray-200 p-3 text-left flex items-start gap-2 transition`}
                   style={{
                     opacity: assistantActive ? 0.6 : 1,
                   }}
                 >
-                  <div className="font-medium text-sm text-gray-900 leading-tight">{s.title}</div>
-                  {s.subtitle && (
-                    <div className="text-xs text-gray-500 mt-1">{s.subtitle}</div>
-                  )}
+                  {getIcon(s)}
+                  <div className="flex flex-col">
+                    <div className="font-medium text-sm text-gray-900 leading-tight">{s.title}</div>
+                    {s.subtitle && <div className="text-xs text-gray-500 mt-0.5">{s.subtitle}</div>}
+                  </div>
                 </motion.button>
               ))}
             </div>
