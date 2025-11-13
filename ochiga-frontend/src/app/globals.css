@@ -1,6 +1,8 @@
 @import "tailwindcss"; /* v4 style import */
 
 /* ─── Custom Animations ─────────────────────────────── */
+
+/* Pulse for icons and buttons */
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
@@ -12,12 +14,14 @@
   }
 }
 
+/* Slow spin for subtle rotating icons */
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
 }
 
+/* Fade in for panels & notifications */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -29,18 +33,48 @@
   }
 }
 
+/* Horizontal auto-scroll loop for suggestion bar */
+@keyframes scroll-horizontal {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
 /* ─── Tailwind Utility Extensions ───────────────────── */
 @layer utilities {
+  /* Custom pulse animation */
   .animate-pulse-custom {
     animation: pulse 3s ease-in-out infinite;
   }
 
+  /* Slow spin for icons */
   .animate-spin-custom {
     animation: spin 6s linear infinite;
   }
 
+  /* Fade-in for chat components */
   .animate-fadeIn {
     animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  /* Auto scroll horizontal for dynamic suggestion row */
+  .animate-auto-scroll {
+    animation: scroll-horizontal 20s linear infinite;
+  }
+
+  /* Hide scrollbars (for horizontal scroll suggestion row) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
