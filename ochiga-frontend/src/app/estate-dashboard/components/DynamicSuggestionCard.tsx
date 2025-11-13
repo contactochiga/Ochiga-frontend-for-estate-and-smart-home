@@ -184,7 +184,7 @@ export default function DynamicSuggestionCard({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 18 }}
             transition={{ duration: 0.32 }}
-            className="fixed bottom-28 left-0 w-full z-40 flex justify-center px-4 pointer-events-auto"
+            className="fixed bottom-[96px] left-0 w-full z-40 flex justify-center px-4 pointer-events-auto"
           >
             <div className="max-w-3xl w-full bg-white rounded-2xl p-4 shadow-lg border border-gray-200 text-gray-800">
               <div className="flex items-start gap-3">
@@ -216,7 +216,7 @@ export default function DynamicSuggestionCard({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 18 }}
             transition={{ duration: 0.28 }}
-            className="fixed bottom-16 left-0 right-0 z-30 px-4 pointer-events-none"
+            className="fixed bottom-[64px] left-0 right-0 z-30 px-4 pointer-events-none"
           >
             <div
               ref={scrollRef}
