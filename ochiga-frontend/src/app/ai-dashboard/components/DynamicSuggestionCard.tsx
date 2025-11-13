@@ -40,25 +40,23 @@ export default function DynamicSuggestionCard({
   const displayList = suggestions.length > 0 ? suggestions : defaultSuggestions;
 
   // ----------------------------
-  // Smart idle detection
+  // Check viewport empty space
   // ----------------------------
-  const checkIdle = () => {
+  const checkViewportSpace = () => {
     if (isTyping) return setVisible(false);
 
+    const footerOffset = 200; // buffer to avoid overlapping content
     const scrollBottom =
-      window.innerHeight + window.scrollY >= document.body.offsetHeight - 50;
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - footerOffset;
 
-    // Only show when user is near the bottom of the page (idle)
-    if (scrollBottom) setVisible(true);
-    else setVisible(false);
+    setVisible(scrollBottom && displayList.length > 0);
   };
 
   useEffect(() => {
     const handleScroll = () => {
       if (idleTimer.current) clearTimeout(idleTimer.current);
-      setVisible(false); // hide while scrolling
-
-      idleTimer.current = setTimeout(checkIdle, 1500); // show after idle
+      setVisible(false); // hide immediately while scrolling
+      idleTimer.current = setTimeout(checkViewportSpace, 300); // show after short idle
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -66,12 +64,11 @@ export default function DynamicSuggestionCard({
       window.removeEventListener("scroll", handleScroll);
       if (idleTimer.current) clearTimeout(idleTimer.current);
     };
-  }, [isTyping]);
+  }, [isTyping, displayList.length]);
 
   useEffect(() => {
-    if (isTyping) setVisible(false);
-    else checkIdle();
-  }, [isTyping]);
+    checkViewportSpace();
+  }, [isTyping, displayList.length]);
 
   // ----------------------------
   // Notification auto-hide
@@ -114,9 +111,9 @@ export default function DynamicSuggestionCard({
         )}
       </AnimatePresence>
 
-      {/* ⚡ Suggestion Card */}
+      {/* ⚡ Dynamic Suggestion Card */}
       <AnimatePresence>
-        {visible && !isTyping && displayList.length > 0 && (
+        {visible && !isTyping && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
