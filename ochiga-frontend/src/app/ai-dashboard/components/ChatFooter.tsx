@@ -8,24 +8,31 @@ export default function ChatFooter({
   input,
   setInput,
   onSend,
-  onVoiceAssist,
 }: {
   input: string;
   setInput: (v: string) => void;
   onSend: () => void;
-  onVoiceAssist?: () => void;
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
   const brandColor = "#e11d48"; // Ochiga Maroon Red
 
+  // Load stored voice
+  useEffect(() => {
+    const savedVoice = localStorage.getItem("ochigaVoice");
+    if (savedVoice) setSelectedVoice(savedVoice);
+  }, []);
+
+  // Detect typing
   useEffect(() => {
     setIsTyping(input.trim().length > 0);
   }, [input]);
 
-  // 🎙️ Start / Stop Mic Recording (Speech-to-Text)
+  // 🎙️ Mic Recording (Speech-to-Text)
   const handleMicClick = () => {
     const SpeechRecognition =
       typeof window !== "undefined" &&
@@ -53,166 +60,247 @@ export default function ChatFooter({
         setIsRecording(false);
       };
 
-      recognition.onerror = () => {
-        setIsRecording(false);
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-      };
+      recognition.onerror = () => setIsRecording(false);
+      recognition.onend = () => setIsRecording(false);
     } else {
       recognitionRef.current?.stop();
       setIsRecording(false);
     }
   };
 
-  // 🚀 Dual-purpose Send / Talk Button
-  const handleMainButtonClick = () => {
-    if (isTyping && input.trim()) {
-      // Send text (typed or transcribed)
-      onSend();
-    } else {
-      // 🗣️ Talk-back mode (only if no text)
-      setIsTalking(true);
-      onVoiceAssist?.();
+  // 🧠 Voice Talk-Back Mode
+  const handleVoiceAssist = async () => {
+    setIsTalking(true);
 
-      // Ochiga Assistant talks back
-      const synth = window.speechSynthesis;
-      const utter = new SpeechSynthesisUtterance(
-        "Hello, I’m Ochiga Assistant. How can I help you?"
-      );
-      utter.lang = "en-US";
+    // Listen
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition not supported.");
+      setIsTalking(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    const synth = window.speechSynthesis;
+
+    const speak = (text: string) => {
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.voice = synth
+        .getVoices()
+        .find((v) => v.name === selectedVoice) || null;
       utter.rate = 1;
       synth.speak(utter);
+    };
 
-      setTimeout(() => {
-        setIsTalking(false);
-      }, 4000);
+    // Greet first
+    speak("Hi, this is Ochiga Assistant. How can I help you today?");
+
+    recognition.start();
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript.toLowerCase();
+      setInput(transcript);
+
+      let reply = "I didn’t quite get that. Can you say it again?";
+      if (transcript.includes("light"))
+        reply = "Okay, the light has been turned on.";
+      else if (transcript.includes("visitor"))
+        reply = "Sure. What time would you like me to schedule your visitor?";
+      else if (transcript.includes("status"))
+        reply = "Your house is secure, internet is stable, and generator is idle.";
+
+      // Speak reply
+      speak(reply);
+      recognition.stop();
+      setTimeout(() => setIsTalking(false), 4000);
+    };
+
+    recognition.onerror = () => {
+      recognition.stop();
+      setIsTalking(false);
+    };
+  };
+
+  // 🚀 Dual-purpose Jelly Button
+  const handleMainButtonClick = () => {
+    if (isTyping && input.trim()) {
+      onSend();
+    } else {
+      if (!selectedVoice) {
+        setShowVoiceModal(true);
+        return;
+      }
+      handleVoiceAssist();
     }
   };
 
+  const handleVoiceSelect = (voiceName: string) => {
+    setSelectedVoice(voiceName);
+    localStorage.setItem("ochigaVoice", voiceName);
+  };
+
   return (
-    <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-800 px-4 py-3 fixed bottom-0 z-50">
-      <div className="max-w-3xl mx-auto relative">
-        <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
-
-          {/* 🎤 Mic / Stop Button */}
-          <button
-            onClick={handleMicClick}
-            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
-              isRecording
-                ? "bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.4)] scale-110"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            {isRecording ? (
-              <FaStop className="text-white text-sm" />
-            ) : (
-              <FaMicrophone className="text-white text-sm" />
-            )}
-          </button>
-
-          {/* ✏️ Input / Waveform Area */}
-          <div className="relative flex-1 h-10 flex items-center">
-            {!isRecording ? (
-              <input
-                type="text"
-                placeholder="Ask Ochiga AI anything…"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onSend()}
-                className="w-full bg-transparent text-gray-100 placeholder-gray-400 outline-none px-2 text-sm"
-              />
-            ) : (
-              // 🩸 Waveform Animation During Recording
-              <div className="absolute inset-0 flex items-center overflow-hidden px-2">
-                <motion.div
-                  className="flex gap-[2px]"
-                  animate={{ x: ["0%", "-50%"] }}
-                  transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
+    <>
+      {/* 🔊 Voice Selection Modal */}
+      {showVoiceModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[999]">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-80 text-center">
+            <h3 className="text-white text-lg font-semibold mb-3">
+              Choose Your Assistant Voice
+            </h3>
+            <div className="flex justify-center gap-4 mb-4">
+              {["Samantha", "Daniel"].map((voice) => (
+                <button
+                  key={voice}
+                  onClick={() => handleVoiceSelect(voice)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                    selectedVoice === voice
+                      ? "bg-red-600 text-white"
+                      : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  }`}
                 >
-                  {[...Array(120)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-[2px] rounded-full"
-                      style={{
-                        height: `${8 + ((i % 8) - 4) * 0.5}px`,
-                        backgroundColor: brandColor,
-                        opacity: 0.7,
-                      }}
-                    />
-                  ))}
-                  {[...Array(120)].map((_, i) => (
-                    <div
-                      key={`loop-${i}`}
-                      className="w-[2px] rounded-full"
-                      style={{
-                        height: `${8 + ((i % 8) - 4) * 0.5}px`,
-                        backgroundColor: brandColor,
-                        opacity: 0.7,
-                      }}
-                    />
-                  ))}
-                </motion.div>
-              </div>
-            )}
+                  {voice}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setShowVoiceModal(false)}
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-full transition"
+            >
+              Done
+            </button>
           </div>
-
-          {/* 🧠 Jelly Button (Dual Function) */}
-          <button
-            onClick={handleMainButtonClick}
-            className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
-              isTalking
-                ? "bg-red-600 shadow-[0_0_20px_rgba(225,29,72,0.4)] scale-110"
-                : isTyping
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-gray-700 hover:bg-gray-600"
-            }`}
-          >
-            {isTyping ? (
-              <FaPaperPlane className="text-white text-sm" />
-            ) : isTalking ? (
-              // 🎙️ Talking Blob Animation
-              <motion.div
-                className="w-6 h-6 bg-gradient-to-r from-[#e11d48] to-[#b91c1c] rounded-full"
-                animate={{
-                  borderRadius: [
-                    "60% 40% 30% 70% / 60% 30% 70% 40%",
-                    "40% 60% 70% 30% / 50% 60% 30% 60%",
-                    "70% 30% 50% 50% / 60% 40% 60% 40%",
-                    "50% 50% 30% 70% / 40% 60% 40% 60%",
-                    "60% 40% 30% 70% / 60% 30% 70% 40%",
-                  ],
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 2.5,
-                  ease: "easeInOut",
-                }}
-              />
-            ) : (
-              // 🫧 Idle Jelly Blob
-              <motion.div
-                className="w-5 h-5 bg-gradient-to-r from-[#9ca3af] to-[#6b7280] rounded-full"
-                animate={{
-                  borderRadius: [
-                    "60% 40% 30% 70% / 60% 30% 70% 40%",
-                    "50% 50% 70% 30% / 60% 50% 40% 50%",
-                    "70% 30% 50% 50% / 50% 60% 40% 60%",
-                    "60% 40% 30% 70% / 60% 30% 70% 40%",
-                  ],
-                }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 6,
-                  ease: "easeInOut",
-                }}
-              />
-            )}
-          </button>
         </div>
-      </div>
-    </footer>
+      )}
+
+      {/* 🌊 Chat Footer */}
+      <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-800 px-4 py-3 fixed bottom-0 z-50">
+        <div className="max-w-3xl mx-auto relative">
+          <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
+            {/* 🎤 Mic / Stop Button */}
+            <button
+              onClick={handleMicClick}
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
+                isRecording
+                  ? "bg-red-600 shadow-[0_0_20px_rgba(255,0,0,0.4)] scale-110"
+                  : "bg-gray-700 hover:bg-gray-600"
+              }`}
+            >
+              {isRecording ? (
+                <FaStop className="text-white text-sm" />
+              ) : (
+                <FaMicrophone className="text-white text-sm" />
+              )}
+            </button>
+
+            {/* ✏️ Input / Waveform */}
+            <div className="relative flex-1 h-10 flex items-center">
+              {!isRecording ? (
+                <input
+                  type="text"
+                  placeholder="Ask Ochiga AI anything…"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && onSend()}
+                  className="w-full bg-transparent text-gray-100 placeholder-gray-400 outline-none px-2 text-sm"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center overflow-hidden px-2">
+                  <motion.div
+                    className="flex gap-[2px]"
+                    animate={{ x: ["0%", "-50%"] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 6,
+                      ease: "linear",
+                    }}
+                  >
+                    {[...Array(120)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="w-[2px] rounded-full"
+                        style={{
+                          height: `${8 + ((i % 8) - 4) * 0.5}px`,
+                          backgroundColor: brandColor,
+                          opacity: 0.7,
+                        }}
+                      />
+                    ))}
+                    {[...Array(120)].map((_, i) => (
+                      <div
+                        key={`loop-${i}`}
+                        className="w-[2px] rounded-full"
+                        style={{
+                          height: `${8 + ((i % 8) - 4) * 0.5}px`,
+                          backgroundColor: brandColor,
+                          opacity: 0.7,
+                        }}
+                      />
+                    ))}
+                  </motion.div>
+                </div>
+              )}
+            </div>
+
+            {/* 🧠 Jelly Button */}
+            <button
+              onClick={handleMainButtonClick}
+              className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
+                isTalking
+                  ? "bg-red-600 shadow-[0_0_20px_rgba(225,29,72,0.4)] scale-110"
+                  : isTyping
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-gray-700 hover:bg-gray-600"
+              }`}
+            >
+              {isTyping ? (
+                <FaPaperPlane className="text-white text-sm" />
+              ) : isTalking ? (
+                <motion.div
+                  className="w-6 h-6 bg-gradient-to-r from-[#e11d48] to-[#b91c1c] rounded-full"
+                  animate={{
+                    borderRadius: [
+                      "60% 40% 30% 70% / 60% 30% 70% 40%",
+                      "40% 60% 70% 30% / 50% 60% 30% 60%",
+                      "70% 30% 50% 50% / 60% 40% 60% 40%",
+                      "50% 50% 30% 70% / 40% 60% 40% 60%",
+                      "60% 40% 30% 70% / 60% 30% 70% 40%",
+                    ],
+                    scale: [1, 1.2, 1],
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 2.5,
+                    ease: "easeInOut",
+                  }}
+                />
+              ) : (
+                <motion.div
+                  className="w-5 h-5 bg-gradient-to-r from-[#9ca3af] to-[#6b7280] rounded-full"
+                  animate={{
+                    borderRadius: [
+                      "60% 40% 30% 70% / 60% 30% 70% 40%",
+                      "50% 50% 70% 30% / 60% 50% 40% 50%",
+                      "70% 30% 50% 50% / 50% 60% 40% 60%",
+                      "60% 40% 30% 70% / 60% 30% 70% 40%",
+                    ],
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 6,
+                    ease: "easeInOut",
+                  }}
+                />
+              )}
+            </button>
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }
