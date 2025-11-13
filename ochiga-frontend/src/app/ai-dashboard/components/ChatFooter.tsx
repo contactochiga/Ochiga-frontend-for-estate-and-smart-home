@@ -1,21 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FaMicrophone, FaStop, FaPaperPlane } from "react-icons/fa";
+import { FaMicrophone, FaStop, FaPaperPlane, FaRobot } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 export default function ChatFooter({
   input,
   setInput,
   onSend,
+  onVoiceAssist, // 🔊 new callback for talk-back mode
 }: {
   input: string;
   setInput: (v: string) => void;
   onSend: () => void;
+  onVoiceAssist?: () => void;
 }) {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isTalking, setIsTalking] = useState(false);
   const brandColor = "#e11d48"; // Ochiga Maroon Red
 
   useEffect(() => {
@@ -28,11 +31,23 @@ export default function ChatFooter({
     } else {
       setIsRecording(false);
       setIsTranscribing(true);
-
       setTimeout(() => {
         setInput("Transcribed voice input...");
         setIsTranscribing(false);
       }, 2000);
+    }
+  };
+
+  const handleMainButtonClick = () => {
+    if (isTyping && input.trim()) {
+      onSend();
+    } else {
+      // 🎧 Trigger talk-back assistant mode
+      setIsTalking(true);
+      onVoiceAssist?.(); // optional callback
+      setTimeout(() => {
+        setIsTalking(false);
+      }, 3000);
     }
   };
 
@@ -76,7 +91,6 @@ export default function ChatFooter({
                 }`}
               />
             ) : (
-              // 🎧 Calm, Straight Linear Flow (like a voice note)
               <div className="absolute inset-0 flex items-center overflow-hidden px-2">
                 <motion.div
                   className="flex gap-[2px]"
@@ -88,7 +102,7 @@ export default function ChatFooter({
                       key={i}
                       className="w-[2px] rounded-full"
                       style={{
-                        height: `${8 + ((i % 8) - 4) * 0.5}px`, // very subtle variation
+                        height: `${8 + ((i % 8) - 4) * 0.5}px`,
                         backgroundColor: brandColor,
                         opacity: 0.7,
                       }}
@@ -110,16 +124,18 @@ export default function ChatFooter({
             )}
           </div>
 
-          {/* 🚀 Send Button */}
+          {/* 🚀 Dual-Purpose Send / Talk Button */}
           <button
-            onClick={onSend}
-            disabled={isTranscribing || (!isTyping && !input.trim())}
+            onClick={handleMainButtonClick}
+            disabled={isTranscribing}
             className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
-              isTranscribing
+              isTalking
+                ? "bg-red-600 shadow-[0_0_20px_rgba(225,29,72,0.4)] scale-110"
+                : isTranscribing
                 ? "bg-gray-700 animate-pulse"
                 : isTyping
                 ? "bg-red-600 hover:bg-red-700"
-                : "bg-gray-700"
+                : "bg-gray-700 hover:bg-gray-600"
             }`}
           >
             {isTranscribing ? (
@@ -130,12 +146,14 @@ export default function ChatFooter({
               />
             ) : isTyping ? (
               <FaPaperPlane className="text-white text-sm" />
-            ) : (
+            ) : isTalking ? (
               <motion.div
-                className="w-5 h-5 rounded-full bg-gray-600"
+                className="w-5 h-5 rounded-full bg-red-600"
                 animate={{ scale: [1, 1.4, 1] }}
-                transition={{ repeat: Infinity, duration: 0.9 }}
+                transition={{ repeat: Infinity, duration: 0.8 }}
               />
+            ) : (
+              <FaRobot className="text-gray-300 text-lg" />
             )}
           </button>
         </div>
