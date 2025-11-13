@@ -19,14 +19,33 @@ export default function ChatFooter({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [voiceGender, setVoiceGender] = useState<"female" | "male">("female");
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const brandColor = "#e11d48";
 
+  /* ---------------------- 🎛 Load & Remember Voice Choice ---------------------- */
+  useEffect(() => {
+    const saved = localStorage.getItem("ochigaVoice");
+    if (saved === "male" || saved === "female") setVoiceGender(saved);
+
+    const loadVoices = () => setVoices(window.speechSynthesis.getVoices());
+    loadVoices();
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }, []);
+
+  const toggleVoice = () => {
+    const next = voiceGender === "female" ? "male" : "female";
+    setVoiceGender(next);
+    localStorage.setItem("ochigaVoice", next);
+  };
+
+  /* ---------------------------- 🧠 Input Watcher ---------------------------- */
   useEffect(() => {
     setIsTyping(input.trim().length > 0);
   }, [input]);
 
-  // 🎙️ Start or stop listening
+  /* --------------------------- 🎤 Speech Capture --------------------------- */
   const toggleListening = () => {
     if (isListening) {
       recognitionRef.current?.stop();
@@ -53,14 +72,13 @@ export default function ChatFooter({
       setInput(userText);
       setIsListening(false);
 
-      // 🧠 Optional AI response (e.g., via onVoiceAssist or mock)
+      // 🧠 Optional AI response (use callback if connected)
       let responseText = "Okay, I heard you say: " + userText;
       if (onVoiceAssist) {
         const res = await onVoiceAssist(userText);
         if (typeof res === "string") responseText = res;
       }
 
-      // 🔊 Speak the response out loud
       speakResponse(responseText);
     };
 
@@ -71,16 +89,25 @@ export default function ChatFooter({
     setIsListening(true);
   };
 
-  // 🗣️ Use browser TTS to talk back
+  /* --------------------------- 🔊 Voice Talkback --------------------------- */
   const speakResponse = (text: string) => {
     const synth = window.speechSynthesis;
     if (!synth) return;
-    setIsSpeaking(true);
 
+    // pick a voice by gender
+    const filtered = voices.filter((v) =>
+      voiceGender === "female"
+        ? /female|woman|Samantha|Google US English/i.test(v.name)
+        : /male|man|Daniel|Google UK English/i.test(v.name)
+    );
+    const selectedVoice = filtered[0] || voices[0];
+
+    setIsSpeaking(true);
     const utter = new SpeechSynthesisUtterance(text);
+    utter.voice = selectedVoice;
     utter.lang = "en-US";
     utter.rate = 1;
-    utter.pitch = 1;
+    utter.pitch = voiceGender === "female" ? 1.1 : 0.9;
     utter.onend = () => setIsSpeaking(false);
     synth.speak(utter);
   };
@@ -89,11 +116,24 @@ export default function ChatFooter({
     if (input.trim()) onSend();
   };
 
+  /* ------------------------------- 🧠 Render ------------------------------- */
   return (
     <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-800 px-4 py-3 fixed bottom-0 z-50">
-      <div className="max-w-3xl mx-auto relative">
-        <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
-          {/* 🎤 MIC / STOP BUTTON */}
+      <div className="max-w-3xl mx-auto relative flex flex-col gap-1 items-center">
+        {/* 🔘 Voice selector */}
+        <button
+          onClick={toggleVoice}
+          className="text-xs text-gray-400 hover:text-white transition-all mb-1"
+        >
+          🎙 Voice:{" "}
+          <span className="font-semibold text-red-400">
+            {voiceGender === "female" ? "Female" : "Male"}
+          </span>
+        </button>
+
+        {/* 💬 Input Row */}
+        <div className="relative flex items-center w-full bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
+          {/* 🎤 MIC / STOP */}
           <button
             onClick={toggleListening}
             className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
@@ -109,7 +149,7 @@ export default function ChatFooter({
             )}
           </button>
 
-          {/* 📝 Input / Voice Transcript */}
+          {/* 📝 Textbox / Transcript */}
           <input
             type="text"
             placeholder={
@@ -126,7 +166,7 @@ export default function ChatFooter({
             className="w-full bg-transparent text-gray-100 placeholder-gray-400 outline-none px-2 text-sm transition-all"
           />
 
-          {/* 🪼 Jelly Button (AI Talkback / Send) */}
+          {/* 🪼 Jelly Button */}
           <button
             onClick={() => {
               if (isTyping) handleSend();
