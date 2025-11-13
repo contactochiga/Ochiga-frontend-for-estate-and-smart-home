@@ -18,22 +18,131 @@ export default function ChatFooter({
   const [isTalking, setIsTalking] = useState(false);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
+  const [shouldContinue, setShouldContinue] = useState(true);
   const recognitionRef = useRef<any>(null);
-  const brandColor = "#e11d48"; // Ochiga Maroon Red
+  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const brandColor = "#e11d48";
 
-  // Load stored voice
+  // 🧠 Load stored voice
   useEffect(() => {
+    synthRef.current = window.speechSynthesis;
     const savedVoice = localStorage.getItem("ochigaVoice");
     if (savedVoice) setSelectedVoice(savedVoice);
   }, []);
 
-  // Detect typing
+  // ✍🏽 Detect typing
   useEffect(() => {
     setIsTyping(input.trim().length > 0);
   }, [input]);
 
-  // 🎙️ Mic Recording (Speech-to-Text)
+  // 📱 Vibration helper
+  const vibrate = (duration = 80) => {
+    if (navigator.vibrate) navigator.vibrate(duration);
+  };
+
+  // 🧠 Speak with selected voice
+  const speak = (text: string, callback?: () => void) => {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    const utter = new SpeechSynthesisUtterance(text);
+
+    // 🎙️ Optional: customize accent later (Nigerian English style)
+    utter.lang = "en-NG"; // fallback Nigerian English variant
+    utter.rate = 1;
+    utter.pitch = 1;
+    utter.voice =
+      synth
+        .getVoices()
+        .find((v) => v.name === selectedVoice) || null;
+
+    utter.onend = () => {
+      setIsTalking(false);
+      callback?.();
+    };
+    synth.speak(utter);
+  };
+
+  // 🎧 Start continuous interaction
+  const startConversation = async () => {
+    vibrate(120);
+    setIsTalking(true);
+    setShouldContinue(true);
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Speech recognition not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognitionRef.current = recognition;
+
+    // 🗣️ Greet once
+    speak("Hi, this is Ochiga Assistant. How can I help you today?", () => {
+      recognition.start();
+    });
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript.toLowerCase().trim();
+
+      // Don’t leave residual text
+      setInput("");
+      console.log("🎤 You said:", transcript);
+
+      // 🔧 Simple intent logic
+      let reply = "I didn’t quite get that. Can you say it again?";
+      if (transcript.includes("light")) reply = "Okay, the light has been turned on.";
+      else if (transcript.includes("visitor"))
+        reply = "Sure. What time should I schedule your visitor?";
+      else if (transcript.includes("status"))
+        reply = "Your home is secure, power is stable, and the network is strong.";
+      else if (transcript.includes("camera"))
+        reply = "Turning on your security cameras now.";
+      else if (transcript.includes("shut down") || transcript.includes("sleep")) {
+        reply = "Alright. Ochiga Assistant signing off.";
+        setShouldContinue(false);
+      }
+
+      // 🎤 Speak reply then continue listening if not shutting down
+      speak(reply, () => {
+        if (shouldContinue) {
+          setTimeout(() => {
+            recognition.start();
+          }, 1000);
+        } else {
+          recognition.stop();
+          vibrate(150);
+          setIsTalking(false);
+        }
+      });
+    };
+
+    recognition.onerror = () => {
+      recognition.stop();
+      if (shouldContinue) {
+        setTimeout(() => recognition.start(), 1000);
+      } else {
+        setIsTalking(false);
+      }
+    };
+
+    recognition.onend = () => {
+      if (shouldContinue) {
+        recognition.start();
+      }
+    };
+  };
+
+  // 🎙️ Mic (manual speech-to-text for typing)
   const handleMicClick = () => {
+    vibrate(60);
+
     const SpeechRecognition =
       typeof window !== "undefined" &&
       ((window as any).SpeechRecognition ||
@@ -68,74 +177,17 @@ export default function ChatFooter({
     }
   };
 
-  // 🧠 Voice Talk-Back Mode
-  const handleVoiceAssist = async () => {
-    setIsTalking(true);
-
-    // Listen
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Speech recognition not supported.");
-      setIsTalking(false);
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "en-US";
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    const synth = window.speechSynthesis;
-
-    const speak = (text: string) => {
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.voice = synth
-        .getVoices()
-        .find((v) => v.name === selectedVoice) || null;
-      utter.rate = 1;
-      synth.speak(utter);
-    };
-
-    // Greet first
-    speak("Hi, this is Ochiga Assistant. How can I help you today?");
-
-    recognition.start();
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript.toLowerCase();
-      setInput(transcript);
-
-      let reply = "I didn’t quite get that. Can you say it again?";
-      if (transcript.includes("light"))
-        reply = "Okay, the light has been turned on.";
-      else if (transcript.includes("visitor"))
-        reply = "Sure. What time would you like me to schedule your visitor?";
-      else if (transcript.includes("status"))
-        reply = "Your house is secure, internet is stable, and generator is idle.";
-
-      // Speak reply
-      speak(reply);
-      recognition.stop();
-      setTimeout(() => setIsTalking(false), 4000);
-    };
-
-    recognition.onerror = () => {
-      recognition.stop();
-      setIsTalking(false);
-    };
-  };
-
-  // 🚀 Dual-purpose Jelly Button
+  // 🚀 Main Jelly Button (Talk / Send)
   const handleMainButtonClick = () => {
     if (isTyping && input.trim()) {
+      vibrate(40);
       onSend();
     } else {
       if (!selectedVoice) {
         setShowVoiceModal(true);
         return;
       }
-      handleVoiceAssist();
+      startConversation();
     }
   };
 
@@ -182,7 +234,7 @@ export default function ChatFooter({
       <footer className="w-full bg-gray-900/80 backdrop-blur-lg border-t border-gray-800 px-4 py-3 fixed bottom-0 z-50">
         <div className="max-w-3xl mx-auto relative">
           <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
-            {/* 🎤 Mic / Stop Button */}
+            {/* 🎤 Mic Button */}
             <button
               onClick={handleMicClick}
               className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
