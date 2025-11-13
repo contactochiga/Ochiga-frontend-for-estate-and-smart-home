@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FaMicrophone, FaStop, FaPaperPlane } from "react-icons/fa";
 import { motion } from "framer-motion";
 
@@ -16,16 +16,16 @@ export default function ChatFooter({
   onVoiceAssist?: () => void;
 }) {
   const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [isTalking, setIsTalking] = useState(false);
+  const recognitionRef = useRef<any>(null);
   const brandColor = "#e11d48"; // Ochiga Maroon Red
 
   useEffect(() => {
     setIsTyping(input.trim().length > 0);
   }, [input]);
 
-  // 🎤 Speech Recognition
+  // 🎙️ Start / Stop Mic Recording (Speech-to-Text)
   const handleMicClick = () => {
     const SpeechRecognition =
       typeof window !== "undefined" &&
@@ -42,6 +42,7 @@ export default function ChatFooter({
       recognition.lang = "en-US";
       recognition.continuous = false;
       recognition.interimResults = false;
+      recognitionRef.current = recognition;
 
       recognition.start();
       setIsRecording(true);
@@ -50,42 +51,37 @@ export default function ChatFooter({
         const transcript = event.results[0][0].transcript;
         setInput(transcript);
         setIsRecording(false);
-
-        // Auto-send after voice input
-        setTimeout(() => {
-          onSend();
-          // 🗣️ Optional voice feedback (speak the transcript)
-          const synth = window.speechSynthesis;
-          const utter = new SpeechSynthesisUtterance(transcript);
-          utter.lang = "en-US";
-          utter.rate = 1;
-          synth.speak(utter);
-        }, 500);
       };
 
       recognition.onerror = () => {
         setIsRecording(false);
       };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
     } else {
+      recognitionRef.current?.stop();
       setIsRecording(false);
     }
   };
 
-  // 🚀 Dual-purpose Send / Talk button
+  // 🚀 Dual-purpose Send / Talk Button
   const handleMainButtonClick = () => {
     if (isTyping && input.trim()) {
+      // Send text (typed or transcribed)
       onSend();
     } else {
+      // 🗣️ Talk-back mode (only if no text)
       setIsTalking(true);
       onVoiceAssist?.();
 
-      // 🗣️ Speak back the last response if needed
+      // Ochiga Assistant talks back
       const synth = window.speechSynthesis;
       const utter = new SpeechSynthesisUtterance(
-        "Hello! I’m Ochiga Assistant. How can I help you today?"
+        "Hello, I’m Ochiga Assistant. How can I help you?"
       );
       utter.lang = "en-US";
-      utter.pitch = 1;
       utter.rate = 1;
       synth.speak(utter);
 
@@ -100,7 +96,7 @@ export default function ChatFooter({
       <div className="max-w-3xl mx-auto relative">
         <div className="relative flex items-center bg-gray-800 border border-gray-700 rounded-full px-3 py-2 gap-2 shadow-inner overflow-hidden">
 
-          {/* 🎙️ Mic / Stop Button */}
+          {/* 🎤 Mic / Stop Button */}
           <button
             onClick={handleMicClick}
             className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
@@ -121,21 +117,14 @@ export default function ChatFooter({
             {!isRecording ? (
               <input
                 type="text"
-                placeholder={
-                  isTranscribing
-                    ? "Transcribing voice input..."
-                    : "Ask Ochiga AI anything…"
-                }
+                placeholder="Ask Ochiga AI anything…"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && onSend()}
-                disabled={isTranscribing}
-                className={`w-full bg-transparent text-gray-100 placeholder-gray-400 outline-none px-2 text-sm transition-all ${
-                  isTranscribing ? "opacity-60" : ""
-                }`}
+                className="w-full bg-transparent text-gray-100 placeholder-gray-400 outline-none px-2 text-sm"
               />
             ) : (
-              // Smooth horizontal waveform animation
+              // 🩸 Waveform Animation During Recording
               <div className="absolute inset-0 flex items-center overflow-hidden px-2">
                 <motion.div
                   className="flex gap-[2px]"
@@ -169,30 +158,21 @@ export default function ChatFooter({
             )}
           </div>
 
-          {/* 🚀 Dual-Purpose Send / Talk Button */}
+          {/* 🧠 Jelly Button (Dual Function) */}
           <button
             onClick={handleMainButtonClick}
-            disabled={isTranscribing}
             className={`flex items-center justify-center w-10 h-10 rounded-full transition-all duration-300 ${
               isTalking
                 ? "bg-red-600 shadow-[0_0_20px_rgba(225,29,72,0.4)] scale-110"
-                : isTranscribing
-                ? "bg-gray-700 animate-pulse"
                 : isTyping
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-gray-700 hover:bg-gray-600"
             }`}
           >
-            {isTranscribing ? (
-              <motion.div
-                className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full"
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-              />
-            ) : isTyping ? (
+            {isTyping ? (
               <FaPaperPlane className="text-white text-sm" />
             ) : isTalking ? (
-              // 🧠 Jelly-like talking blob
+              // 🎙️ Talking Blob Animation
               <motion.div
                 className="w-6 h-6 bg-gradient-to-r from-[#e11d48] to-[#b91c1c] rounded-full"
                 animate={{
@@ -212,7 +192,7 @@ export default function ChatFooter({
                 }}
               />
             ) : (
-              // 🫧 Idle blob (soft jelly look)
+              // 🫧 Idle Jelly Blob
               <motion.div
                 className="w-5 h-5 bg-gradient-to-r from-[#9ca3af] to-[#6b7280] rounded-full"
                 animate={{
