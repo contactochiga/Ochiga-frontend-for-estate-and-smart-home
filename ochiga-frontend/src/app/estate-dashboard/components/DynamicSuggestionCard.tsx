@@ -1,33 +1,192 @@
 "use client";
 
-import React from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
-type DynamicSuggestionCardProps = {
-  suggestions: string[];
-  isTyping: boolean;
-  onSend: (text: string) => void;
-};
+interface EstateNotification {
+  type: "alert" | "video" | "access" | "message" | "energy" | "maintenance";
+  title: string;
+  description?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+interface Props {
+  suggestions?: string[];
+  onSend: (suggestion: string) => void;
+  isTyping?: boolean;
+  notification?: EstateNotification | null;
+  estateStatus?: {
+    power?: "on" | "off";
+    gate?: "open" | "closed";
+    waterLevel?: "low" | "normal";
+    maintenance?: boolean;
+  };
+}
 
 export default function DynamicSuggestionCard({
-  suggestions,
-  isTyping,
+  suggestions = [],
   onSend,
-}: DynamicSuggestionCardProps) {
-  if (!suggestions.length || isTyping) return null;
+  isTyping = false,
+  notification,
+  estateStatus,
+}: Props) {
+  const [visible, setVisible] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
+  const [dynamicSuggestions, setDynamicSuggestions] = useState<string[]>([]);
+  const idleTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // ----------------------------
+  // Default & Smart Suggestions
+  // ----------------------------
+  const baseSuggestions = useMemo(
+    () => [
+      "View CCTV feed",
+      "Unlock main gate",
+      "Turn on street lights",
+      "Check estate power supply",
+      "Fund my smart wallet",
+      "View maintenance schedule",
+    ],
+    []
+  );
+
+  // Generate contextual suggestions from estate status
+  useEffect(() => {
+    let contextSuggestions: string[] = [];
+
+    if (estateStatus) {
+      if (estateStatus.power === "off") contextSuggestions.push("Switch to backup power");
+      if (estateStatus.gate === "open") contextSuggestions.push("Lock estate gate");
+      if (estateStatus.waterLevel === "low") contextSuggestions.push("Activate borehole pump");
+      if (estateStatus.maintenance)
+        contextSuggestions.push("View current maintenance task");
+    }
+
+    setDynamicSuggestions(contextSuggestions);
+  }, [estateStatus]);
+
+  const displayList =
+    suggestions.length > 0
+      ? suggestions
+      : dynamicSuggestions.length > 0
+      ? dynamicSuggestions
+      : baseSuggestions;
+
+  // ----------------------------
+  // Check viewport empty space
+  // ----------------------------
+  const checkViewportSpace = () => {
+    if (isTyping) return setVisible(false);
+
+    const footerOffset = 200;
+    const scrollBottom =
+      window.innerHeight + window.scrollY >= document.body.offsetHeight - footerOffset;
+
+    setVisible(scrollBottom && displayList.length > 0);
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+      setVisible(false);
+      idleTimer.current = setTimeout(checkViewportSpace, 300);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [isTyping, displayList.length]);
+
+  useEffect(() => {
+    checkViewportSpace();
+  }, [isTyping, displayList.length]);
+
+  // ----------------------------
+  // Notification auto-hide
+  // ----------------------------
+  useEffect(() => {
+    if (notification) {
+      setShowNotification(true);
+      const timer = setTimeout(() => setShowNotification(false), 7000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
+
+  // ----------------------------
+  // Estate Alerts Auto Notifications
+  // ----------------------------
+  useEffect(() => {
+    if (!estateStatus) return;
+
+    if (estateStatus.power === "off") {
+      setShowNotification(true);
+    }
+  }, [estateStatus]);
 
   return (
-    <div className="fixed bottom-24 left-0 w-full flex justify-center px-4 md:px-10 z-30">
-      <div className="flex flex-wrap gap-3 max-w-3xl bg-gray-900/80 border border-gray-700 backdrop-blur-md rounded-2xl p-3 shadow-md">
-        {suggestions.map((suggestion, idx) => (
-          <button
-            key={idx}
-            onClick={() => onSend(suggestion)}
-            className="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white text-sm rounded-xl transition-all duration-200"
+    <>
+      {/* 🔔 Estate Notification Overlay */}
+      <AnimatePresence>
+        {showNotification && notification && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4 }}
+            className="fixed bottom-28 left-0 w-full z-40 flex justify-center px-4 pointer-events-auto"
           >
-            {suggestion}
-          </button>
-        ))}
-      </div>
-    </div>
+            <div className="max-w-3xl w-full bg-gray-900/90 border border-gray-800 backdrop-blur-md rounded-2xl p-4 shadow-lg flex flex-col items-start text-gray-200">
+              <span className="text-sm font-semibold mb-1">
+                {notification.title}
+              </span>
+              {notification.description && (
+                <p className="text-xs text-gray-400 mb-2">
+                  {notification.description}
+                </p>
+              )}
+              {notification.actionLabel && (
+                <button
+                  onClick={notification.onAction}
+                  className="mt-1 w-full text-center bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium py-1.5 rounded-full transition"
+                >
+                  {notification.actionLabel}
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ⚡ Estate Suggestion Card */}
+      <AnimatePresence>
+        {visible && !isTyping && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 15 }}
+            transition={{ duration: 0.3 }}
+            className="fixed bottom-16 left-0 w-full z-30 flex justify-center px-4 pointer-events-none"
+          >
+            <div className="w-full max-w-3xl bg-gray-900/80 backdrop-blur-md border border-gray-800 rounded-2xl p-3 shadow-lg flex flex-wrap justify-center gap-2 text-gray-200 pointer-events-auto">
+              {displayList.map((s, i) => (
+                <motion.button
+                  key={`${s}-${i}`}
+                  onClick={() => onSend(s)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs md:text-sm px-3 py-1.5 rounded-full border border-gray-700 transition"
+                  title={s}
+                >
+                  {s}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
