@@ -49,7 +49,7 @@
 }
 
 /* ──────────────────────────────────────────────── */
-/* ─── NEW: Bounce Highlight for Existing Panel ───── */
+/* ─── Highlight Animation for Replaced Panels ───── */
 /* ──────────────────────────────────────────────── */
 
 @keyframes bounceFlash {
@@ -74,28 +74,24 @@
 /* ──────────────────────────────────────────────── */
 /* ─── Tailwind Utility Extensions ───────────────── */
 /* ──────────────────────────────────────────────── */
+
 @layer utilities {
-  /* Custom pulse animation */
   .animate-pulse-custom {
     animation: pulse 3s ease-in-out infinite;
   }
 
-  /* Slow spin for icons */
   .animate-spin-custom {
     animation: spin 6s linear infinite;
   }
 
-  /* Fade-in for chat components */
   .animate-fadeIn {
     animation: fadeIn 0.4s ease-out forwards;
   }
 
-  /* Auto scroll horizontal for suggestion row */
   .animate-auto-scroll {
     animation: scroll-horizontal 20s linear infinite;
   }
 
-  /* Hide scrollbars (for horizontal scroll suggestion row) */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -107,8 +103,47 @@
 }
 
 /* ──────────────────────────────────────────────── */
+/* ─── Push Menu Layout Support (NEW) ────────────── */
+/* ──────────────────────────────────────────────── */
+
+.pushable {
+  transition: transform 0.5s cubic-bezier(.2,.8,.2,1),
+              filter 0.45s ease,
+              opacity 0.45s ease;
+  transform-origin: left center;
+}
+
+body.sidebar-open .pushable {
+  transform: translateX(70%);
+  filter: blur(6px) saturate(.95) brightness(.9);
+}
+
+/* For footer + suggestion card shifting together */
+.shift-with-sidebar {
+  transition: transform 0.5s cubic-bezier(.2,.8,.2,1);
+}
+
+body.sidebar-open .shift-with-sidebar {
+  transform: translateX(70%);
+}
+
+/* Desktop adjustment */
+@media (min-width: 1024px) {
+  body.sidebar-open .pushable,
+  body.sidebar-open .shift-with-sidebar {
+    transform: translateX(40%);
+  }
+}
+
+/* Overlay smoothness */
+.sidebar-scrim {
+  transition: opacity .35s ease;
+}
+
+/* ──────────────────────────────────────────────── */
 /* ─── Test Utility ──────────────────────────────── */
 /* ──────────────────────────────────────────────── */
+
 .test-bg {
   @apply bg-purple-500 text-white p-10 text-3xl;
 }
