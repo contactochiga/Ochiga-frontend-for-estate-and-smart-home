@@ -30,62 +30,77 @@ export default function EstateDashboard() {
   const createId = () => Math.random().toString(36).substring(2, 9);
 
   // ======================================================
-  // Handle Chat + Panel REPLACEMENT Logic
+  // HANDLE SEND — PANEL BLOCK REPLACEMENT SYSTEM
   // ======================================================
   const handleSend = (text?: string) => {
     const message = (text ?? input).trim();
     if (!message) return;
 
     const panel = detectEstatePanelType(message);
+    const now = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
     // ======================================================
-    // PANEL REQUEST LOGIC — clean replacement
+    // PANEL REQUEST — Replace whole block
     // ======================================================
     if (panel) {
       setMessages((prev) => {
-        // Remove ANY previous message involving this panel
+        // Remove ANY old blocks for this panel
         const cleaned = prev.filter((m) => m.panel !== panel);
 
-        // Insert one fresh assistant + panel
-        const newAssistant: ChatMessage = {
-          role: "assistant",
-          content: "", // No chat bubble text — only panel
-          panel,
+        // Create FRESH user bubble
+        const userMsg: ChatMessage = {
+          role: "user",
+          content: message,
           id: createId(),
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+          panel: null,
+          time: now,
         };
 
-        return [...cleaned, newAssistant];
+        // Create FRESH assistant bubble
+        const assistantMsg: ChatMessage = {
+          role: "assistant",
+          content: `Processing "${message}"...`,
+          id: createId(),
+          panel: null,
+          time: now,
+        };
+
+        // Create FRESH panel block
+        const panelMsg: ChatMessage = {
+          role: "assistant",
+          content: "",
+          id: createId(),
+          panel,
+          time: now,
+        };
+
+        return [...cleaned, userMsg, assistantMsg, panelMsg];
       });
 
       setInput("");
 
-      // Smooth scroll into view
       setTimeout(() => {
         chatRef.current?.scrollTo({
           top: chatRef.current.scrollHeight,
           behavior: "smooth",
         });
-      }, 100);
+      }, 120);
 
       return;
     }
 
     // ======================================================
-    // NORMAL NON-PANEL MESSAGE
+    // NORMAL CHAT MESSAGE
     // ======================================================
     const userMsg: ChatMessage = {
       role: "user",
       content: message,
-      panel: null,
       id: createId(),
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      panel: null,
+      time: now,
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -93,7 +108,7 @@ export default function EstateDashboard() {
   };
 
   // ======================================================
-  // RENDER PANELS
+  // PANEL RENDER SYSTEM
   // ======================================================
   const renderPanel = (panel: string | null | undefined) => {
     switch (panel) {
@@ -111,7 +126,7 @@ export default function EstateDashboard() {
   };
 
   // ======================================================
-  // UI RENDER
+  // UI
   // ======================================================
   return (
     <LayoutWrapper>
@@ -123,15 +138,15 @@ export default function EstateDashboard() {
           className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
         >
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
+
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                data-id={msg.id}
                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div className="flex flex-col max-w-[80%]">
 
-                  {/* CHAT BUBBLE (Panel messages have NO bubble) */}
+                  {/* CHAT BUBBLES */}
                   {msg.panel == null && (
                     <>
                       <div
@@ -150,24 +165,23 @@ export default function EstateDashboard() {
                     </>
                   )}
 
-                  {/* PANEL (Only for assistant messages with panel) */}
+                  {/* PANEL */}
                   {msg.role === "assistant" && msg.panel && (
                     <div className="mt-1">{renderPanel(msg.panel)}</div>
                   )}
                 </div>
               </div>
             ))}
+
           </div>
         </div>
 
-        {/* Suggestion Panel */}
         <DynamicSuggestionCard
           suggestions={[]}
           isTyping={input.trim().length > 0}
           onSend={handleSend}
         />
 
-        {/* Footer Input */}
         <EstateChatFooter input={input} setInput={setInput} onSend={handleSend} />
       </main>
     </LayoutWrapper>
