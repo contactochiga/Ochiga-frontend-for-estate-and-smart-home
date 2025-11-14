@@ -1,12 +1,11 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import ChatFooter from "./components/ChatFooter";
-import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
+import EstateChatFooter from "./components/EstateChatFooter";
+import EstateDynamicSuggestionCard from "./components/EstateDynamicSuggestionCard";
 import HamburgerMenu from "./components/HamburgerMenu";
 import LayoutWrapper from "./layout/LayoutWrapper";
 
-// FIXED PANEL IMPORTS PATH
 import {
   EstateDevicePanel,
   EstatePowerPanel,
@@ -31,7 +30,7 @@ export default function EstateDashboard() {
     {
       id: "sys-1",
       role: "assistant",
-      content: "Hello! Welcome to your Estate Dashboard. How can I help?",
+      content: "Welcome to your Estate Dashboard! How can I assist you today?",
       panel: null,
       panelTag: null,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -69,15 +68,9 @@ export default function EstateDashboard() {
     setMessages((prev) => {
       const grouped = prev.filter((m) => m.panelTag === panelTag);
       if (!grouped.length) return prev;
-
       const filtered = prev.filter((m) => m.panelTag !== panelTag);
-
-      const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const updatedGroup = grouped.map((m) => ({ ...m, time: now }));
-
-      return [...filtered, ...updatedGroup];
+      return [...filtered, ...grouped];
     });
-
     setTimeout(() => {
       if (isAtBottom()) scrollToBottom();
       else setShowScrollDown(true);
@@ -85,38 +78,11 @@ export default function EstateDashboard() {
   };
 
   const appendPanelBlock = (userText: string, assistantReply: string, panel: string) => {
-    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const tag = panel;
-
-    const userMsg: ChatMessage = {
-      id: createId(),
-      role: "user",
-      content: userText,
-      panel: null,
-      panelTag: tag,
-      time: now,
-    };
-
-    const assistantMsg: ChatMessage = {
-      id: createId(),
-      role: "assistant",
-      content: assistantReply,
-      panel: null,
-      panelTag: tag,
-      time: now,
-    };
-
-    const panelMsg: ChatMessage = {
-      id: createId(),
-      role: "assistant",
-      content: "",
-      panel,
-      panelTag: tag,
-      time: now,
-    };
-
+    const userMsg: ChatMessage = { id: createId(), role: "user", content: userText, panel: null, panelTag: tag, time: "" };
+    const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: assistantReply, panel: null, panelTag: tag, time: "" };
+    const panelMsg: ChatMessage = { id: createId(), role: "assistant", content: "", panel, panelTag: tag, time: "" };
     setMessages((prev) => [...prev, userMsg, assistantMsg, panelMsg]);
-
     setTimeout(() => {
       if (isAtBottom()) scrollToBottom();
       else setShowScrollDown(true);
@@ -126,17 +92,16 @@ export default function EstateDashboard() {
   const handleSend = (text?: string) => {
     const messageText = (text ?? input).trim();
     if (!messageText) return;
-
     setInput("");
 
-    // Simple logic for demonstration: match keywords to panels
+    // Simple mapping of keywords to panels
     let panel: string | null = null;
-    let reply = "Understood.";
-
     if (messageText.toLowerCase().includes("device")) panel = "device";
     if (messageText.toLowerCase().includes("power")) panel = "power";
     if (messageText.toLowerCase().includes("account")) panel = "accounting";
     if (messageText.toLowerCase().includes("community")) panel = "community";
+
+    const reply = "Got it!";
 
     if (panel) {
       const exists = messages.some((m) => m.panelTag === panel);
@@ -144,23 +109,8 @@ export default function EstateDashboard() {
       else appendPanelBlock(messageText, reply, panel);
       setActivePanel(panel);
     } else {
-      const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const userMsg: ChatMessage = {
-        id: createId(),
-        role: "user",
-        content: messageText,
-        panel: null,
-        panelTag: null,
-        time: now,
-      };
-      const assistantMsg: ChatMessage = {
-        id: createId(),
-        role: "assistant",
-        content: reply,
-        panel: null,
-        panelTag: null,
-        time: now,
-      };
+      const userMsg: ChatMessage = { id: createId(), role: "user", content: messageText, panel: null, panelTag: null, time: "" };
+      const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: reply, panel: null, panelTag: null, time: "" };
       setMessages((prev) => [...prev, userMsg, assistantMsg]);
       setTimeout(() => {
         if (isAtBottom()) scrollToBottom();
@@ -171,16 +121,11 @@ export default function EstateDashboard() {
 
   const renderPanel = (panel: string | null | undefined) => {
     switch (panel) {
-      case "device":
-        return <EstateDevicePanel />;
-      case "power":
-        return <EstatePowerPanel />;
-      case "accounting":
-        return <EstateAccountingPanel />;
-      case "community":
-        return <EstateCommunityPanel />;
-      default:
-        return null;
+      case "device": return <EstateDevicePanel />;
+      case "power": return <EstatePowerPanel />;
+      case "accounting": return <EstateAccountingPanel />;
+      case "community": return <EstateCommunityPanel />;
+      default: return null;
     }
   };
 
@@ -230,9 +175,6 @@ export default function EstateDashboard() {
                           }`}
                         >
                           {msg.content}
-                          {msg.role === "user" && (
-                            <span className="text-[10px] text-gray-300 ml-2">{msg.time}</span>
-                          )}
                         </div>
                       )}
                       {isPanelBlock && <div className="mt-1 w-full">{renderPanel(msg.panel)}</div>}
@@ -247,24 +189,13 @@ export default function EstateDashboard() {
         {/* DYNAMIC SUGGESTION CARD */}
         <div className="w-full px-4 z-40 pointer-events-none">
           <div className="max-w-3xl mx-auto pointer-events-auto">
-            <DynamicSuggestionCard
-              suggestions={["View devices", "Check power", "Check accounting", "Community"]}
-              onSend={handleSend}
-              isTyping={input.length > 0}
-            />
+            <EstateDynamicSuggestionCard onSend={handleSend} isTyping={input.length > 0} />
           </div>
         </div>
 
         {/* CHAT FOOTER FULL WIDTH */}
         <div className="w-full px-4 py-2 bg-gray-900 border-t border-gray-700 flex justify-center items-center z-50">
-          <ChatFooter
-            input={input}
-            setInput={setInput}
-            listening={false}
-            onMicClick={() => {}}
-            onSend={() => handleSend()}
-            onAction={() => {}}
-          />
+          <EstateChatFooter input={input} setInput={setInput} onSend={() => handleSend()} />
         </div>
       </div>
 
