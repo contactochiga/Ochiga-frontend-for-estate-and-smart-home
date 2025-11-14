@@ -1,3 +1,5 @@
+// ochiga-frontend/src/app/estate-dashboard/page.tsx
+
 "use client";
 
 import { useRef, useState, useEffect } from "react";
@@ -165,6 +167,13 @@ export default function EstateDashboard() {
     setTimeout(() => { if (isAtBottom()) scrollToBottom(); else setShowScrollDown(true); }, 120);
   }
 
+  const suggestions = [
+    "Check estate devices",
+    "View power status",
+    "Open accounting panel",
+    "Open community panel",
+  ];
+
   const renderPanel = (panel: string | null | undefined) => {
     switch (panel) {
       case "estate_devices":
@@ -180,61 +189,94 @@ export default function EstateDashboard() {
     }
   };
 
+  useEffect(() => {
+    if (isAtBottom()) scrollToBottom("auto");
+  }, [messages.length]);
+
   return (
     <LayoutWrapper menuOpen={menuOpen}>
+      {/* HAMBURGER */}
       <header className="absolute top-4 left-4 z-50">
         <HamburgerMenu onToggle={(o: boolean) => setMenuOpen(o)} />
       </header>
 
-      {/* MAIN */}
-      <main
-        className="flex-1 flex flex-col justify-between relative overflow-hidden transition-all duration-500"
-        style={{ transform: menuOpen ? "translateX(15rem)" : "translateX(0)", filter: menuOpen ? "blur(2px)" : "none" }}
-      >
-        <div ref={chatRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth">
-          <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            {messages.map((msg, i) => {
-              const isPanelBlock = Boolean(msg.panel);
-              return (
-                <div key={msg.id} ref={(el) => (messageRefs.current[i] = el)} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className="flex flex-col max-w-[80%]">
-                    {!isPanelBlock && (
-                      <div className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm relative break-words ${msg.role === "user" ? "bg-blue-600 text-white rounded-br-none self-end" : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none self-start"}`}>
-                        <div>{msg.content}</div>
-                        {msg.role === "user" && <div className="text-[10px] text-gray-300 opacity-80 absolute right-2 bottom-1">{msg.time}</div>}
-                      </div>
-                    )}
-                    {isPanelBlock && (
-                      <div className="mt-1 w-full">
-                        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3 shadow-sm">{renderPanel(msg.panel)}</div>
-                        <div className="text-[10px] text-gray-400 mt-2 mb-2 px-2">{msg.time}</div>
-                      </div>
-                    )}
+      {/* FIXED PAGE */}
+      <div className="fixed inset-0 flex flex-col w-full h-full">
+        {/* CHAT + PANELS */}
+        <main
+          className="flex-1 flex flex-col overflow-hidden"
+          style={{
+            transform: menuOpen ? "translateX(70%)" : "translateX(0)",
+            filter: menuOpen ? "blur(2px)" : "none",
+            transition: "all 0.5s",
+          }}
+        >
+          <div
+            ref={chatRef}
+            onScroll={handleScroll}
+            className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
+          >
+            <div className="max-w-3xl mx-auto flex flex-col gap-4">
+              {messages.map((msg, i) => {
+                const isPanelBlock = Boolean(msg.panel);
+                return (
+                  <div
+                    key={msg.id}
+                    ref={(el) => (messageRefs.current[i] = el)}
+                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                  >
+                    <div className="flex flex-col max-w-[80%]">
+                      {msg.content && !isPanelBlock && (
+                        <div
+                          className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
+                            msg.role === "user"
+                              ? "bg-blue-600 text-white rounded-br-none"
+                              : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
+                          }`}
+                        >
+                          {msg.content}
+                          {msg.role === "user" && (
+                            <span className="text-[10px] text-gray-300 ml-2">{msg.time}</span>
+                          )}
+                        </div>
+                      )}
+                      {isPanelBlock && (
+                        <div className="mt-1 w-full">
+                          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3 shadow-sm">
+                            {renderPanel(msg.panel)}
+                          </div>
+                          <div className="text-[10px] text-gray-400 mt-2 mb-2 px-2">{msg.time}</div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          </div>
+        </main>
+
+        {/* DYNAMIC SUGGESTION CARD */}
+        <div className="w-full px-4 z-40 pointer-events-none">
+          <div className="max-w-3xl mx-auto pointer-events-auto">
+            <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
           </div>
         </div>
-      </main>
 
-      {showScrollDown && (
-        <button onClick={() => scrollToBottom("smooth")} className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg">
-          <FaArrowDown />
-        </button>
-      )}
-
-      <div className="fixed bottom-16 left-0 w-full px-4 z-40 pointer-events-none">
-        <div className="max-w-3xl mx-auto pointer-events-auto">
-          <DynamicSuggestionCard suggestions={[]} onSend={handleSend} isTyping={input.trim().length > 0} />
-        </div>
-      </div>
-
-      <div className="fixed bottom-0 left-0 w-full z-50">
-        <div className="max-w-3xl mx-auto px-4">
+        {/* CHAT FOOTER FULL WIDTH */}
+        <div className="w-full px-4 py-2 bg-gray-900 border-t border-gray-700 flex justify-center items-center z-50">
           <EstateChatFooter input={input} setInput={setInput} onSend={() => handleSend()} onAction={handleAction} />
         </div>
       </div>
+
+      {showScrollDown && (
+        <button
+          onClick={() => scrollToBottom("smooth")}
+          className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
+        >
+          <FaArrowDown />
+        </button>
+      )}
     </LayoutWrapper>
   );
 }
