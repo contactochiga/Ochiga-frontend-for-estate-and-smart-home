@@ -359,20 +359,22 @@ export default function AIDashboard() {
 
   return (
     <LayoutWrapper menuOpen={menuOpen}>
+      {/* HAMBURGER */}
       <header className="absolute top-4 left-4 z-50">
         <HamburgerMenu onToggle={(o: boolean) => setMenuOpen(o)} />
       </header>
 
-      {/* SLIDING CONTAINER */}
-      <div
-        className="relative flex flex-col h-full w-full transition-all duration-500"
-        style={{
-          transform: menuOpen ? "translateX(70%)" : "translateX(0)",
-          filter: menuOpen ? "blur(2px)" : "none",
-        }}
-      >
-        {/* CHAT AREA */}
-        <main className="flex-1 flex flex-col overflow-hidden">
+      {/* FIXED PAGE */}
+      <div className="fixed inset-0 flex flex-col w-full h-full">
+        {/* CHAT + PANELS */}
+        <main
+          className="flex-1 flex flex-col overflow-hidden"
+          style={{
+            transform: menuOpen ? "translateX(70%)" : "translateX(0)",
+            filter: menuOpen ? "blur(2px)" : "none",
+            transition: "all 0.5s",
+          }}
+        >
           <div
             ref={chatRef}
             onScroll={handleScroll}
@@ -381,7 +383,6 @@ export default function AIDashboard() {
             <div className="max-w-3xl mx-auto flex flex-col gap-4">
               {messages.map((msg, i) => {
                 const isPanelBlock = Boolean(msg.panel);
-
                 return (
                   <div
                     key={msg.id}
@@ -403,7 +404,6 @@ export default function AIDashboard() {
                           )}
                         </div>
                       )}
-
                       {isPanelBlock && <div className="mt-1 w-full">{renderPanel(msg.panel)}</div>}
                     </div>
                   </div>
