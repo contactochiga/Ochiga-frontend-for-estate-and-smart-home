@@ -42,15 +42,11 @@ export default function EstateDashboard() {
       minute: "2-digit",
     });
 
-    // ======================================================
-    // PANEL REQUEST — Replace whole block
-    // ======================================================
+    // ===== PANEL REQUEST — replace block =====
     if (panel) {
       setMessages((prev) => {
-        // Remove ANY old blocks for this panel
         const cleaned = prev.filter((m) => m.panel !== panel);
 
-        // Create FRESH user bubble
         const userMsg: ChatMessage = {
           role: "user",
           content: message,
@@ -59,7 +55,6 @@ export default function EstateDashboard() {
           time: now,
         };
 
-        // Create FRESH assistant bubble
         const assistantMsg: ChatMessage = {
           role: "assistant",
           content: `Processing "${message}"...`,
@@ -68,7 +63,6 @@ export default function EstateDashboard() {
           time: now,
         };
 
-        // Create FRESH panel block
         const panelMsg: ChatMessage = {
           role: "assistant",
           content: "",
@@ -92,23 +86,23 @@ export default function EstateDashboard() {
       return;
     }
 
-    // ======================================================
-    // NORMAL CHAT MESSAGE
-    // ======================================================
-    const userMsg: ChatMessage = {
-      role: "user",
-      content: message,
-      id: createId(),
-      panel: null,
-      time: now,
-    };
+    // ===== Normal chat bubble =====
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: message,
+        id: createId(),
+        panel: null,
+        time: now,
+      },
+    ]);
 
-    setMessages((prev) => [...prev, userMsg]);
     setInput("");
   };
 
   // ======================================================
-  // PANEL RENDER SYSTEM
+  // PANEL RENDER
   // ======================================================
   const renderPanel = (panel: string | null | undefined) => {
     switch (panel) {
@@ -132,58 +126,66 @@ export default function EstateDashboard() {
     <LayoutWrapper>
       <HamburgerMenu />
 
-      <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
-        <div
-          ref={chatRef}
-          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
-        >
-          <div className="max-w-3xl mx-auto flex flex-col gap-4">
+      {/* EVERYTHING that gets pushed by sidebar */}
+      <div className="pushable min-h-screen flex flex-col relative">
+        <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
 
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div className="flex flex-col max-w-[80%]">
+          {/* CHAT SCROLL AREA */}
+          <div
+            ref={chatRef}
+            className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-40 space-y-4 scroll-smooth"
+          >
+            <div className="max-w-3xl mx-auto flex flex-col gap-4">
+              {messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div className="flex flex-col max-w-[80%]">
 
-                  {/* CHAT BUBBLES */}
-                  {msg.panel == null && (
-                    <>
-                      <div
-                        className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
-                          msg.role === "user"
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
+                    {/* TEXT BUBBLES */}
+                    {msg.panel == null && (
+                      <>
+                        <div
+                          className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
+                            msg.role === "user"
+                              ? "bg-blue-600 text-white rounded-br-none"
+                              : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
+                          }`}
+                        >
+                          {msg.content}
+                        </div>
+                        <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">
+                          {msg.time}
+                        </div>
+                      </>
+                    )}
 
-                      <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">
-                        {msg.time}
-                      </div>
-                    </>
-                  )}
-
-                  {/* PANEL */}
-                  {msg.role === "assistant" && msg.panel && (
-                    <div className="mt-1">{renderPanel(msg.panel)}</div>
-                  )}
+                    {/* PANEL BLOCK */}
+                    {msg.role === "assistant" && msg.panel && (
+                      <div className="mt-1">{renderPanel(msg.panel)}</div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-
+              ))}
+            </div>
           </div>
-        </div>
 
-        <DynamicSuggestionCard
-          suggestions={[]}
-          isTyping={input.trim().length > 0}
-          onSend={handleSend}
-        />
+          {/* DYNAMIC SUGGESTION CARD — FIXED ABOVE FOOTER */}
+          <div className="fixed bottom-[92px] left-0 w-full z-40 flex justify-center shift-with-sidebar pointer-events-none">
+            <DynamicSuggestionCard
+              suggestions={[]}
+              isTyping={input.trim().length > 0}
+              onSend={handleSend}
+            />
+          </div>
 
-        <EstateChatFooter input={input} setInput={setInput} onSend={handleSend} />
-      </main>
+          {/* FOOTER BAR */}
+          <div className="shift-with-sidebar z-50">
+            <EstateChatFooter input={input} setInput={setInput} onSend={handleSend} />
+          </div>
+        </main>
+      </div>
     </LayoutWrapper>
   );
 }
