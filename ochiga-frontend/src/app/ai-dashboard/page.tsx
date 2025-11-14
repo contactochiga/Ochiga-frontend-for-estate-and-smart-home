@@ -36,8 +36,8 @@ type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
-  panel?: string | null; // the panel this message *opens* (only for assistant panel block)
-  panelTag?: string | null; // grouping tag used to move blocks (user + assistant + panel)
+  panel?: string | null;
+  panelTag?: string | null;
   time: string;
 };
 
@@ -60,17 +60,14 @@ export default function AIDashboard() {
   const [showScrollDown, setShowScrollDown] = useState(false);
   const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // helper to create id
   const createId = () => Math.random().toString(36).substring(2, 9);
 
-  // is user near bottom?
   const isAtBottom = () => {
     if (!chatRef.current) return true;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
     return scrollTop + clientHeight >= scrollHeight - 100;
   };
 
-  // update showScrollDown whenever messages change
   useEffect(() => {
     if (!chatRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
@@ -78,7 +75,6 @@ export default function AIDashboard() {
     setShowScrollDown(!atBottom);
   }, [messages]);
 
-  // scroll handler for user manual scrolling
   const handleScroll = () => {
     if (!chatRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
@@ -86,7 +82,6 @@ export default function AIDashboard() {
     setShowScrollDown(!atBottom);
   };
 
-  // scroll to bottom helper (smooth)
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (!chatRef.current) return;
     chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior });
@@ -95,34 +90,28 @@ export default function AIDashboard() {
 
   const handleMicClick = () => (listening ? stopListening() : startListening());
 
-  // MOVE existing panel block (user+assistant+panel) to bottom (update times)
   const movePanelBlockToBottom = (panelTag: string) => {
     setMessages((prev) => {
-      // collect messages with panelTag
       const grouped = prev.filter((m) => m.panelTag === panelTag);
-      if (!grouped.length) return prev; // nothing to do
+      if (!grouped.length) return prev;
 
-      // remove those messages from original array
       const filtered = prev.filter((m) => m.panelTag !== panelTag);
 
-      // update timestamps for moved group
       const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       const updatedGroup = grouped.map((m) => ({ ...m, time: now }));
 
       return [...filtered, ...updatedGroup];
     });
 
-    // after state update, scroll if user was at bottom
     setTimeout(() => {
       if (isAtBottom()) scrollToBottom();
       else setShowScrollDown(true);
     }, 120);
   };
 
-  // Append a fresh panel block (user + assistant + panel)
   const appendPanelBlock = (userText: string, assistantReply: string, panel: string) => {
     const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const tag = panel; // using panel string as tag (should be unique per panel)
+    const tag = panel;
 
     const userMsg: ChatMessage = {
       id: createId(),
@@ -145,7 +134,7 @@ export default function AIDashboard() {
     const panelMsg: ChatMessage = {
       id: createId(),
       role: "assistant",
-      content: "", // panel itself renders below the bubble
+      content: "",
       panel,
       panelTag: tag,
       time: now,
@@ -153,16 +142,16 @@ export default function AIDashboard() {
 
     setMessages((prev) => [...prev, userMsg, assistantMsg, panelMsg]);
 
-    // scroll logic: auto scroll only if user at bottom
     setTimeout(() => {
       if (isAtBottom()) scrollToBottom();
       else setShowScrollDown(true);
     }, 120);
   };
 
-  // Unified action handler
-  const handleAction = (actions: Array<{ type: string; action: string; target: string }>, userMessage?: string) => {
-    // we'll process each action sequentially; if panel commands exist we'll open/move them
+  const handleAction = (
+    actions: Array<{ type: string; action: string; target: string }>,
+    userMessage?: string
+  ) => {
     actions.forEach((a) => {
       let reply = "I didn’t quite get that. Can you say it again?";
       let panel: string | null = null;
@@ -184,38 +173,34 @@ export default function AIDashboard() {
           reply = "Scanning for nearby devices…";
           panel = "devices";
         }
-      } else if (a.type === "schedule") {
-        if (a.action === "create" && a.target === "visitor") {
-          reply = "Sure. What time should I schedule your visitor?";
-          panel = "visitors";
-        }
-      } else if (a.type === "info") {
-        if (a.action === "query" && a.target === "status") {
-          reply = "Your home is secure, power is stable, and the network is strong.";
-          panel = null;
-        }
-      } else if (a.type === "system") {
-        if (a.action === "shutdown" && a.target === "assistant") {
-          reply = "Alright. Ochiga Assistant signing off.";
-          panel = null;
-        }
       }
 
-      // If userMessage provided, we will use it as the user's bubble content
+      if (a.type === "schedule" && a.target === "visitor") {
+        reply = "Sure. What time should I schedule your visitor?";
+        panel = "visitors";
+      }
+
+      if (a.type === "info" && a.target === "status") {
+        reply = "Your home is secure, power is stable, and the network is strong.";
+        panel = null;
+      }
+
+      if (a.type === "system" && a.target === "assistant") {
+        reply = "Alright. Ochiga Assistant signing off.";
+        panel = null;
+      }
+
       const userText = userMessage ?? `${a.action} ${a.target}`;
 
-      // If this panel already exists (has a panelTag in messages), move that group to bottom
       if (panel) {
         const exists = messages.some((m) => m.panelTag === panel);
-        if (exists) {
-          movePanelBlockToBottom(panel);
-        } else {
-          appendPanelBlock(userText, reply, panel);
-        }
+        if (exists) movePanelBlockToBottom(panel);
+        else appendPanelBlock(userText, reply, panel);
+
         setActivePanel(panel);
       } else {
-        // Non-panel reply: append user + assistant simple messages
         const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
         const userMsg: ChatMessage = {
           id: createId(),
           role: "user",
@@ -224,6 +209,7 @@ export default function AIDashboard() {
           panelTag: null,
           time: now,
         };
+
         const assistantMsg: ChatMessage = {
           id: createId(),
           role: "assistant",
@@ -232,6 +218,7 @@ export default function AIDashboard() {
           panelTag: null,
           time: now,
         };
+
         setMessages((prev) => [...prev, userMsg, assistantMsg]);
 
         setTimeout(() => {
@@ -239,84 +226,83 @@ export default function AIDashboard() {
           else setShowScrollDown(true);
         }, 120);
 
-        // speak response
         speak(reply);
       }
     });
   };
 
-  // Unified send handler for typed and spoken messages
   function handleSend(text?: string, spoken = false) {
     const messageText = (text ?? input).trim();
     if (!messageText) return;
 
     setInput("");
 
-    // detect panel intent
     const panel = detectPanelType(messageText);
 
-    // map simple text commands to actions
     const actions: Array<{ type: string; action: string; target: string }> = [];
     const lower = messageText.toLowerCase();
 
     if (lower.includes("light")) actions.push({ type: "device", action: "turn_on", target: "light" });
-    if (lower.includes("ac") || lower.includes("air conditioner")) actions.push({ type: "device", action: "turn_on", target: "ac" });
+    if (lower.includes("ac")) actions.push({ type: "device", action: "turn_on", target: "ac" });
     if (lower.includes("door")) actions.push({ type: "device", action: "open", target: "door" });
     if (lower.includes("camera")) actions.push({ type: "device", action: "turn_on", target: "camera" });
     if (lower.includes("visitor")) actions.push({ type: "schedule", action: "create", target: "visitor" });
     if (lower.includes("status")) actions.push({ type: "info", action: "query", target: "status" });
-    if (lower.includes("shut down") || lower.includes("sleep")) actions.push({ type: "system", action: "shutdown", target: "assistant" });
+    if (lower.includes("shut down") || lower.includes("sleep"))
+      actions.push({ type: "system", action: "shutdown", target: "assistant" });
+
     if (
       lower.includes("connect device") ||
       lower.includes("add device") ||
-      lower.includes("scan devices") ||
-      lower.includes("discover device") ||
-      lower.includes("pair device") ||
-      lower.includes("new device")
-    )
+      lower.includes("scan") ||
+      lower.includes("discover") ||
+      lower.includes("pair")
+    ) {
       actions.push({ type: "device", action: "discover", target: "devices" });
+    }
 
     if (actions.length) {
       handleAction(actions, messageText);
-    } else {
-      // fallback: just append user + assistant (and set active panel if detected)
-      const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-      const userMsg: ChatMessage = {
-        id: createId(),
-        role: "user",
-        content: messageText,
-        panel: null,
-        panelTag: null,
-        time: now,
-      };
-      const replyMsg: ChatMessage = {
-        id: createId(),
-        role: "assistant",
-        content: `Okay — I processed: "${messageText}".`,
-        panel: panel ?? null,
-        panelTag: panel ?? null,
-        time: now,
-      };
+      return;
+    }
 
-      // If panel detected and already exists, move existing; else append new pair (+ panel if panel exists)
-      if (panel) {
-        const exists = messages.some((m) => m.panelTag === panel);
-        if (exists) {
-          // move existing block to bottom
-          movePanelBlockToBottom(panel);
-        } else {
-          // append user + assistant + panel block
-          appendPanelBlock(messageText, replyMsg.content, panel);
-          setActivePanel(panel);
-        }
+    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    const userMsg: ChatMessage = {
+      id: createId(),
+      role: "user",
+      content: messageText,
+      panel: null,
+      panelTag: null,
+      time: now,
+    };
+
+    const replyMsg: ChatMessage = {
+      id: createId(),
+      role: "assistant",
+      content: `Okay — I processed: "${messageText}".`,
+      panel: panel ?? null,
+      panelTag: panel ?? null,
+      time: now,
+    };
+
+    if (panel) {
+      const exists = messages.some((m) => m.panelTag === panel);
+      if (exists) {
+        movePanelBlockToBottom(panel);
       } else {
-        setMessages((prev) => [...prev, userMsg, replyMsg]);
-        setTimeout(() => {
-          if (isAtBottom()) scrollToBottom();
-          else setShowScrollDown(true);
-        }, 120);
-        if (spoken) speak(replyMsg.content);
+        appendPanelBlock(messageText, replyMsg.content, panel);
+        setActivePanel(panel);
       }
+    } else {
+      setMessages((prev) => [...prev, userMsg, replyMsg]);
+
+      setTimeout(() => {
+        if (isAtBottom()) scrollToBottom();
+        else setShowScrollDown(true);
+      }, 120);
+
+      if (spoken) speak(replyMsg.content);
     }
   }
 
@@ -329,7 +315,6 @@ export default function AIDashboard() {
     "Connect new device",
   ];
 
-  // Render panel based on panel key
   const renderPanel = (panel: string | null | undefined) => {
     switch (panel) {
       case "lights":
@@ -371,12 +356,8 @@ export default function AIDashboard() {
     }
   };
 
-  // When messages state changes, if user is at bottom we auto-scroll
   useEffect(() => {
-    if (isAtBottom()) {
-      scrollToBottom("auto");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (isAtBottom()) scrollToBottom("auto");
   }, [messages.length]);
 
   return (
@@ -392,56 +373,77 @@ export default function AIDashboard() {
           className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
         >
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
-            {messages.map((msg, i) => (
-              <div
-                key={msg.id}
-                ref={(el) => (messageRefs.current[i] = el)}
-                data-panel={msg.panel || ""}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div className="flex flex-col max-w-[80%]">
-                  <div
-                    className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm transition-all duration-300 ${
-                      msg.role === "user"
-                        ? "bg-blue-600 text-white rounded-br-none"
-                        : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
+            {messages.map((msg, i) => {
+              const isPanelBlock = Boolean(msg.panel);
 
-                  {/* time stamp under bubble */}
-                  <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">
-                    {msg.time}
-                  </div>
+              return (
+                <div
+                  key={msg.id}
+                  ref={(el) => (messageRefs.current[i] = el)}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div className="flex flex-col max-w-[80%]">
+                    {/* normal bubble text */}
+                    {msg.content && (
+                      <div
+                        className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
+                          msg.role === "user"
+                            ? "bg-blue-600 text-white rounded-br-none"
+                            : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    )}
 
-                  {/* Panel injection: only render when this message is the assistant panel block */}
-                  {msg.panel && renderPanel(msg.panel)}
+                    {/* TIMESTAMP RULES */}
+                    {/* USER & NORMAL ASSISTANT messages keep timestamp */}
+                    {/* PANEL BLOCK → timestamp moves BELOW PANEL, so skip here */}
+                    {!isPanelBlock && (
+                      <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">{msg.time}</div>
+                    )}
+
+                    {/* PANEL SECTION (assistant panel block) */}
+                    {isPanelBlock && (
+                      <>
+                        {renderPanel(msg.panel)}
+
+                        {/* TIMESTAMP BELOW PANEL (Option 2) */}
+                        <div className="text-[10px] text-gray-400 mt-2 mb-2 px-2">
+                          {msg.time}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         {showScrollDown && (
           <button
             onClick={() => scrollToBottom("smooth")}
-            className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg transition"
-            aria-label="Scroll to latest message"
+            className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
           >
             <FaArrowDown />
           </button>
         )}
       </main>
 
-      <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
+      <DynamicSuggestionCard
+        suggestions={suggestions}
+        onSend={handleSend}
+        isTyping={input.length > 0}
+      />
+
       <ChatFooter
         input={input}
         setInput={setInput}
         listening={listening}
         onMicClick={handleMicClick}
         onSend={() => handleSend(undefined, false)}
-        onAction={handleAction} // Unified action handler
+        onAction={handleAction}
       />
     </LayoutWrapper>
   );
