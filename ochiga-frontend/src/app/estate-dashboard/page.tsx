@@ -1,3 +1,4 @@
+// ochiga-frontend/src/app/estate-dashboard/page.tsx
 "use client";
 
 import { useRef, useState, useEffect } from "react";
@@ -278,15 +279,20 @@ export default function EstateDashboard() {
         <HamburgerMenu onToggle={(o: boolean) => setMenuOpen(o)} />
       </header>
 
+      {/* MAIN (this element uses transform when menuOpen — keep transform here) */}
       <main
         className={`flex-1 flex flex-col justify-between relative overflow-hidden transition-all duration-500 ${
           menuOpen ? "translate-x-60 blur-sm" : "translate-x-0"
         }`}
       >
+        {/* CHAT SCROLL CONTAINER
+            - keep footers outside of this main (below) so footers are not affected by transforms
+            - add bottom padding to avoid content being hidden under the fixed footer
+        */}
         <div
           ref={chatRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
+          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-40 space-y-4 scroll-smooth"
         >
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
             {messages.map((msg, i) => {
@@ -335,37 +341,46 @@ export default function EstateDashboard() {
             })}
           </div>
         </div>
-
-        {/* FLOATING SCROLL-TO-BOTTOM BUTTON */}
-    {showScrollDown && (
-      <button
-        onClick={() => scrollToBottom("smooth")}
-        className="fixed bottom-32 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
-      >
-        <FaArrowDown />
-      </button>
-    )}
-
-    {/* FIXED DYNAMIC SUGGESTION CARD */}
-    <div className="fixed bottom-20 left-0 w-full px-4 z-40">
-      <DynamicSuggestionCard
-        suggestions={[]}
-        onSend={handleSend}
-        isTyping={input.trim().length > 0}
-      />
-    </div>
-
-        {/* FIXED FOOTER */}
-    <div className="fixed bottom-0 left-0 w-full z-50">
-      <EstateChatFooter
-        input={input}
-        setInput={setInput}
-        onSend={() => handleSend()}
-        onAction={handleAction}
-      />
-    </div>
-
       </main>
+
+      {/* ---------- IMPORTANT: fixed elements are placed OUTSIDE of <main> so they are fixed to the viewport ----------
+          When an ancestor has CSS transform (like translate-x-60), position:fixed children inside it are no longer
+          fixed to the viewport in some browsers. Placing them here (outside main) ensures they stay at the screen bottom.
+      */}
+
+      {/* FLOATING SCROLL-TO-BOTTOM BUTTON */}
+      {showScrollDown && (
+        <button
+          onClick={() => scrollToBottom("smooth")}
+          className="fixed bottom-28 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
+        >
+          <FaArrowDown />
+        </button>
+      )}
+
+      {/* FIXED DYNAMIC SUGGESTION CARD */}
+      <div className="fixed bottom-16 left-0 w-full px-4 z-40 pointer-events-none">
+        {/* pointer-events-none on wrapper to avoid blocking clicks; inner component should re-enable pointer-events */}
+        <div className="max-w-3xl mx-auto pointer-events-auto">
+          <DynamicSuggestionCard
+            suggestions={[]}
+            onSend={handleSend}
+            isTyping={input.trim().length > 0}
+          />
+        </div>
+      </div>
+
+      {/* FIXED FOOTER */}
+      <div className="fixed bottom-0 left-0 w-full z-50">
+        <div className="max-w-3xl mx-auto px-4">
+          <EstateChatFooter
+            input={input}
+            setInput={setInput}
+            onSend={() => handleSend()}
+            onAction={handleAction}
+          />
+        </div>
+      </div>
     </LayoutWrapper>
   );
 }
