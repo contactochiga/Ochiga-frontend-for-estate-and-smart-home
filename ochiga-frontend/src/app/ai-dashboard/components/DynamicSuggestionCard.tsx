@@ -14,22 +14,35 @@ import {
   FiKey,
 } from "react-icons/fi";
 
+interface ResidentNotification {
+  type: "alert" | "video" | "access" | "message";
+  title: string;
+  description?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+interface Suggestion {
+  id: string;
+  title: string;
+  subtitle?: string;
+  payload?: string;
+}
+
 interface Props {
   onSend: (payload: string) => void;
   isTyping?: boolean;
-  notification?: {
-    type: "alert" | "video" | "access" | "message";
-    title: string;
-    description?: string;
-    actionLabel?: string;
-    onAction?: () => void;
-  } | null;
   assistantActive?: boolean;
+  notification?: ResidentNotification | null;
 }
 
 /**
  * RESIDENT DynamicSuggestionCard
- * EXACT estate UI + resident suggestions
+ * - EXACT estate card UI
+ * - Resident suggestion content
+ * - Real-time notifications
+ * - Hide on scroll / reappear on idle
+ * - Light drift auto-scroll effect
  */
 export default function ResidentDynamicSuggestionCard({
   onSend,
@@ -39,40 +52,97 @@ export default function ResidentDynamicSuggestionCard({
 }: Props) {
   const [visible, setVisible] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
-  const lastY = useRef<number>(typeof window !== "undefined" ? window.scrollY : 0);
+
+  const lastY = useRef<number>(
+    typeof window !== "undefined" ? window.scrollY : 0
+  );
   const hideTimer = useRef<number | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // ---------- RESIDENT Suggestions ----------
-  const residentSuggestions = useMemo(
+  // 🔹 Slow drifting scroll animation
+  const driftTimer = useRef<number | null>(null);
+
+  const startDrift = () => {
+    if (!scrollRef.current) return;
+
+    const container = scrollRef.current;
+    let direction = 1;
+
+    driftTimer.current = window.setInterval(() => {
+      if (!container) return;
+
+      container.scrollLeft += 0.25 * direction;
+
+      // reverse direction at edges
+      if (container.scrollLeft + container.clientWidth >= container.scrollWidth - 2) {
+        direction = -1;
+      }
+      if (container.scrollLeft <= 1) {
+        direction = 1;
+      }
+    }, 18); // slow & smooth
+  };
+
+  const stopDrift = () => {
+    if (driftTimer.current) window.clearInterval(driftTimer.current);
+  };
+
+  useEffect(() => {
+    startDrift();
+    return stopDrift;
+  }, []);
+
+  // --------------------------------------------------
+  // 🔹 Resident Suggestions (exactly like your app logic)
+  // --------------------------------------------------
+  const residentSuggestions = useMemo<Suggestion[]>(
     () => [
-      { id: "r1", title: "Turn On Lights", subtitle: "living room bulbs", payload: "turn_on_living_room_lights" },
-      { id: "r2", title: "Turn Off Lights", subtitle: "all rooms", payload: "turn_off_all_lights" },
-      { id: "r3", title: "View CCTV Feed", subtitle: "living room camera", payload: "view_cctv_feed" },
-      { id: "r4", title: "Check Device Status", subtitle: "smart home devices", payload: "check_device_status" },
-      { id: "r5", title: "Lock All Doors", subtitle: "security lock", payload: "lock_all_doors" },
+      {
+        id: "r1",
+        title: "Turn On Living Room Lights",
+        subtitle: "Smart bulb automation",
+        payload: "turn_on_living_room_lights",
+      },
+      {
+        id: "r2",
+        title: "Turn Off All Lights",
+        subtitle: "whole apartment lights",
+        payload: "turn_off_all_lights",
+      },
+      {
+        id: "r3",
+        title: "View Indoor Camera",
+        subtitle: "living room CCTV",
+        payload: "view_indoor_cctv",
+      },
+      {
+        id: "r4",
+        title: "Check Device Status",
+        subtitle: "active smart devices",
+        payload: "check_device_status",
+      },
+      {
+        id: "r5",
+        title: "Secure Doors",
+        subtitle: "lock all smart locks",
+        payload: "lock_all_doors",
+      },
     ],
     []
   );
 
   const displayList = residentSuggestions;
 
-  // ---------- Scroll visibility ----------
+  // --------------------------------------------------
+  // 🔹 Hide on scroll / show on idle
+  // --------------------------------------------------
   useEffect(() => {
-    if (isTyping || assistantActive) {
-      setVisible(false);
-      return;
-    }
-    setVisible(true);
-  }, [isTyping, assistantActive]);
-
-  useEffect(() => {
-    const onScroll = () => {
+    const handler = () => {
       const currentY = window.scrollY || 0;
-      const delta = currentY - (lastY.current || 0);
+      const delta = currentY - lastY.current;
 
-      if (delta > 10) setVisible(false);
-      else if (delta < -10) setVisible(true);
+      if (delta > 14) setVisible(false);
+      else if (delta < -14) setVisible(true);
 
       lastY.current = currentY;
 
@@ -82,49 +152,55 @@ export default function ResidentDynamicSuggestionCard({
       }, 280);
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("scroll", handler, { passive: true });
+
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", handler);
       if (hideTimer.current) window.clearTimeout(hideTimer.current);
     };
   }, [isTyping, assistantActive]);
 
-  // ---------- Notification ----------
+  // --------------------------------------------------
+  // 🔹 Notification pop-up (real-time)
+  // --------------------------------------------------
   useEffect(() => {
-    if (notification) {
-      setShowNotification(true);
-      const t = window.setTimeout(() => setShowNotification(false), 7000);
-      return () => clearTimeout(t);
-    }
+    if (!notification) return;
+
+    setShowNotification(true);
+    const t = window.setTimeout(() => setShowNotification(false), 7000);
+    return () => clearTimeout(t);
   }, [notification]);
 
-  const handleClick = (s: any) => {
-    const payload = s.payload ?? s.title;
-    onSend(payload);
+  const handleClick = (s: Suggestion) => {
+    onSend(s.payload ?? s.title);
   };
 
-  // ---------- Icons ----------
-  const getIcon = (s: any) => {
+  // --------------------------------------------------
+  // 🔹 Icons
+  // --------------------------------------------------
+  const getIcon = (s: Suggestion) => {
     const key = s.payload?.toLowerCase() ?? "";
-    if (key.includes("light")) return <FiCpu size={16} className="text-gray-400" />;
-    if (key.includes("device")) return <FiCpu size={16} className="text-gray-400" />;
-    if (key.includes("power")) return <FiZap size={16} className="text-gray-400" />;
+    if (key.includes("light")) return <FiZap size={16} className="text-gray-400" />;
     if (key.includes("camera")) return <FiCamera size={16} className="text-gray-400" />;
     if (key.includes("lock") || key.includes("door")) return <FiLock size={16} className="text-gray-400" />;
-    if (key.includes("home")) return <FiHome size={16} className="text-gray-400" />;
+    if (key.includes("device")) return <FiCpu size={16} className="text-gray-400" />;
     return <FiKey size={16} className="text-gray-400" />;
   };
 
+  // --------------------------------------------------
+  // 🔹 RENDER COMPONENT
+  // --------------------------------------------------
+
   return (
     <>
-      {/* 🔔 Notification */}
+      {/* 🔔 REAL-TIME NOTIFICATION PANEL */}
       <AnimatePresence>
         {showNotification && notification && (
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 18 }}
-            transition={{ duration: 0.32 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ duration: 0.28 }}
             style={{
               bottom: `calc(96px + env(safe-area-inset-bottom))`,
               zIndex: 70,
@@ -136,13 +212,16 @@ export default function ResidentDynamicSuggestionCard({
                 <div className="flex-1">
                   <div className="font-semibold text-sm">{notification.title}</div>
                   {notification.description && (
-                    <div className="text-xs text-gray-400 mt-1">{notification.description}</div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      {notification.description}
+                    </div>
                   )}
                 </div>
+
                 {notification.actionLabel && (
                   <button
                     onClick={notification.onAction}
-                    className="px-3 py-1 rounded-full bg-blue-600 text-white text-xs shadow hover:bg-blue-700 transition"
+                    className="px-3 py-1 rounded-full bg-blue-600 text-white text-xs hover:bg-blue-700 transition"
                   >
                     {notification.actionLabel}
                   </button>
@@ -153,13 +232,13 @@ export default function ResidentDynamicSuggestionCard({
         )}
       </AnimatePresence>
 
-      {/* ⭐ Suggestion Row */}
+      {/* ⭐ RESIDENT SUGGESTIONS ROW */}
       <AnimatePresence>
         {visible && !isTyping && displayList.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: 18 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 18 }}
+            exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.28 }}
             style={{
               bottom: `calc(84px + env(safe-area-inset-bottom))`,
@@ -183,7 +262,7 @@ export default function ResidentDynamicSuggestionCard({
                   whileTap={{ scale: 0.97 }}
                   className="flex-none min-w-[220px] bg-gray-800 text-gray-100 rounded-2xl shadow border border-gray-700 p-3 text-left flex items-start gap-2 transition scroll-snap-align-start hover:bg-gray-750"
                   style={{
-                    opacity: assistantActive ? 0.6 : 1,
+                    opacity: assistantActive ? 0.55 : 1,
                   }}
                 >
                   {getIcon(s)}
