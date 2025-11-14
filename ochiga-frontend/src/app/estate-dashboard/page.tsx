@@ -355,7 +355,7 @@ export default function EstateDashboard() {
       />
     </div>
 
-    {/* FIXED FOOTER */}
+        {/* FIXED FOOTER */}
     <div className="fixed bottom-0 left-0 w-full z-50">
       <EstateChatFooter
         input={input}
@@ -365,5 +365,7 @@ export default function EstateDashboard() {
       />
     </div>
 
-  </main>
-</LayoutWrapper>
+      </main>
+    </LayoutWrapper>
+  );
+}
