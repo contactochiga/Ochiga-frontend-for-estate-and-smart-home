@@ -55,10 +55,11 @@ export default function AIDashboard() {
   ]);
 
   const [activePanel, setActivePanel] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { listening, startListening, stopListening } = useSpeechRecognition(handleSend);
   const chatRef = useRef<HTMLDivElement | null>(null);
-  const [showScrollDown, setShowScrollDown] = useState(false);
   const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [showScrollDown, setShowScrollDown] = useState(false);
 
   const createId = () => Math.random().toString(36).substring(2, 9);
 
@@ -66,6 +67,12 @@ export default function AIDashboard() {
     if (!chatRef.current) return true;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
     return scrollTop + clientHeight >= scrollHeight - 100;
+  };
+
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
+    if (!chatRef.current) return;
+    chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior });
+    setShowScrollDown(false);
   };
 
   useEffect(() => {
@@ -82,12 +89,6 @@ export default function AIDashboard() {
     setShowScrollDown(!atBottom);
   };
 
-  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    if (!chatRef.current) return;
-    chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior });
-    setShowScrollDown(false);
-  };
-
   const handleMicClick = () => (listening ? stopListening() : startListening());
 
   const movePanelBlockToBottom = (panelTag: string) => {
@@ -96,8 +97,8 @@ export default function AIDashboard() {
       if (!grouped.length) return prev;
 
       const filtered = prev.filter((m) => m.panelTag !== panelTag);
-
       const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
       const updatedGroup = grouped.map((m) => ({ ...m, time: now }));
 
       return [...filtered, ...updatedGroup];
@@ -110,8 +111,8 @@ export default function AIDashboard() {
   };
 
   const appendPanelBlock = (userText: string, assistantReply: string, panel: string) => {
-    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     const tag = panel;
+    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     const userMsg: ChatMessage = {
       id: createId(),
@@ -251,13 +252,7 @@ export default function AIDashboard() {
     if (lower.includes("shut down") || lower.includes("sleep"))
       actions.push({ type: "system", action: "shutdown", target: "assistant" });
 
-    if (
-      lower.includes("connect device") ||
-      lower.includes("add device") ||
-      lower.includes("scan") ||
-      lower.includes("discover") ||
-      lower.includes("pair")
-    ) {
+    if (lower.includes("connect device") || lower.includes("add device") || lower.includes("scan") || lower.includes("discover") || lower.includes("pair")) {
       actions.push({ type: "device", action: "discover", target: "devices" });
     }
 
@@ -361,12 +356,18 @@ export default function AIDashboard() {
   }, [messages.length]);
 
   return (
-    <LayoutWrapper>
+    <LayoutWrapper menuOpen={menuOpen}>
       <header className="absolute top-4 left-4 z-50">
-        <HamburgerMenu />
+        <HamburgerMenu onToggle={(o: boolean) => setMenuOpen(o)} />
       </header>
 
-      <main className="flex-1 flex flex-col justify-between relative overflow-hidden">
+      <main
+        className="flex-1 flex flex-col justify-between relative overflow-hidden transition-all duration-500"
+        style={{
+          transform: menuOpen ? "translateX(15rem)" : "translateX(0)",
+          filter: menuOpen ? "blur(2px)" : "none",
+        }}
+      >
         <div
           ref={chatRef}
           onScroll={handleScroll}
@@ -383,36 +384,27 @@ export default function AIDashboard() {
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div className="flex flex-col max-w-[80%]">
-                    {/* normal bubble text */}
-                    {msg.content && (
-                      <div
-                        className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
-                          msg.role === "user"
-                            ? "bg-blue-600 text-white rounded-br-none"
-                            : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
-                        }`}
-                      >
+                    {/* User Message */}
+                    {msg.role === "user" && (
+                      <div className="px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm bg-blue-600 text-white rounded-br-none self-end relative break-words">
+                        <div>{msg.content}</div>
+                        <div className="text-[10px] text-gray-300 opacity-80 absolute right-2 bottom-1">{msg.time}</div>
+                      </div>
+                    )}
+
+                    {/* Assistant / Panel Message */}
+                    {msg.role === "assistant" && !isPanelBlock && (
+                      <div className="px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none self-start break-words">
                         {msg.content}
                       </div>
                     )}
 
-                    {/* TIMESTAMP RULES */}
-                    {/* USER & NORMAL ASSISTANT messages keep timestamp */}
-                    {/* PANEL BLOCK → timestamp moves BELOW PANEL, so skip here */}
-                    {!isPanelBlock && (
-                      <div className="text-[10px] text-gray-400 mt-1 mb-2 px-2">{msg.time}</div>
-                    )}
-
-                    {/* PANEL SECTION (assistant panel block) */}
                     {isPanelBlock && (
-                      <>
-                        {renderPanel(msg.panel)}
-
-                        {/* TIMESTAMP BELOW PANEL (Option 2) */}
-                        <div className="text-[10px] text-gray-400 mt-2 mb-2 px-2">
-                          {msg.time}
+                      <div className="mt-1 w-full">
+                        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3 shadow-sm">
+                          {renderPanel(msg.panel)}
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -420,31 +412,39 @@ export default function AIDashboard() {
             })}
           </div>
         </div>
-
-        {showScrollDown && (
-          <button
-            onClick={() => scrollToBottom("smooth")}
-            className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
-          >
-            <FaArrowDown />
-          </button>
-        )}
       </main>
 
-      <DynamicSuggestionCard
-        suggestions={suggestions}
-        onSend={handleSend}
-        isTyping={input.length > 0}
-      />
+      {showScrollDown && (
+        <button
+          onClick={() => scrollToBottom("smooth")}
+          className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
+        >
+          <FaArrowDown />
+        </button>
+      )}
 
-      <ChatFooter
-        input={input}
-        setInput={setInput}
-        listening={listening}
-        onMicClick={handleMicClick}
-        onSend={() => handleSend(undefined, false)}
-        onAction={handleAction}
-      />
+      <div className="fixed bottom-16 left-0 w-full px-4 z-40 pointer-events-none">
+        <div className="max-w-3xl mx-auto pointer-events-auto">
+          <DynamicSuggestionCard
+            suggestions={suggestions}
+            onSend={handleSend}
+            isTyping={input.trim().length > 0}
+          />
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 w-full z-50">
+        <div className="max-w-3xl mx-auto px-4">
+          <ChatFooter
+            input={input}
+            setInput={setInput}
+            listening={listening}
+            onMicClick={handleMicClick}
+            onSend={() => handleSend(undefined, false)}
+            onAction={handleAction}
+          />
+        </div>
+      </div>
     </LayoutWrapper>
   );
 }
