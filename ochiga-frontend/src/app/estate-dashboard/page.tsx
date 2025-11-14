@@ -28,7 +28,7 @@ type ChatMessage = {
 export default function EstateDashboard() {
   const createId = () => Math.random().toString(36).substring(2, 9);
 
-  const [menuOpen, setMenuOpen] = useState(false); // ← for hamburger push
+  const [menuOpen, setMenuOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "sys-1",
@@ -279,20 +279,19 @@ export default function EstateDashboard() {
         <HamburgerMenu onToggle={(o: boolean) => setMenuOpen(o)} />
       </header>
 
-      {/* MAIN (this element uses transform when menuOpen — keep transform here) */}
+      {/* MAIN — identical ChatFooter behavior achieved by removing transform issues */}
       <main
-        className={`flex-1 flex flex-col justify-between relative overflow-hidden transition-all duration-500 ${
-          menuOpen ? "translate-x-60 blur-sm" : "translate-x-0"
-        }`}
+        className="flex-1 flex flex-col justify-between relative overflow-hidden transition-all duration-500"
+        style={{
+          transform: menuOpen ? "translateX(15rem)" : "translateX(0)",
+          filter: menuOpen ? "blur(2px)" : "none",
+        }}
       >
-        {/* CHAT SCROLL CONTAINER
-            - keep footers outside of this main (below) so footers are not affected by transforms
-            - add bottom padding to avoid content being hidden under the fixed footer
-        */}
+        {/* CHAT AREA — exact AI Dashboard spacing (pb-32) */}
         <div
           ref={chatRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-40 space-y-4 scroll-smooth"
+          className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
         >
           <div className="max-w-3xl mx-auto flex flex-col gap-4">
             {messages.map((msg, i) => {
@@ -318,7 +317,7 @@ export default function EstateDashboard() {
                       >
                         <div>{msg.content}</div>
 
-                        {/* ONLY USER TIMESTAMP */}
+                        {/* user timestamp only */}
                         {msg.role === "user" && (
                           <div className="text-[10px] text-gray-300 opacity-80 absolute right-2 bottom-1">
                             {msg.time}
@@ -327,11 +326,13 @@ export default function EstateDashboard() {
                       </div>
                     )}
 
-                    {/* PANEL (NO TIMESTAMP) */}
                     {isPanelBlock && (
                       <div className="mt-1 w-full">
                         <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3 shadow-sm">
                           {renderPanel(msg.panel)}
+                        </div>
+                        <div className="text-[10px] text-gray-400 mt-2 mb-2 px-2">
+                          {msg.time}
                         </div>
                       </div>
                     )}
@@ -343,24 +344,18 @@ export default function EstateDashboard() {
         </div>
       </main>
 
-      {/* ---------- IMPORTANT: fixed elements are placed OUTSIDE of <main> so they are fixed to the viewport ----------
-          When an ancestor has CSS transform (like translate-x-60), position:fixed children inside it are no longer
-          fixed to the viewport in some browsers. Placing them here (outside main) ensures they stay at the screen bottom.
-      */}
-
       {/* FLOATING SCROLL-TO-BOTTOM BUTTON */}
       {showScrollDown && (
         <button
           onClick={() => scrollToBottom("smooth")}
-          className="fixed bottom-28 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
+          className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
         >
           <FaArrowDown />
         </button>
       )}
 
-      {/* FIXED DYNAMIC SUGGESTION CARD */}
+      {/* FIXED DYNAMIC SUGGESTION CARD (AI-Dashboard identical) */}
       <div className="fixed bottom-16 left-0 w-full px-4 z-40 pointer-events-none">
-        {/* pointer-events-none on wrapper to avoid blocking clicks; inner component should re-enable pointer-events */}
         <div className="max-w-3xl mx-auto pointer-events-auto">
           <DynamicSuggestionCard
             suggestions={[]}
@@ -370,7 +365,7 @@ export default function EstateDashboard() {
         </div>
       </div>
 
-      {/* FIXED FOOTER */}
+      {/* FIXED FOOTER — EXACT AI DASHBOARD POSITIONING */}
       <div className="fixed bottom-0 left-0 w-full z-50">
         <div className="max-w-3xl mx-auto px-4">
           <EstateChatFooter
