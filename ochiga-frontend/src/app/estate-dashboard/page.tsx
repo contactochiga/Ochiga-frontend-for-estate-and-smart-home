@@ -1,5 +1,3 @@
-// ochiga-frontend/src/app/estate-dashboard/page.tsx
-
 "use client";
 
 import { useRef, useState, useEffect } from "react";
@@ -14,7 +12,7 @@ import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
 import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
 
 import { detectEstatePanelType } from "./utils/estatePanelDetection";
-import { FaArrowDown } from "react-icons/fa";
+import { FaArrowDown, FaLightbulb, FaWallet, FaVideo, FaBolt } from "react-icons/fa";
 
 type ChatMessage = {
   id: string;
@@ -69,7 +67,6 @@ export default function EstateDashboard() {
     setMessages((prev) => {
       const group = prev.filter((m) => m.panelTag === panelTag);
       if (!group.length) return prev;
-
       const rest = prev.filter((m) => m.panelTag !== panelTag);
       const t = nowTime();
       const updatedGroup = group.map((m) => ({ ...m, time: t, id: createId() }));
@@ -168,10 +165,10 @@ export default function EstateDashboard() {
   }
 
   const suggestions = [
-    "Check estate devices",
-    "View power status",
-    "Open accounting panel",
-    "Open community panel",
+    { title: "Check estate devices", icon: FaLightbulb, description: "Manage all devices across your estate" },
+    { title: "View power status", icon: FaBolt, description: "Monitor estate power and consumption" },
+    { title: "Open accounting panel", icon: FaWallet, description: "Track estate finances and payments" },
+    { title: "Open community panel", icon: FaVideo, description: "Manage visitor and community interactions" },
   ];
 
   const renderPanel = (panel: string | null | undefined) => {
@@ -195,14 +192,11 @@ export default function EstateDashboard() {
 
   return (
     <LayoutWrapper menuOpen={menuOpen}>
-      {/* HAMBURGER */}
       <header className="absolute top-4 left-4 z-50">
         <HamburgerMenu onToggle={(o: boolean) => setMenuOpen(o)} />
       </header>
 
-      {/* FIXED PAGE */}
       <div className="fixed inset-0 flex flex-col w-full h-full">
-        {/* CHAT + PANELS */}
         <main
           className="flex-1 flex flex-col overflow-hidden"
           style={{
@@ -227,17 +221,9 @@ export default function EstateDashboard() {
                   >
                     <div className="flex flex-col max-w-[80%]">
                       {msg.content && !isPanelBlock && (
-                        <div
-                          className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
-                            msg.role === "user"
-                              ? "bg-blue-600 text-white rounded-br-none"
-                              : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
-                          }`}
-                        >
+                        <div className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${msg.role === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"}`}>
                           {msg.content}
-                          {msg.role === "user" && (
-                            <span className="text-[10px] text-gray-300 ml-2">{msg.time}</span>
-                          )}
+                          {msg.role === "user" && <span className="text-[10px] text-gray-300 ml-2">{msg.time}</span>}
                         </div>
                       )}
                       {isPanelBlock && (
@@ -256,14 +242,14 @@ export default function EstateDashboard() {
           </div>
         </main>
 
-        {/* DYNAMIC SUGGESTION CARD */}
+        {/* Dynamic Suggestion Card */}
         <div className="w-full px-4 z-40 pointer-events-none">
           <div className="max-w-3xl mx-auto pointer-events-auto">
             <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
           </div>
         </div>
 
-        {/* CHAT FOOTER FULL WIDTH */}
+        {/* Chat Footer */}
         <div className="w-full px-4 py-2 bg-gray-900 border-t border-gray-700 flex justify-center items-center z-50">
           <EstateChatFooter input={input} setInput={setInput} onSend={() => handleSend()} onAction={handleAction} />
         </div>
