@@ -1,3 +1,4 @@
+// ochiga-frontend/src/app/ai-dashboard/page.tsx
 "use client";
 
 import { useRef, useState, useEffect } from "react";
@@ -55,11 +56,11 @@ export default function AIDashboard() {
   ]);
 
   const [activePanel, setActivePanel] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const { listening, startListening, stopListening } = useSpeechRecognition(handleSend);
   const chatRef = useRef<HTMLDivElement | null>(null);
-  const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const createId = () => Math.random().toString(36).substring(2, 9);
 
@@ -74,13 +75,6 @@ export default function AIDashboard() {
     chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior });
     setShowScrollDown(false);
   };
-
-  useEffect(() => {
-    if (!chatRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
-    const atBottom = scrollTop + clientHeight >= scrollHeight - 50;
-    setShowScrollDown(!atBottom);
-  }, [messages]);
 
   const handleScroll = () => {
     if (!chatRef.current) return;
@@ -97,8 +91,8 @@ export default function AIDashboard() {
       if (!grouped.length) return prev;
 
       const filtered = prev.filter((m) => m.panelTag !== panelTag);
-      const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
+      const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       const updatedGroup = grouped.map((m) => ({ ...m, time: now }));
 
       return [...filtered, ...updatedGroup];
@@ -111,8 +105,8 @@ export default function AIDashboard() {
   };
 
   const appendPanelBlock = (userText: string, assistantReply: string, panel: string) => {
-    const tag = panel;
     const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const tag = panel;
 
     const userMsg: ChatMessage = {
       id: createId(),
@@ -283,12 +277,9 @@ export default function AIDashboard() {
 
     if (panel) {
       const exists = messages.some((m) => m.panelTag === panel);
-      if (exists) {
-        movePanelBlockToBottom(panel);
-      } else {
-        appendPanelBlock(messageText, replyMsg.content, panel);
-        setActivePanel(panel);
-      }
+      if (exists) movePanelBlockToBottom(panel);
+      else appendPanelBlock(messageText, replyMsg.content, panel);
+      setActivePanel(panel);
     } else {
       setMessages((prev) => [...prev, userMsg, replyMsg]);
 
@@ -358,13 +349,13 @@ export default function AIDashboard() {
   return (
     <LayoutWrapper menuOpen={menuOpen}>
       <header className="absolute top-4 left-4 z-50">
-        <HamburgerMenu onToggle={(o: boolean) => setMenuOpen(o)} />
+        <HamburgerMenu onToggle={(open) => setMenuOpen(open)} />
       </header>
 
       <main
-        className="flex-1 flex flex-col justify-between relative overflow-hidden transition-all duration-500"
+        className="flex-1 flex flex-col relative overflow-hidden"
         style={{
-          transform: menuOpen ? "translateX(15rem)" : "translateX(0)",
+          transform: menuOpen ? "translateX(70%)" : "translateX(0)",
           filter: menuOpen ? "blur(2px)" : "none",
         }}
       >
@@ -384,28 +375,24 @@ export default function AIDashboard() {
                   className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div className="flex flex-col max-w-[80%]">
-                    {/* User Message */}
-                    {msg.role === "user" && (
-                      <div className="px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm bg-blue-600 text-white rounded-br-none self-end relative break-words">
-                        <div>{msg.content}</div>
-                        <div className="text-[10px] text-gray-300 opacity-80 absolute right-2 bottom-1">{msg.time}</div>
-                      </div>
-                    )}
-
-                    {/* Assistant / Panel Message */}
-                    {msg.role === "assistant" && !isPanelBlock && (
-                      <div className="px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none self-start break-words">
+                    {msg.content && (
+                      <div
+                        className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
+                          msg.role === "user"
+                            ? "bg-blue-600 text-white rounded-br-none"
+                            : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
+                        }`}
+                      >
                         {msg.content}
+                        {/* Timestamp only on user messages */}
+                        {msg.role === "user" && (
+                          <span className="text-[10px] text-gray-300 ml-2">{msg.time}</span>
+                        )}
                       </div>
                     )}
 
-                    {isPanelBlock && (
-                      <div className="mt-1 w-full">
-                        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3 shadow-sm">
-                          {renderPanel(msg.panel)}
-                        </div>
-                      </div>
-                    )}
+                    {/* Panel block — timestamp removed */}
+                    {isPanelBlock && <div className="mt-1 w-full">{renderPanel(msg.panel)}</div>}
                   </div>
                 </div>
               );
@@ -414,6 +401,7 @@ export default function AIDashboard() {
         </div>
       </main>
 
+      {/* Floating scroll button */}
       {showScrollDown && (
         <button
           onClick={() => scrollToBottom("smooth")}
@@ -423,16 +411,18 @@ export default function AIDashboard() {
         </button>
       )}
 
+      {/* Dynamic suggestion card */}
       <div className="fixed bottom-16 left-0 w-full px-4 z-40 pointer-events-none">
         <div className="max-w-3xl mx-auto pointer-events-auto">
           <DynamicSuggestionCard
             suggestions={suggestions}
             onSend={handleSend}
-            isTyping={input.trim().length > 0}
+            isTyping={input.length > 0}
           />
         </div>
       </div>
 
+      {/* Chat footer */}
       <div className="fixed bottom-0 left-0 w-full z-50">
         <div className="max-w-3xl mx-auto px-4">
           <ChatFooter
