@@ -1,18 +1,17 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import EstateChatFooter from "./components/EstateChatFooter";
-import EstateDynamicSuggestionCard from "./components/EstateDynamicSuggestionCard";
-import HamburgerMenu from "./components/HamburgerMenu";
 import LayoutWrapper from "./layout/LayoutWrapper";
+import HamburgerMenu from "./components/HamburgerMenu";
+import EstateChatFooter from "./components/EstateChatFooter";
+import DynamicSuggestionCard from "./components/DynamicSuggestionCard";
 
-import {
-  EstateDevicePanel,
-  EstatePowerPanel,
-  EstateAccountingPanel,
-  EstateCommunityPanel,
-} from "./components/panels";
+import EstateDevicePanel from "./components/panels/EstateDevicePanel";
+import EstatePowerPanel from "./components/panels/EstatePowerPanel";
+import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
+import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
 
+import { detectEstatePanelType } from "./utils/estatePanelDetection";
 import { FaArrowDown } from "react-icons/fa";
 
 type ChatMessage = {
@@ -25,37 +24,31 @@ type ChatMessage = {
 };
 
 export default function EstateDashboard() {
+  const createId = () => Math.random().toString(36).substring(2, 9);
+
+  const [menuOpen, setMenuOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "sys-1",
       role: "assistant",
-      content: "Welcome to your Estate Dashboard! How can I assist you today?",
+      content: "Welcome, Estate Admin! How can I assist you today?",
       panel: null,
       panelTag: null,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
 
-  const [activePanel, setActivePanel] = useState<string | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const chatRef = useRef<HTMLDivElement | null>(null);
-  const [showScrollDown, setShowScrollDown] = useState(false);
   const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [showScrollDown, setShowScrollDown] = useState(false);
 
-  const createId = () => Math.random().toString(36).substring(2, 9);
+  const nowTime = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const isAtBottom = () => {
     if (!chatRef.current) return true;
     const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
     return scrollTop + clientHeight >= scrollHeight - 100;
-  };
-
-  const handleScroll = () => {
-    if (!chatRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
-    const atBottom = scrollTop + clientHeight >= scrollHeight - 50;
-    setShowScrollDown(!atBottom);
   };
 
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
@@ -64,149 +57,184 @@ export default function EstateDashboard() {
     setShowScrollDown(false);
   };
 
-  const movePanelBlockToBottom = (panelTag: string) => {
+  const handleScroll = () => {
+    if (!chatRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = chatRef.current;
+    setShowScrollDown(scrollTop + clientHeight < scrollHeight - 50);
+  };
+
+  const movePanelGroupToBottom = (panelTag: string) => {
     setMessages((prev) => {
-      const grouped = prev.filter((m) => m.panelTag === panelTag);
-      if (!grouped.length) return prev;
-      const filtered = prev.filter((m) => m.panelTag !== panelTag);
-      return [...filtered, ...grouped];
+      const group = prev.filter((m) => m.panelTag === panelTag);
+      if (!group.length) return prev;
+
+      const rest = prev.filter((m) => m.panelTag !== panelTag);
+      const t = nowTime();
+      const updatedGroup = group.map((m) => ({ ...m, time: t, id: createId() }));
+      return [...rest, ...updatedGroup];
     });
+
     setTimeout(() => {
       if (isAtBottom()) scrollToBottom();
       else setShowScrollDown(true);
     }, 120);
   };
 
-  const appendPanelBlock = (userText: string, assistantReply: string, panel: string) => {
+  const appendPanelGroup = (userText: string, assistantText: string, panel: string) => {
     const tag = panel;
-    const userMsg: ChatMessage = { id: createId(), role: "user", content: userText, panel: null, panelTag: tag, time: "" };
-    const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: assistantReply, panel: null, panelTag: tag, time: "" };
-    const panelMsg: ChatMessage = { id: createId(), role: "assistant", content: "", panel, panelTag: tag, time: "" };
+    const t = nowTime();
+
+    const userMsg: ChatMessage = { id: createId(), role: "user", content: userText, panel: null, panelTag: tag, time: t };
+    const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: assistantText, panel: null, panelTag: tag, time: t };
+    const panelMsg: ChatMessage = { id: createId(), role: "assistant", content: "", panel, panelTag: tag, time: t };
+
     setMessages((prev) => [...prev, userMsg, assistantMsg, panelMsg]);
+
     setTimeout(() => {
       if (isAtBottom()) scrollToBottom();
       else setShowScrollDown(true);
     }, 120);
   };
 
-  const handleSend = (text?: string) => {
+  const handleAction = (actions: Array<{ type: string; action: string; target: string }>, userMessage?: string) => {
+    actions.forEach((a) => {
+      let reply = "I didn't quite get that. Can you repeat?";
+      let panel: string | null = null;
+
+      if (a.type === "device") {
+        if (["light", "ac", "camera"].includes(a.target)) panel = "estate_devices";
+        if (a.action === "discover") panel = "estate_devices";
+        reply = `Opening ${a.target} panel.`;
+      }
+
+      if (a.type === "info" && a.target === "status") {
+        reply = "Estate status: security steady, power stable.";
+        panel = "estate_power";
+      }
+
+      if (a.type === "schedule" && a.target === "visitor") {
+        reply = "Opening visitor management.";
+        panel = "estate_community";
+      }
+
+      const userText = userMessage ?? `${a.action} ${a.target}`;
+
+      if (panel) {
+        const exists = messages.some((m) => m.panelTag === panel);
+        if (exists) movePanelGroupToBottom(panel);
+        else appendPanelGroup(userText, reply, panel);
+      } else {
+        const t = nowTime();
+        const userMsg: ChatMessage = { id: createId(), role: "user", content: userText, panel: null, panelTag: null, time: t };
+        const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: reply, panel: null, panelTag: null, time: t };
+        setMessages((prev) => [...prev, userMsg, assistantMsg]);
+      }
+    });
+  };
+
+  function handleSend(text?: string) {
     const messageText = (text ?? input).trim();
     if (!messageText) return;
+
     setInput("");
-
-    // Simple mapping of keywords to panels
-    let panel: string | null = null;
-    if (messageText.toLowerCase().includes("device")) panel = "device";
-    if (messageText.toLowerCase().includes("power")) panel = "power";
-    if (messageText.toLowerCase().includes("account")) panel = "accounting";
-    if (messageText.toLowerCase().includes("community")) panel = "community";
-
-    const reply = "Got it!";
+    const panel = detectEstatePanelType(messageText);
 
     if (panel) {
+      const reply =
+        panel === "estate_devices"
+          ? "Estate device panel opened."
+          : panel === "estate_power"
+          ? "Estate power control opened."
+          : panel === "estate_accounting"
+          ? "Estate accounting opened."
+          : panel === "estate_community"
+          ? "Estate community panel opened."
+          : `Opened ${panel}.`;
+
       const exists = messages.some((m) => m.panelTag === panel);
-      if (exists) movePanelBlockToBottom(panel);
-      else appendPanelBlock(messageText, reply, panel);
-      setActivePanel(panel);
-    } else {
-      const userMsg: ChatMessage = { id: createId(), role: "user", content: messageText, panel: null, panelTag: null, time: "" };
-      const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: reply, panel: null, panelTag: null, time: "" };
-      setMessages((prev) => [...prev, userMsg, assistantMsg]);
-      setTimeout(() => {
-        if (isAtBottom()) scrollToBottom();
-        else setShowScrollDown(true);
-      }, 120);
+      if (exists) movePanelGroupToBottom(panel);
+      else appendPanelGroup(messageText, reply, panel);
+      return;
     }
-  };
+
+    const t = nowTime();
+    const userMsg: ChatMessage = { id: createId(), role: "user", content: messageText, panel: null, panelTag: null, time: t };
+    const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: `Okay — I processed: "${messageText}".`, panel: null, panelTag: null, time: t };
+
+    setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    setTimeout(() => { if (isAtBottom()) scrollToBottom(); else setShowScrollDown(true); }, 120);
+  }
 
   const renderPanel = (panel: string | null | undefined) => {
     switch (panel) {
-      case "device": return <EstateDevicePanel />;
-      case "power": return <EstatePowerPanel />;
-      case "accounting": return <EstateAccountingPanel />;
-      case "community": return <EstateCommunityPanel />;
-      default: return null;
+      case "estate_devices":
+        return <EstateDevicePanel devices={[]} onAction={(id, action) => handleSend(`Device ${id} ${action}`)} />;
+      case "estate_power":
+        return <EstatePowerPanel />;
+      case "estate_accounting":
+        return <EstateAccountingPanel />;
+      case "estate_community":
+        return <EstateCommunityPanel />;
+      default:
+        return null;
     }
   };
 
-  useEffect(() => {
-    if (isAtBottom()) scrollToBottom("auto");
-  }, [messages.length]);
-
   return (
     <LayoutWrapper menuOpen={menuOpen}>
-      {/* HAMBURGER */}
       <header className="absolute top-4 left-4 z-50">
         <HamburgerMenu onToggle={(o: boolean) => setMenuOpen(o)} />
       </header>
 
-      {/* FIXED PAGE */}
-      <div className="fixed inset-0 flex flex-col w-full h-full">
-        {/* CHAT + PANELS */}
-        <main
-          className="flex-1 flex flex-col overflow-hidden"
-          style={{
-            transform: menuOpen ? "translateX(70%)" : "translateX(0)",
-            filter: menuOpen ? "blur(2px)" : "none",
-            transition: "all 0.5s",
-          }}
-        >
-          <div
-            ref={chatRef}
-            onScroll={handleScroll}
-            className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth"
-          >
-            <div className="max-w-3xl mx-auto flex flex-col gap-4">
-              {messages.map((msg, i) => {
-                const isPanelBlock = Boolean(msg.panel);
-                return (
-                  <div
-                    key={msg.id}
-                    ref={(el) => (messageRefs.current[i] = el)}
-                    className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div className="flex flex-col max-w-[80%]">
-                      {msg.content && (
-                        <div
-                          className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
-                            msg.role === "user"
-                              ? "bg-blue-600 text-white rounded-br-none"
-                              : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
-                          }`}
-                        >
-                          {msg.content}
-                        </div>
-                      )}
-                      {isPanelBlock && <div className="mt-1 w-full">{renderPanel(msg.panel)}</div>}
-                    </div>
+      {/* MAIN */}
+      <main
+        className="flex-1 flex flex-col justify-between relative overflow-hidden transition-all duration-500"
+        style={{ transform: menuOpen ? "translateX(15rem)" : "translateX(0)", filter: menuOpen ? "blur(2px)" : "none" }}
+      >
+        <div ref={chatRef} onScroll={handleScroll} className="flex-1 overflow-y-auto px-4 md:px-10 pt-20 pb-32 space-y-4 scroll-smooth">
+          <div className="max-w-3xl mx-auto flex flex-col gap-4">
+            {messages.map((msg, i) => {
+              const isPanelBlock = Boolean(msg.panel);
+              return (
+                <div key={msg.id} ref={(el) => (messageRefs.current[i] = el)} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div className="flex flex-col max-w-[80%]">
+                    {!isPanelBlock && (
+                      <div className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm relative break-words ${msg.role === "user" ? "bg-blue-600 text-white rounded-br-none self-end" : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none self-start"}`}>
+                        <div>{msg.content}</div>
+                        {msg.role === "user" && <div className="text-[10px] text-gray-300 opacity-80 absolute right-2 bottom-1">{msg.time}</div>}
+                      </div>
+                    )}
+                    {isPanelBlock && (
+                      <div className="mt-1 w-full">
+                        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3 shadow-sm">{renderPanel(msg.panel)}</div>
+                        <div className="text-[10px] text-gray-400 mt-2 mb-2 px-2">{msg.time}</div>
+                      </div>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </main>
-
-        {/* DYNAMIC SUGGESTION CARD */}
-        <div className="w-full px-4 z-40 pointer-events-none">
-          <div className="max-w-3xl mx-auto pointer-events-auto">
-            <EstateDynamicSuggestionCard onSend={handleSend} isTyping={input.length > 0} />
+                </div>
+              );
+            })}
           </div>
         </div>
-
-        {/* CHAT FOOTER FULL WIDTH */}
-        <div className="w-full px-4 py-2 bg-gray-900 border-t border-gray-700 flex justify-center items-center z-50">
-          <EstateChatFooter input={input} setInput={setInput} onSend={() => handleSend()} />
-        </div>
-      </div>
+      </main>
 
       {showScrollDown && (
-        <button
-          onClick={() => scrollToBottom("smooth")}
-          className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg"
-        >
+        <button onClick={() => scrollToBottom("smooth")} className="fixed bottom-24 right-6 z-50 w-10 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full flex items-center justify-center shadow-lg">
           <FaArrowDown />
         </button>
       )}
+
+      <div className="fixed bottom-16 left-0 w-full px-4 z-40 pointer-events-none">
+        <div className="max-w-3xl mx-auto pointer-events-auto">
+          <DynamicSuggestionCard suggestions={[]} onSend={handleSend} isTyping={input.trim().length > 0} />
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 w-full z-50">
+        <div className="max-w-3xl mx-auto px-4">
+          <EstateChatFooter input={input} setInput={setInput} onSend={() => handleSend()} onAction={handleAction} />
+        </div>
+      </div>
     </LayoutWrapper>
   );
 }
