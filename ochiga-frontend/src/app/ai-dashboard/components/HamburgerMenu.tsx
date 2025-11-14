@@ -1,89 +1,129 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaBars,
+  FaTimes,
   FaHome,
-  FaBuilding,
-  FaMapMarkedAlt,
+  FaLightbulb,
+  FaFan,
+  FaVideo,
   FaUserCircle,
 } from "react-icons/fa";
 
-export default function HamburgerMenu() {
+export default function ResidentHamburgerMenu() {
   const [open, setOpen] = useState(false);
+
+  // BODY CLASS FOR PUSH-AWAY EFFECT
+  useEffect(() => {
+    if (open) document.body.classList.add("sidebar-open");
+    else document.body.classList.remove("sidebar-open");
+  }, [open]);
+
+  // ESC KEY CLOSE
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <>
-      {/* 🔹 Top Bar */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-gray-900/80 backdrop-blur-md border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+      {/* 🔹 TOP BAR */}
+      <header className="fixed top-0 left-0 w-full z-[60] bg-transparent px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          {/* Hamburger Button */}
+          {/* Toggle Button */}
           <button
-            onClick={() => setOpen(!open)}
-            className="p-2 rounded-md hover:bg-gray-800 transition"
-            aria-label="Toggle menu"
+            onClick={() => setOpen((v) => !v)}
+            className="p-2 rounded-md bg-gray-800/60 hover:bg-gray-800 transition text-white"
+            aria-label={open ? "Close menu" : "Open menu"}
           >
-            <FaBars className="text-white text-xl" />
+            {open ? <FaTimes className="text-xl" /> : <FaBars className="text-xl" />}
           </button>
 
-          {/* Title */}
           <span className="text-white text-sm md:text-base font-medium tracking-wide">
-            Ochiga AI
+            Resident Dashboard
           </span>
         </div>
       </header>
 
-      {/* 🔹 Sidebar Drawer */}
+      {/* 🔹 OVERLAY (click to close) */}
       <div
-        className={`fixed top-0 left-0 h-[100dvh] w-[80%] bg-gradient-to-b from-gray-950/95 to-gray-900/90 backdrop-blur-2xl border-r border-gray-800 shadow-[0_8px_40px_rgba(0,0,0,0.7)] rounded-r-3xl transform transition-transform duration-500 ease-in-out z-40 ${
-          open ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-0 z-[55] transition-opacity duration-400 ease-in-out ${
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
+        style={{
+          backdropFilter: open ? "blur(6px) saturate(.9)" : "none",
+          backgroundColor: open ? "rgba(0,0,0,0.38)" : "transparent",
+        }}
+        onClick={() => setOpen(false)}
+      />
+
+      {/* 🔹 SLIDING SIDE MENU */}
+      <aside
+        className={`fixed top-0 left-0 h-[100dvh] w-[70%] max-w-[360px] z-[60] transform transition-transform duration-500 ease-in-out
+          ${open ? "translate-x-0" : "-translate-x-full"}
+        `}
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(7,10,16,1) 0%, rgba(11,12,17,1) 100%)",
+          borderRight: "1px solid rgba(255,255,255,0.03)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+          borderTopRightRadius: 18,
+          borderBottomRightRadius: 18,
+        }}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col h-full pt-20 pb-6 px-5">
-          {/* Search Bar */}
+          {/* 🔍 SEARCH */}
           <div className="mb-8 mt-2">
             <input
               type="text"
-              placeholder="Search estates, rooms or devices"
-              className="w-full px-4 py-2 rounded-xl bg-gray-800/60 border border-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent shadow-inner"
+              placeholder="Search rooms, devices or scenes"
+              className="w-full px-4 py-2 rounded-xl bg-gray-800/60 border border-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-inner"
             />
           </div>
 
-          {/* Menu Buttons */}
-          <nav className="flex flex-col gap-5 text-gray-300 flex-1">
+          {/* 🔹 MENU ITEMS */}
+          <nav className="flex flex-col gap-6 text-gray-300 flex-1">
             <button className="flex items-center gap-3 text-left hover:text-white transition">
-              <FaHome className="text-lg" /> <span>Estate</span>
+              <FaHome className="text-lg" /> <span>Home Overview</span>
             </button>
+
             <button className="flex items-center gap-3 text-left hover:text-white transition">
-              <FaBuilding className="text-lg" /> <span>Buildings</span>
+              <FaLightbulb className="text-lg" /> <span>Lights Control</span>
             </button>
+
             <button className="flex items-center gap-3 text-left hover:text-white transition">
-              <FaMapMarkedAlt className="text-lg" /> <span>Map</span>
+              <FaFan className="text-lg" /> <span>Fans & Cooling</span>
+            </button>
+
+            <button className="flex items-center gap-3 text-left hover:text-white transition">
+              <FaVideo className="text-lg" /> <span>Security Cameras</span>
+            </button>
+
+            <button className="flex items-center gap-3 text-left hover:text-white transition">
+              <FaUserCircle className="text-lg" /> <span>My Profile</span>
             </button>
           </nav>
 
-          {/* Profile Section */}
-          <div className="mt-6 border-t border-gray-800 pt-4">
-            <button className="flex items-center gap-3 w-full text-gray-400 hover:text-white transition">
-              <div className="bg-blue-600 text-white rounded-full w-9 h-9 flex items-center justify-center font-semibold shadow-md">
-                I
+          {/* 👤 PROFILE FOOTER */}
+          <div className="border-t border-gray-800 pt-4 mt-4">
+            <button className="flex items-center gap-4 w-full hover:text-white transition">
+              <div className="bg-blue-600 text-white rounded-full w-11 h-11 flex items-center justify-center text-lg font-semibold shadow-md">
+                R
               </div>
-              <div className="flex flex-col text-left leading-tight">
-                <span className="text-sm font-medium">Info Pav</span>
-                <span className="text-xs text-gray-500">Settings / Logout</span>
+
+              <div className="flex flex-col text-left">
+                <span className="text-sm font-medium">Resident User</span>
+                <span className="text-xs text-gray-500">Settings • Logout</span>
               </div>
             </button>
           </div>
         </div>
-      </div>
-
-      {/* 🔹 Overlay (click to close) */}
-      {open && (
-        <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      </aside>
     </>
   );
 }
