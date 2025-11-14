@@ -37,9 +37,12 @@ export default function EstateHamburgerMenu() {
               Estate Dashboard
             </span>
           </div>
-          <button className="p-2 rounded-md active:scale-95 transition text-white">
-            <BsThreeDots size={22} />
-          </button>
+          {/* Hide three-dot button when menu is open */}
+          {!open && (
+            <button className="p-2 rounded-md active:scale-95 transition text-white">
+              <BsThreeDots size={22} />
+            </button>
+          )}
         </div>
       </header>
 
@@ -49,10 +52,10 @@ export default function EstateHamburgerMenu() {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="h-16 px-4 flex items-center" />
+        <div className="h-16" />
 
-        {/* SEARCH */}
-        <div className="px-4 flex items-center gap-3 mb-6">
+        {/* SEARCH aligned perfectly with top bar container */}
+        <div className="px-4 flex items-center mb-4">
           <div className="flex items-center flex-1 bg-gray-800 rounded-xl px-3 py-2">
             <FiSearch className="opacity-50" size={18} />
             <input
