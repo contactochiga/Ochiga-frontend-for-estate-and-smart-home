@@ -1,85 +1,59 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { loadGoogleMaps } from "../../../lib/GoogleMapLoader";
+import { useEffect, useRef } from "react";
 
 interface MapPickerProps {
-  setLocation: (c: { lat: number; lng: number } | null) => void;
+  setLocation: (coords: { lat: number; lng: number } | null) => void;
 }
 
 export default function MapPicker({ setLocation }: MapPickerProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
-  const [loaded, setLoaded] = useState(false);
-  const [inputId] = useState("ochiga-address-input-" + Math.random().toString(36).slice(2, 8));
+  const mapInstance = useRef<google.maps.Map | null>(null);
+
+  // Wait for Google Maps global object
+  const waitForGoogleMaps = () =>
+    new Promise<void>((resolve) => {
+      const interval = setInterval(() => {
+        if ((window as any).google?.maps) {
+          clearInterval(interval);
+          resolve();
+        }
+      }, 100);
+    });
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    let listener: google.maps.MapsEventListener | null = null;
 
-    let isMounted = true;
+    const initMap = async () => {
+      await waitForGoogleMaps();
 
-    // Only load Google Maps once
-    loadGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!)
-      .then((googleMaps) => {
-        if (!isMounted) return;
+      if (!mapRef.current) return;
 
-        const map = new googleMaps.Map(mapRef.current!, {
-          center: { lat: 9.05785, lng: 7.49508 }, // Abuja default
-          zoom: 12,
-          streetViewControl: false,
-          mapTypeControl: false,
+      mapInstance.current = new google.maps.Map(mapRef.current, {
+        center: { lat: 6.465422, lng: 3.406448 }, // Lagos default
+        zoom: 14,
+        disableDefaultUI: true,
+      });
+
+      listener = mapInstance.current.addListener("click", (e: any) => {
+        setLocation({
+          lat: e.latLng.lat(),
+          lng: e.latLng.lng(),
         });
+      });
+    };
 
-        const marker = new googleMaps.Marker({
-          map,
-          draggable: true,
-          position: map.getCenter(),
-        });
-        markerRef.current = marker;
-
-        // Drag event
-        marker.addListener("dragend", () => {
-          const pos = marker.getPosition();
-          if (pos) setLocation({ lat: pos.lat(), lng: pos.lng() });
-        });
-
-        // Autocomplete
-        const inputEl = document.getElementById(inputId) as HTMLInputElement | null;
-        if (inputEl && googleMaps.places) {
-          const ac = new googleMaps.places.Autocomplete(inputEl, { types: ["address"] });
-          ac.addListener("place_changed", () => {
-            const place = ac.getPlace();
-            if (!place.geometry) return;
-            const loc = place.geometry.location!;
-            map.panTo(loc);
-            map.setZoom(15);
-            marker.setPosition(loc);
-            setLocation({ lat: loc.lat(), lng: loc.lng() });
-          });
-        }
-
-        setLoaded(true);
-      })
-      .catch((err) => console.error("Google Maps failed to load", err));
+    initMap();
 
     return () => {
-      isMounted = false;
+      if (listener) listener.remove();
     };
-  }, [setLocation, inputId]);
+  }, [setLocation]);
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <input
-        id={inputId}
-        placeholder="Search address..."
-        className="p-2 bg-gray-800 border border-gray-700 text-white outline-none"
-      />
-      <div
-        ref={mapRef}
-        className={`flex-1 w-full h-full transition-opacity duration-500 ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`}
-      />
-    </div>
+    <div
+      ref={mapRef}
+      className="w-full h-64 rounded-lg border border-gray-700"
+    />
   );
 }
