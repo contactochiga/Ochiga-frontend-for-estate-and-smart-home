@@ -11,6 +11,7 @@ interface LayoutProps {
  * - Fixed full-screen layout
  * - Dark background consistent with Ochiga brand
  * - Handles scrolling and prevents zoom issues
+ * - Loads Google Maps script once for all children
  */
 export default function AuthLayoutWrapper({ children }: LayoutProps) {
   const layoutRef = useRef<HTMLDivElement | null>(null);
@@ -21,6 +22,18 @@ export default function AuthLayoutWrapper({ children }: LayoutProps) {
     if (!layoutRef.current) return;
     setScrollY(layoutRef.current.scrollTop);
   };
+
+  // Load Google Maps script once
+  useEffect(() => {
+    if (!(window as any).google?.maps) {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => console.error("Failed to load Google Maps script");
+      document.head.appendChild(script);
+    }
+  }, []);
 
   useEffect(() => {
     const container = layoutRef.current;
