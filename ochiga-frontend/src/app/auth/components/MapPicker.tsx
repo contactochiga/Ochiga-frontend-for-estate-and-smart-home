@@ -16,10 +16,15 @@ export default function MapPicker({ setLocation }: MapPickerProps) {
   useEffect(() => {
     if (!mapRef.current) return;
 
+    let isMounted = true;
+
+    // Only load Google Maps once
     loadGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!)
       .then((googleMaps) => {
+        if (!isMounted) return;
+
         const map = new googleMaps.Map(mapRef.current!, {
-          center: { lat: 9.05785, lng: 7.49508 },
+          center: { lat: 9.05785, lng: 7.49508 }, // Abuja default
           zoom: 12,
           streetViewControl: false,
           mapTypeControl: false,
@@ -32,6 +37,7 @@ export default function MapPicker({ setLocation }: MapPickerProps) {
         });
         markerRef.current = marker;
 
+        // Drag event
         marker.addListener("dragend", () => {
           const pos = marker.getPosition();
           if (pos) setLocation({ lat: pos.lat(), lng: pos.lng() });
@@ -39,7 +45,7 @@ export default function MapPicker({ setLocation }: MapPickerProps) {
 
         // Autocomplete
         const inputEl = document.getElementById(inputId) as HTMLInputElement | null;
-        if (inputEl) {
+        if (inputEl && googleMaps.places) {
           const ac = new googleMaps.places.Autocomplete(inputEl, { types: ["address"] });
           ac.addListener("place_changed", () => {
             const place = ac.getPlace();
@@ -55,6 +61,10 @@ export default function MapPicker({ setLocation }: MapPickerProps) {
         setLoaded(true);
       })
       .catch((err) => console.error("Google Maps failed to load", err));
+
+    return () => {
+      isMounted = false;
+    };
   }, [setLocation, inputId]);
 
   return (
