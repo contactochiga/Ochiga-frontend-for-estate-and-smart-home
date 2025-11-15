@@ -1,60 +1,66 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import { LoadScript, GoogleMap, Marker, Autocomplete } from "@react-google-maps/api";
 
-export default function MapPicker({ setLocation }: { setLocation: (c:{lat:number,lng:number}|null)=>void }) {
-  const mapRef = useRef<HTMLDivElement | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
-  const inputId = "ochiga-address-input-" + Math.random().toString(36).slice(2,8);
+interface MapPickerProps {
+  setLocation: (c: { lat: number; lng: number } | null) => void;
+}
 
-  useEffect(() => {
-    if (!mapRef.current) return;
-    if (!(window as any).google) {
-      console.warn("Google maps not loaded");
-      return;
+export default function MapPicker({ setLocation }: MapPickerProps) {
+  const [mapCenter, setMapCenter] = useState({ lat: 9.05785, lng: 7.49508 }); // Abuja default
+  const [markerPos, setMarkerPos] = useState(mapCenter);
+  const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
+
+  const libraries: ("places")[] = ["places"];
+
+  const handlePlaceChanged = () => {
+    if (autocomplete !== null) {
+      const place = autocomplete.getPlace();
+      if (!place.geometry) return;
+      const loc = place.geometry.location;
+      const coords = { lat: loc.lat(), lng: loc.lng() };
+      setMapCenter(coords);
+      setMarkerPos(coords);
+      setLocation(coords);
     }
+  };
 
-    const map = new google.maps.Map(mapRef.current, {
-      center: { lat: 9.05785, lng: 7.49508 }, // Abuja
-      zoom: 12,
-      streetViewControl: false,
-      mapTypeControl: false,
-    });
-
-    const marker = new google.maps.Marker({
-      map,
-      draggable: true,
-      position: map.getCenter(),
-    });
-    markerRef.current = marker;
-
-    marker.addListener("dragend", () => {
-      const pos = marker.getPosition();
-      if (pos) {
-        setLocation({ lat: pos.lat(), lng: pos.lng() });
-      }
-    });
-
-    // places autocomplete
-    const inputEl = document.getElementById(inputId) as HTMLInputElement | null;
-    if (inputEl && (window as any).google?.maps?.places) {
-      const ac = new google.maps.places.Autocomplete(inputEl, { types: ["address"] });
-      ac.addListener("place_changed", () => {
-        const place = ac.getPlace();
-        if (!place.geometry) return;
-        const loc = place.geometry.location!;
-        map.panTo(loc);
-        map.setZoom(15);
-        marker.setPosition(loc);
-        setLocation({ lat: loc.lat(), lng: loc.lng() });
-      });
-    }
-  }, [setLocation]);
+  const onLoadAutocomplete = (ac: google.maps.places.Autocomplete) => {
+    setAutocomplete(ac);
+  };
 
   return (
-    <div className="w-full h-full flex flex-col">
-      <input id={inputId} placeholder="Search address..." className="p-2 bg-gray-800 border border-gray-700 text-white outline-none" />
-      <div ref={mapRef} className="flex-1 w-full h-full" />
-    </div>
+    <LoadScript
+      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY!}
+      libraries={libraries}
+    >
+      <div className="flex flex-col w-full h-full">
+        <Autocomplete onLoad={onLoadAutocomplete} onPlaceChanged={handlePlaceChanged}>
+          <input
+            type="text"
+            placeholder="Search address..."
+            className="p-2 bg-gray-800 border border-gray-700 text-white outline-none"
+          />
+        </Autocomplete>
+
+        <GoogleMap
+          mapContainerStyle={{ width: "100%", height: "100%" }}
+          center={mapCenter}
+          zoom={12}
+          options={{ streetViewControl: false, mapTypeControl: false }}
+        >
+          <Marker
+            position={markerPos}
+            draggable
+            onDragEnd={(e) => {
+              const coords = { lat: e.latLng!.lat(), lng: e.latLng!.lng() };
+              setMarkerPos(coords);
+              setLocation(coords);
+            }}
+          />
+        </GoogleMap>
+      </div>
+    </LoadScript>
   );
 }
