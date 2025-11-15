@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { signupWithEmail, loginWithEmail, signInWithGoogle } from "./authFunctions";
+import { signInWithGoogle, loginWithEmail, signupWithEmail } from "../../lib/firebaseAuth";
 import AuthContainer from "./components/AuthContainer";
 import AuthInput from "./components/AuthInput";
 import AuthButton from "./components/AuthButton";
