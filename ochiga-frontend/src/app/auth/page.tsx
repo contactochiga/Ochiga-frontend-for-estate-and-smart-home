@@ -28,7 +28,7 @@ export default function AuthPage() {
     if (savedRole === "estate") {
       router.push("/estate-dashboard");
     } else if (savedRole === "resident") {
-      router.push("/ai-dashboard");
+      router.push("/resident-dashboard");
     }
   }, []);
   // ---------------------------------------------------
