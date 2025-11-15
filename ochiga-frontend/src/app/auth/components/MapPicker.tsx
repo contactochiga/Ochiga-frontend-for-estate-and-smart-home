@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { loadGoogleMaps } from "../../lib/GoogleMapLoader";
+import { loadGoogleMaps } from "../../../../lib/GoogleMapLoader";
 
 interface MapPickerProps {
   setLocation: (c: { lat: number; lng: number } | null) => void;
