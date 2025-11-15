@@ -1,32 +1,36 @@
-// src/lib/GoogleMapLoader.ts
-let googleMapsPromise: Promise<typeof google.maps> | null = null;
+"use client";
 
-export function loadGoogleMaps(apiKey: string): Promise<typeof google.maps> {
-  if (googleMapsPromise) return googleMapsPromise;
+import { useEffect, useState, ReactNode } from "react";
 
-  googleMapsPromise = new Promise((resolve, reject) => {
-    if (typeof window === "undefined") return;
+interface Props {
+  children: ReactNode;
+}
 
-    if ((window as any).google && (window as any).google.maps) {
-      resolve((window as any).google.maps);
+const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY;
+
+export default function GoogleMapLoader({ children }: Props) {
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if ((window as any).google) {
+      setLoaded(true);
       return;
     }
 
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_API_KEY}&libraries=places`;
     script.async = true;
-    script.defer = true;
-
-    script.onload = () => {
-      if ((window as any).google && (window as any).google.maps) {
-        resolve((window as any).google.maps);
-      } else {
-        reject(new Error("Google Maps failed to load"));
-      }
-    };
-    script.onerror = () => reject(new Error("Failed to load Google Maps script"));
+    script.onload = () => setLoaded(true);
     document.head.appendChild(script);
-  });
 
-  return googleMapsPromise;
+    return () => {
+      // Do NOT remove script, keep it globally
+    };
+  }, []);
+
+  if (!loaded) {
+    return <div className="flex items-center justify-center h-56">Loading map...</div>;
+  }
+
+  return <>{children}</>;
 }
