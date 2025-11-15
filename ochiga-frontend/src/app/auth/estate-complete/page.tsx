@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
-// Dynamic import of MapPicker (no SSR)
+// Dynamic import, no SSR
 const MapPicker = dynamic(() => import("../components/MapPicker"), { ssr: false });
+const GoogleMapLoader = dynamic(() => import("../components/GoogleMapLoader"), { ssr: false });
 
 export default function EstateCompletePage() {
   const params = useSearchParams();
@@ -19,7 +20,7 @@ export default function EstateCompletePage() {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // On mount: verify token (mock)
+  // On mount, verify token (mock)
   useEffect(() => {
     const invites = JSON.parse(localStorage.getItem("ochiga_invites") || "[]");
     const found = invites.find((i: any) => i.token === token && i.type === "estateInvite" && !i.used);
@@ -34,7 +35,6 @@ export default function EstateCompletePage() {
   // Reverse geocode when location changes
   useEffect(() => {
     if (!location) return;
-
     const fetchAddress = async () => {
       try {
         const res = await fetch(
@@ -46,7 +46,6 @@ export default function EstateCompletePage() {
         console.warn(err);
       }
     };
-
     fetchAddress();
   }, [location]);
 
@@ -113,8 +112,11 @@ export default function EstateCompletePage() {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
+
           <div className="h-56 rounded overflow-hidden border border-gray-800">
-            <MapPicker setLocation={setLocation} />
+            <GoogleMapLoader>
+              <MapPicker setLocation={setLocation} />
+            </GoogleMapLoader>
           </div>
 
           <button disabled={saving} className="w-full py-3 rounded bg-emerald-600 hover:bg-emerald-700">
