@@ -27,7 +27,7 @@ export default function EstateHamburgerMenu() {
   return (
     <>
       {/* TOP BAR */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-gray-900/70 backdrop-blur-lg border-b border-white/10 py-3">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0d0f12]/80 backdrop-blur-lg border-b border-white/10 py-3">
         <div className="px-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
@@ -48,8 +48,9 @@ export default function EstateHamburgerMenu() {
 
       {/* SIDEBAR */}
       <aside
-        className={`fixed top-0 left-0 h-[100dvh] w-[72%] max-w-[350px] z-40 bg-gray-950/95 backdrop-blur-xl
-        shadow-2xl border-r border-white/5 transform duration-300 ease-in-out
+        className={`fixed top-0 left-0 h-[100dvh] w-[72%] max-w-[350px] z-40 
+        bg-[#0d0f12]/95 backdrop-blur-xl shadow-2xl border-r border-white/5
+        transform duration-300 ease-in-out
         ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="pt-20 px-4 space-y-2">
@@ -63,7 +64,7 @@ export default function EstateHamburgerMenu() {
             <button
               key={i}
               className="w-full text-left py-3 px-3 rounded-lg
-              hover:bg-gray-800 transition text-white/90 font-medium
+              hover:bg-gray-800/70 transition text-white/90 font-medium
               active:scale-[0.97]"
             >
               {item}
@@ -89,7 +90,6 @@ export default function EstateHamburgerMenu() {
               </div>
             </button>
 
-            {/* Chevron Control */}
             <button
               onClick={() => setProfileOpen(!profileOpen)}
               className="p-2 rounded-md text-white/70"
@@ -100,14 +100,14 @@ export default function EstateHamburgerMenu() {
 
           {/* DROPDOWN MENU */}
           {profileOpen && (
-            <div className="mt-3 bg-gray-900/90 border border-white/10 rounded-xl shadow-xl animate-slide-down">
-              <button className="w-full flex items-center gap-3 px-4 py-3 text-white/85 hover:bg-gray-800 transition">
+            <div className="mt-3 bg-[#16191d]/95 border border-white/10 rounded-xl shadow-xl animate-slide-down">
+              <button className="w-full flex items-center gap-3 px-4 py-3 text-white/85 hover:bg-gray-800/70 transition">
                 <MdOutlinePerson size={18} /> Profile
               </button>
-              <button className="w-full flex items-center gap-3 px-4 py-3 text-white/85 hover:bg-gray-800 transition">
+              <button className="w-full flex items-center gap-3 px-4 py-3 text-white/85 hover:bg-gray-800/70 transition">
                 <MdSettings size={18} /> Settings
               </button>
-              <button className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800 transition">
+              <button className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800/70 transition">
                 <FiLogOut size={18} /> Logout
               </button>
             </div>
