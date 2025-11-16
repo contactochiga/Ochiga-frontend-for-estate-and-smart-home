@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { AiOutlineArrowLeft } from "react-icons/ai";
 
 export default function ResidentActivationPage() {
   const router = useRouter();
@@ -47,7 +48,15 @@ export default function ResidentActivationPage() {
   };
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-black px-6">
+    <div className="h-screen w-full bg-black flex items-center justify-center overflow-hidden relative px-6">
+      {/* Top Back Button */}
+      <button
+        onClick={() => router.push("/auth")}
+        className="absolute top-4 left-4 text-gray-400 hover:text-white transition"
+      >
+        <AiOutlineArrowLeft size={26} />
+      </button>
+
       {/* If token invalid */}
       {tokenValid === false && (
         <motion.div
