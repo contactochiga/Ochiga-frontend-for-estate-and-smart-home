@@ -19,9 +19,24 @@ export default function LoginPage() {
     }
 
     setLoading(true);
+    setError("");
+
     setTimeout(() => {
-      document.cookie = "ochiga_estate_auth=true; path=/";
-      router.push("/estate-dashboard");
+      const email = usernameOrEmail.toLowerCase().trim();
+
+      // 🔹 MOCK ROLE DETECTION (replace later with backend/Firebase)
+      if (email === "manager@ochiga.com") {
+        document.cookie = "ochiga_estate_auth=true; path=/";
+        router.push("/estate-dashboard");
+      } 
+      else if (email === "resident@ochiga.com") {
+        document.cookie = "ochiga_resident_auth=true; path=/";
+        router.push("/ai-dashboard");
+      } 
+      else {
+        setError("Invalid credentials");
+      }
+
       setLoading(false);
     }, 1200);
   };
@@ -74,7 +89,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* Login Button (Brand Color Applied) */}
+        {/* Login Button (Brand Color) */}
         <button
           onClick={handleLogin}
           disabled={loading}
@@ -85,7 +100,6 @@ export default function LoginPage() {
           {loading ? "Processing..." : "Login"}
         </button>
 
-        {/* Divider */}
         <div className="my-5 text-gray-400 flex items-center gap-4">
           <div className="flex-1 h-[1px] bg-gray-800" />
           <span>OR</span>
