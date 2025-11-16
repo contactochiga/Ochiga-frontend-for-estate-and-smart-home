@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import OyiLoader from "../../components/OyiLoader";
 import OyiLiquidWave from "../../components/OyiLiquidWave";
-import { FaGoogle, FaApple } from "react-icons/fa"; // Import Google & Apple logos
+import { FaGoogle, FaApple } from "react-icons/fa"; // Google & Apple icons
 
 export default function AuthLanding() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function AuthLanding() {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-black text-white flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 bg-black text-white flex flex-col items-center justify-start overflow-hidden">
 
       {/* ---------------------------
           SPLASH SCREEN
@@ -35,40 +35,40 @@ export default function AuthLanding() {
             exit={{ opacity: 0 }}
             className="absolute inset-0 flex items-center justify-center z-50"
           >
-            <OyiLoader size={260} />
+            <OyiLoader size={260} /> {/* Only one logo during loading */}
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* ---------------------------
-          LOGO + TAGLINE
+          LOGO + TAGLINE (detached from auth card)
       ---------------------------- */}
-      <div className="flex flex-col items-center justify-center z-10">
+      {showAuth && (
         <motion.div
-          initial={{ scale: 1.5, y: 0 }}
-          animate={showAuth ? { scale: 0.7, y: 0 } : { scale: 1.5, y: 0 }}
+          className="flex flex-col items-center justify-center mt-16 sm:mt-24"
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
-          className="flex items-center justify-center"
         >
-          <div className="w-20 h-20 sm:w-24 sm:h-24">
+          <motion.div
+            className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center"
+            initial={{ scale: 1 }}
+            animate={{ scale: 0.7 }}
+            transition={{ type: "spring", stiffness: 120, damping: 20 }}
+          >
             <OyiLiquidWave />
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Tagline */}
-        <AnimatePresence>
-          {showAuth && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-2 text-center text-gray-400 text-xs sm:text-sm md:text-base font-medium"
-            >
-              Smart Infrastructure Suite
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-2 text-center text-gray-400 text-xs sm:text-sm md:text-base font-medium"
+          >
+            Smart Infrastructure Suite
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* ---------------------------
           AUTH CARD
@@ -77,10 +77,10 @@ export default function AuthLanding() {
         {showAuth && (
           <motion.div
             key="auth-card"
-            initial={{ y: 80, opacity: 0 }}
+            initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 160, damping: 20 }}
-            className="w-full max-w-sm sm:max-w-md bg-[#111] border border-gray-800 rounded-2xl px-6 sm:px-8 py-8 sm:py-10 shadow-xl mt-6"
+            className="w-full max-w-sm sm:max-w-md bg-[#111] border border-gray-800 rounded-2xl px-6 sm:px-8 py-8 sm:py-10 shadow-xl mt-8"
           >
             <motion.div
               initial="hidden"
@@ -88,20 +88,20 @@ export default function AuthLanding() {
               variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
               className="flex flex-col gap-4"
             >
-              {/* Google */}
-              <motion.button
-                variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
-                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-sm sm:text-base flex items-center justify-center gap-2"
-              >
-                <FaGoogle className="text-white" /> Continue with Google
-              </motion.button>
-
               {/* Apple */}
               <motion.button
                 variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
                 className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-sm sm:text-base flex items-center justify-center gap-2"
               >
                 <FaApple className="text-white" /> Continue with Apple
+              </motion.button>
+
+              {/* Google */}
+              <motion.button
+                variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-sm sm:text-base flex items-center justify-center gap-2"
+              >
+                <FaGoogle className="text-white" /> Continue with Google
               </motion.button>
 
               {/* Email */}
