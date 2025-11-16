@@ -11,6 +11,9 @@ import EstatePowerPanel from "./components/panels/EstatePowerPanel";
 import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
 import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
 
+// NEW: Home creation panel import
+import HomeCreationPanel from "./components/panels/HomeCreationPanel";
+
 import { detectEstatePanelType } from "./utils/estatePanelDetection";
 import { FaArrowDown, FaLightbulb, FaWallet, FaVideo, FaBolt } from "react-icons/fa";
 
@@ -43,7 +46,8 @@ export default function EstateDashboard() {
   const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [showScrollDown, setShowScrollDown] = useState(false);
 
-  const nowTime = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const nowTime = () =>
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   const isAtBottom = () => {
     if (!chatRef.current) return true;
@@ -69,7 +73,11 @@ export default function EstateDashboard() {
       if (!group.length) return prev;
       const rest = prev.filter((m) => m.panelTag !== panelTag);
       const t = nowTime();
-      const updatedGroup = group.map((m) => ({ ...m, time: t, id: createId() }));
+      const updatedGroup = group.map((m) => ({
+        ...m,
+        time: t,
+        id: createId(),
+      }));
       return [...rest, ...updatedGroup];
     });
 
@@ -83,9 +91,30 @@ export default function EstateDashboard() {
     const tag = panel;
     const t = nowTime();
 
-    const userMsg: ChatMessage = { id: createId(), role: "user", content: userText, panel: null, panelTag: tag, time: t };
-    const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: assistantText, panel: null, panelTag: tag, time: t };
-    const panelMsg: ChatMessage = { id: createId(), role: "assistant", content: "", panel, panelTag: tag, time: t };
+    const userMsg: ChatMessage = {
+      id: createId(),
+      role: "user",
+      content: userText,
+      panel: null,
+      panelTag: tag,
+      time: t,
+    };
+    const assistantMsg: ChatMessage = {
+      id: createId(),
+      role: "assistant",
+      content: assistantText,
+      panel: null,
+      panelTag: tag,
+      time: t,
+    };
+    const panelMsg: ChatMessage = {
+      id: createId(),
+      role: "assistant",
+      content: "",
+      panel,
+      panelTag: tag,
+      time: t,
+    };
 
     setMessages((prev) => [...prev, userMsg, assistantMsg, panelMsg]);
 
@@ -124,8 +153,22 @@ export default function EstateDashboard() {
         else appendPanelGroup(userText, reply, panel);
       } else {
         const t = nowTime();
-        const userMsg: ChatMessage = { id: createId(), role: "user", content: userText, panel: null, panelTag: null, time: t };
-        const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: reply, panel: null, panelTag: null, time: t };
+        const userMsg: ChatMessage = {
+          id: createId(),
+          role: "user",
+          content: userText,
+          panel: null,
+          panelTag: null,
+          time: t,
+        };
+        const assistantMsg: ChatMessage = {
+          id: createId(),
+          role: "assistant",
+          content: reply,
+          panel: null,
+          panelTag: null,
+          time: t,
+        };
         setMessages((prev) => [...prev, userMsg, assistantMsg]);
       }
     });
@@ -136,6 +179,7 @@ export default function EstateDashboard() {
     if (!messageText) return;
 
     setInput("");
+
     const panel = detectEstatePanelType(messageText);
 
     if (panel) {
@@ -148,20 +192,42 @@ export default function EstateDashboard() {
           ? "Estate accounting opened."
           : panel === "estate_community"
           ? "Estate community panel opened."
+          : panel === "home_creation"
+          ? "Home creation panel opened."
           : `Opened ${panel}.`;
 
       const exists = messages.some((m) => m.panelTag === panel);
+
       if (exists) movePanelGroupToBottom(panel);
       else appendPanelGroup(messageText, reply, panel);
+
       return;
     }
 
     const t = nowTime();
-    const userMsg: ChatMessage = { id: createId(), role: "user", content: messageText, panel: null, panelTag: null, time: t };
-    const assistantMsg: ChatMessage = { id: createId(), role: "assistant", content: `Okay — I processed: "${messageText}".`, panel: null, panelTag: null, time: t };
+    const userMsg: ChatMessage = {
+      id: createId(),
+      role: "user",
+      content: messageText,
+      panel: null,
+      panelTag: null,
+      time: t,
+    };
+    const assistantMsg: ChatMessage = {
+      id: createId(),
+      role: "assistant",
+      content: `Okay — I processed: "${messageText}".`,
+      panel: null,
+      panelTag: null,
+      time: t,
+    };
 
     setMessages((prev) => [...prev, userMsg, assistantMsg]);
-    setTimeout(() => { if (isAtBottom()) scrollToBottom(); else setShowScrollDown(true); }, 120);
+
+    setTimeout(() => {
+      if (isAtBottom()) scrollToBottom();
+      else setShowScrollDown(true);
+    }, 120);
   }
 
   const suggestions = [
@@ -181,6 +247,11 @@ export default function EstateDashboard() {
         return <EstateAccountingPanel />;
       case "estate_community":
         return <EstateCommunityPanel />;
+
+      // NEW: Home creation panel renderer
+      case "home_creation":
+        return <HomeCreationPanel />;
+
       default:
         return null;
     }
@@ -213,6 +284,7 @@ export default function EstateDashboard() {
             <div className="max-w-3xl mx-auto flex flex-col gap-4">
               {messages.map((msg, i) => {
                 const isPanelBlock = Boolean(msg.panel);
+
                 return (
                   <div
                     key={msg.id}
@@ -221,11 +293,20 @@ export default function EstateDashboard() {
                   >
                     <div className="flex flex-col max-w-[80%]">
                       {msg.content && !isPanelBlock && (
-                        <div className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${msg.role === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"}`}>
+                        <div
+                          className={`px-4 py-3 rounded-2xl text-sm md:text-base shadow-sm ${
+                            msg.role === "user"
+                              ? "bg-blue-600 text-white rounded-br-none"
+                              : "bg-gray-900 text-gray-100 border border-gray-700 rounded-bl-none"
+                          }`}
+                        >
                           {msg.content}
-                          {msg.role === "user" && <span className="text-[10px] text-gray-300 ml-2">{msg.time}</span>}
+                          {msg.role === "user" && (
+                            <span className="text-[10px] text-gray-300 ml-2">{msg.time}</span>
+                          )}
                         </div>
                       )}
+
                       {isPanelBlock && (
                         <div className="mt-1 w-full">
                           <div className="bg-gray-800 border border-gray-700 rounded-2xl p-3 shadow-sm">
@@ -242,14 +323,16 @@ export default function EstateDashboard() {
           </div>
         </main>
 
-        {/* Dynamic Suggestion Card */}
         <div className="w-full px-4 z-40 pointer-events-none">
           <div className="max-w-3xl mx-auto pointer-events-auto">
-            <DynamicSuggestionCard suggestions={suggestions} onSend={handleSend} isTyping={input.length > 0} />
+            <DynamicSuggestionCard
+              suggestions={suggestions}
+              onSend={handleSend}
+              isTyping={input.length > 0}
+            />
           </div>
         </div>
 
-        {/* Chat Footer */}
         <div className="w-full px-4 py-2 bg-gray-900 border-t border-gray-700 flex justify-center items-center z-50">
           <EstateChatFooter input={input} setInput={setInput} onSend={() => handleSend()} onAction={handleAction} />
         </div>
