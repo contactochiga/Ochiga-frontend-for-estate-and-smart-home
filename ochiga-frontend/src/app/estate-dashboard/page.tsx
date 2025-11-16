@@ -11,8 +11,8 @@ import EstatePowerPanel from "./components/panels/EstatePowerPanel";
 import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
 import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
 
-// NEW: Home creation panel import
-import HomeCreationPanel from "./components/panels/HomeCreationPanel";
+// UPDATED: Correct home creation panel import
+import EstateHomeCreationPanel from "./components/panels/EstateHomeCreationPanel";
 
 import { detectEstatePanelType } from "./utils/estatePanelDetection";
 import { FaArrowDown, FaLightbulb, FaWallet, FaVideo, FaBolt } from "react-icons/fa";
@@ -248,9 +248,9 @@ export default function EstateDashboard() {
       case "estate_community":
         return <EstateCommunityPanel />;
 
-      // NEW: Home creation panel renderer
+      // UPDATED: Correct home creation panel
       case "home_creation":
-        return <HomeCreationPanel />;
+        return <EstateHomeCreationPanel />;
 
       default:
         return null;
