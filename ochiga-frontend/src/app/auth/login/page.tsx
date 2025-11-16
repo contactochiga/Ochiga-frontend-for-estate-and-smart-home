@@ -38,13 +38,14 @@ export default function LoginPage() {
       </button>
 
       {/* LOGIN CARD */}
-      <div className="
-        w-[90%] max-w-sm sm:max-w-md
-        bg-[#111] border border-gray-800 
-        rounded-2xl px-6 sm:px-8 py-8 sm:py-10 
-        shadow-xl animate-fadeIn
-      ">
-
+      <div
+        className="
+          w-[90%] max-w-sm sm:max-w-md
+          bg-[#111] border border-gray-800 
+          rounded-2xl px-6 sm:px-8 py-8 sm:py-10 
+          shadow-xl animate-fadeIn
+        "
+      >
         <h1 className="text-2xl text-center text-white font-semibold mb-6">
           Login to Your Account
         </h1>
@@ -73,13 +74,13 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* Login Button */}
+        {/* Login Button (Brand Color Applied) */}
         <button
           onClick={handleLogin}
           disabled={loading}
           className="w-full py-3 rounded-xl font-semibold
-                     bg-[#02E57D] text-black 
-                     hover:bg-[#16f18c] transition"
+                     bg-[#E30613] text-white
+                     hover:bg-[#F52733] transition"
         >
           {loading ? "Processing..." : "Login"}
         </button>
