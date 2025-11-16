@@ -1,44 +1,84 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { loadGoogleMaps } from "@/lib/GoogleMapLoader";
+import { useState } from "react";
 
 interface MapPickerProps {
-  setLocation: (coords: { lat: number; lng: number } | null) => void;
+  onLocationSelect?: (location: { address: string; lat: number; lng: number }) => void;
 }
 
-export default function MapPicker({ setLocation }: MapPickerProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
+export default function MapPicker({ onLocationSelect }: MapPickerProps) {
+  const [address, setAddress] = useState("");
+  const [lat, setLat] = useState<number | string>("");
+  const [lng, setLng] = useState<number | string>("");
 
-  useEffect(() => {
-    async function initMap() {
-      await loadGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "");
+  const handleSave = () => {
+    const location = {
+      address,
+      lat: Number(lat),
+      lng: Number(lng),
+    };
 
-      if (!mapRef.current || !window.google?.maps) return;
-
-      const defaultCenter = { lat: 6.4402, lng: 3.4179 };
-
-      const map = new google.maps.Map(mapRef.current, {
-        zoom: 15,
-        center: defaultCenter,
-      });
-
-      const marker = new google.maps.Marker({
-        position: defaultCenter,
-        map,
-        draggable: true,
-      });
-
-      marker.addListener("dragend", () => {
-        const pos = marker.getPosition();
-        if (pos) {
-          setLocation({ lat: pos.lat(), lng: pos.lng() });
-        }
-      });
+    if (onLocationSelect) {
+      onLocationSelect(location);
     }
 
-    initMap();
-  }, []);
+    console.log("Saved location:", location);
+  };
 
-  return <div ref={mapRef} className="h-[300px] w-full rounded-lg" />;
+  return (
+    <div className="flex flex-col gap-4 w-full">
+
+      {/* ADDRESS INPUT */}
+      <div className="flex flex-col">
+        <label className="text-sm font-medium">Address</label>
+        <input
+          type="text"
+          placeholder="Enter address manually"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          className="border px-3 py-2 rounded-md"
+        />
+      </div>
+
+      {/* LATITUDE */}
+      <div className="flex flex-col">
+        <label className="text-sm font-medium">Latitude</label>
+        <input
+          type="number"
+          placeholder="Latitude"
+          value={lat}
+          onChange={(e) => setLat(e.target.value)}
+          className="border px-3 py-2 rounded-md"
+        />
+      </div>
+
+      {/* LONGITUDE */}
+      <div className="flex flex-col">
+        <label className="text-sm font-medium">Longitude</label>
+        <input
+          type="number"
+          placeholder="Longitude"
+          value={lng}
+          onChange={(e) => setLng(e.target.value)}
+          className="border px-3 py-2 rounded-md"
+        />
+      </div>
+
+      {/* STATIC MAP BOX (NO GOOGLE MAP, JUST DESIGN) */}
+      <div className="w-full h-56 bg-gray-200 rounded-md flex items-center justify-center">
+        <p className="text-gray-500">
+          Map preview (disabled for now)
+        </p>
+      </div>
+
+      {/* SAVE BUTTON */}
+      <button
+        onClick={handleSave}
+        className="bg-black text-white py-2 rounded-md mt-2"
+      >
+        Save Location
+      </button>
+
+    </div>
+  );
 }
