@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+"use client";
+
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import OyiLoader from "./components/OyiLoader"; // make sure path is correct
+import { useEffect, useState } from "react";
+import OyiLoader from "../components/OyiLoader"; 
 
 export default function Landing() {
   const router = useRouter();
