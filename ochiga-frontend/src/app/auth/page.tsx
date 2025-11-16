@@ -104,9 +104,9 @@ export default function AuthLanding() {
                 <FaGoogle className="text-white" /> Continue with Google
               </motion.button>
 
-              {/* Email */}
+              {/* Email — UPDATED ONLY THIS LINE */}
               <motion.button
-                onClick={() => router.push("/auth/resident-complete")}
+                onClick={() => router.push("/auth/login")} // <-- UPDATED
                 variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
                 className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-sm sm:text-base"
               >
