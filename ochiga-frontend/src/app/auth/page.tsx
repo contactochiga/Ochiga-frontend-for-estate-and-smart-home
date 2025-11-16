@@ -9,22 +9,25 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     setError("");
 
-    // Dummy login for now — replace with real API when ready
+    // 🔐 Dummy authentication for now
     if (email === "admin@ochiga.com" && password === "123456") {
-      localStorage.setItem("ochiga_auth", "true");
-      router.push("/estate-dashboard");
+      // Store token as cookie (middleware compatible)
+      document.cookie = "ochiga_auth=true; path=/";
+
+      // Redirect to your dashboard (choose your path)
+      router.push("/dashboard");
     } else {
-      setError("Invalid email or password");
+      setError("Invalid login details");
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-black">
+    <div className="h-screen flex items-center justify-center bg-black">
       <div className="w-[90%] max-w-md bg-gray-900 p-8 rounded-xl border border-gray-700">
-        <h1 className="text-2xl font-semibold text-white mb-6 text-center">
+        <h1 className="text-2xl text-white text-center font-semibold mb-6">
           Ochiga Login
         </h1>
 
@@ -50,7 +53,7 @@ export default function AuthPage() {
 
         <button
           onClick={handleLogin}
-          className="w-full p-3 bg-blue-600 rounded text-white font-medium hover:bg-blue-700"
+          className="w-full p-3 bg-blue-600 rounded text-white font-medium hover:bg-blue-700 active:scale-95 transition"
         >
           Log In
         </button>
