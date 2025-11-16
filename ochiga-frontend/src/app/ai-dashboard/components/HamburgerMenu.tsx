@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { FiMenu, FiX, FiChevronDown, FiChevronUp, FiLogOut, FiSearch } from "react-icons/fi";
 import { MdOutlinePerson, MdSettings } from "react-icons/md";
 
@@ -32,32 +33,29 @@ function getInitials(name?: string | null) {
 
 function loadAuthUser(): UserInfo {
   try {
-    // Try common places where frontend auth might expose the user
     if (typeof window !== "undefined") {
-      // 1) window.__AUTH_USER__ (app might set this)
-      // 2) localStorage "authUser" or "user"
-      // 3) fallback nulls
-      // NOTE: adapt these keys to your actual auth implementation later.
-      // This will not throw if nothing exists.
+      // Window injected user object
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const winUser = window.__AUTH_USER__;
       if (winUser && (winUser.name || winUser.email)) return { name: winUser.name, email: winUser.email };
 
-      const raw = localStorage.getItem("authUser") || localStorage.getItem("user");
+      // Registered & logged-in user stored by your Auth page
+      const raw = localStorage.getItem("authUser");
       if (raw) {
         try {
           const parsed = JSON.parse(raw);
-          if (parsed && (parsed.name || parsed.email)) return { name: parsed.name, email: parsed.email };
+          if (parsed && (parsed.name || parsed.email)) {
+            return { name: parsed.name, email: parsed.email };
+          }
         } catch {
-          // raw might be plain text (email or name)
           return { name: raw };
         }
       }
     }
-  } catch (e) {
-    // swallow - just return fallback below
-  }
+
+  } catch (e) {}
+
   return { name: "Resident User", email: null };
 }
 
@@ -66,9 +64,9 @@ export default function ResidentHamburgerMenu() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<UserInfo>({ name: "Resident User", email: null });
   const sidebarRef = useRef<HTMLDivElement | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    // load user once
     const u = loadAuthUser();
     setUser(u);
   }, []);
@@ -90,33 +88,32 @@ export default function ResidentHamburgerMenu() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // click outside to close (sidebar)
   const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    // clicking backdrop closes everything
     setOpen(false);
     setProfileOpen(false);
   }, []);
 
-  // stop propagation when clicking inside sidebar so backdrop handler doesn't run
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
-  // Avatar / Profile handlers (replace console.log with router push or modal)
   const openProfile = () => {
-    // placeholder — wire to your auth/profile route
-    console.log("Open resident profile page");
-    // e.g. router.push("/profile")
+    router.push("/profile"); // or your actual profile route
   };
+
   const openSettings = () => {
-    console.log("Open resident settings");
+    router.push("/settings"); // placeholder
   };
+
   const logout = () => {
-    console.log("Perform logout");
-    // e.g. call auth signout, then router.push("/auth/login")
+    try {
+      localStorage.removeItem("authUser");
+      sessionStorage.clear();
+    } catch (e) {}
+
+    router.push("/auth"); // ✅ Redirects to Login/Register Auth page
   };
 
   const initials = getInitials(user?.name);
 
-  // quick links placeholder - replace with actual navigation/actions
   const quickLinks = [
     { id: "q1", label: "Smart Devices", onClick: () => console.log("goto devices") },
     { id: "q2", label: "Lighting & Rooms", onClick: () => console.log("goto lights") },
@@ -144,7 +141,6 @@ export default function ResidentHamburgerMenu() {
             <span className="text-white font-semibold text-base">My Home</span>
           </div>
 
-          {/* optional right-side action when closed */}
           {!open && (
             <div className="flex items-center gap-2">
               <button
@@ -164,7 +160,6 @@ export default function ResidentHamburgerMenu() {
         className={`fixed inset-0 z-40 ${open ? "pointer-events-auto" : "pointer-events-none"}`}
         aria-hidden={!open}
       >
-        {/* Backdrop */}
         <div
           onClick={handleBackdropClick}
           className={`absolute inset-0 transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0"}`}
@@ -174,7 +169,6 @@ export default function ResidentHamburgerMenu() {
           }}
         />
 
-        {/* Actual sliding panel */}
         <aside
           ref={sidebarRef}
           onClick={stopPropagation}
@@ -215,13 +209,11 @@ export default function ResidentHamburgerMenu() {
             ))}
           </nav>
 
-          {/* Divider filler */}
           <div className="flex-1" />
 
           {/* PROFILE FOOTER */}
           <div className="absolute bottom-0 left-0 w-full px-4 py-5 border-t border-white/6 bg-gradient-to-t from-transparent to-[rgba(255,255,255,0.01)]">
             <div className="flex items-center justify-between">
-              {/* Avatar + Name */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={openProfile}
@@ -245,7 +237,6 @@ export default function ResidentHamburgerMenu() {
                 </button>
               </div>
 
-              {/* Chevron Control */}
               <div>
                 <button
                   onClick={() => setProfileOpen((v) => !v)}
@@ -258,7 +249,6 @@ export default function ResidentHamburgerMenu() {
               </div>
             </div>
 
-            {/* DROPDOWN MENU */}
             {profileOpen && (
               <div className="mt-3 bg-gray-900/95 border border-white/6 rounded-xl shadow-xl overflow-hidden">
                 <button
