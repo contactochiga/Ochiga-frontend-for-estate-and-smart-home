@@ -1,23 +1,9 @@
-// ochiga-frontend/src/app/ai-dashboard/components/HamburgerMenu.tsx
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FiMenu, FiX, FiChevronDown, FiChevronUp, FiLogOut, FiSearch } from "react-icons/fi";
 import { MdOutlinePerson, MdSettings } from "react-icons/md";
-
-/**
- * Resident Hamburger Menu — matches Estate behavior but with Resident theme
- * Title: "My Home" (as requested)
- *
- * - Reads a simple auth-user fallback from localStorage / window for initials & name
- * - Sidebar push / backdrop / escape to close / click outside to close
- * - Profile area with initials circle, name, chevron to open dropdown
- * - Avatar click -> open profile handler (placeholder for real routing)
- * - Four quick links as placeholders (replace with real routes/actions later)
- *
- * Copy & paste directly.
- */
 
 type UserInfo = {
   name?: string | null;
@@ -34,27 +20,21 @@ function getInitials(name?: string | null) {
 function loadAuthUser(): UserInfo {
   try {
     if (typeof window !== "undefined") {
-      // Window injected user object
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      const winUser = window.__AUTH_USER__;
-      if (winUser && (winUser.name || winUser.email)) return { name: winUser.name, email: winUser.email };
+      const winUser = (window as any).__AUTH_USER__;
+      if (winUser && (winUser.name || winUser.email))
+        return { name: winUser.name, email: winUser.email };
 
-      // Registered & logged-in user stored by your Auth page
       const raw = localStorage.getItem("authUser");
       if (raw) {
         try {
           const parsed = JSON.parse(raw);
-          if (parsed && (parsed.name || parsed.email)) {
-            return { name: parsed.name, email: parsed.email };
-          }
+          if (parsed && (parsed.name || parsed.email)) return parsed;
         } catch {
           return { name: raw };
         }
       }
     }
-
-  } catch (e) {}
+  } catch {}
 
   return { name: "Resident User", email: null };
 }
@@ -63,6 +43,10 @@ export default function ResidentHamburgerMenu() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [user, setUser] = useState<UserInfo>({ name: "Resident User", email: null });
+
+  // 🔥 Added for logout confirmation modal
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
@@ -76,40 +60,36 @@ export default function ResidentHamburgerMenu() {
     else document.body.classList.remove("sidebar-open");
   }, [open]);
 
-  // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
         setProfileOpen(false);
+        setShowLogoutConfirm(false);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
+  const handleBackdropClick = useCallback(() => {
     setOpen(false);
     setProfileOpen(false);
   }, []);
 
   const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
 
-  const openProfile = () => {
-    router.push("/profile"); // or your actual profile route
-  };
+  const openProfile = () => router.push("/profile");
+  const openSettings = () => router.push("/settings");
 
-  const openSettings = () => {
-    router.push("/settings"); // placeholder
-  };
-
-  const logout = () => {
+  // 🔥 Logout now matches Estate logic
+  const handleLogout = () => {
     try {
       localStorage.removeItem("authUser");
       sessionStorage.clear();
-    } catch (e) {}
+    } catch {}
 
-    router.push("/auth"); // ✅ Redirects to Login/Register Auth page
+    router.push("/auth");
   };
 
   const initials = getInitials(user?.name);
@@ -129,11 +109,10 @@ export default function ResidentHamburgerMenu() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
-                setOpen((v) => !v);
+                setOpen(!open);
                 if (open) setProfileOpen(false);
               }}
               className="p-2 rounded-md active:scale-95 transition text-white"
-              aria-label={open ? "Close menu" : "Open menu"}
             >
               {open ? <FiX size={22} /> : <FiMenu size={22} />}
             </button>
@@ -142,15 +121,11 @@ export default function ResidentHamburgerMenu() {
           </div>
 
           {!open && (
-            <div className="flex items-center gap-2">
-              <button
-                className="p-2 rounded-md active:scale-95 transition text-white/90"
-                aria-label="More"
-                onClick={() => console.log("resident options")}
-              >
-                <FiSearch size={18} />
-              </button>
-            </div>
+            <button
+              className="p-2 rounded-md active:scale-95 transition text-white/90"
+            >
+              <FiSearch size={18} />
+            </button>
           )}
         </div>
       </header>
@@ -158,15 +133,12 @@ export default function ResidentHamburgerMenu() {
       {/* SIDEBAR */}
       <div
         className={`fixed inset-0 z-40 ${open ? "pointer-events-auto" : "pointer-events-none"}`}
-        aria-hidden={!open}
       >
         <div
           onClick={handleBackdropClick}
-          className={`absolute inset-0 transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0"}`}
-          style={{
-            backgroundColor: open ? "rgba(0,0,0,0.38)" : "transparent",
-            backdropFilter: open ? "blur(6px) saturate(.9)" : "none",
-          }}
+          className={`absolute inset-0 transition-opacity duration-300 ${
+            open ? "opacity-100" : "opacity-0"
+          } bg-black/40 backdrop-blur-sm`}
         />
 
         <aside
@@ -177,13 +149,12 @@ export default function ResidentHamburgerMenu() {
           style={{
             background: "linear-gradient(180deg, rgba(7,10,16,1) 0%, rgba(11,12,17,1) 100%)",
             borderRight: "1px solid rgba(255,255,255,0.03)",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
             borderTopRightRadius: 18,
             borderBottomRightRadius: 18,
             paddingTop: 84,
           }}
         >
-          {/* Search */}
+          {/* SEARCH */}
           <div className="px-4">
             <div className="flex items-center gap-3 bg-gray-800/60 rounded-xl px-3 py-2">
               <FiSearch className="text-gray-400" size={16} />
@@ -191,12 +162,11 @@ export default function ResidentHamburgerMenu() {
                 type="text"
                 placeholder="Search rooms, devices or scenes"
                 className="bg-transparent outline-none text-sm text-gray-200 placeholder-gray-400 w-full"
-                aria-label="Search"
               />
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* QUICK LINKS */}
           <nav className="px-4 mt-4 space-y-2">
             {quickLinks.map((q) => (
               <button
@@ -214,60 +184,47 @@ export default function ResidentHamburgerMenu() {
           {/* PROFILE FOOTER */}
           <div className="absolute bottom-0 left-0 w-full px-4 py-5 border-t border-white/6 bg-gradient-to-t from-transparent to-[rgba(255,255,255,0.01)]">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={openProfile}
-                  className="flex items-center gap-3 active:scale-95 transition"
-                  aria-label="Open profile"
-                >
-                  <div
-                    className="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center text-lg font-semibold shadow-sm"
-                    title={user?.name ?? "Resident User"}
-                  >
-                    {initials}
-                  </div>
-                  <div className="text-left">
-                    <p className="text-white font-semibold text-sm">
-                      {user?.name ?? "Resident User"}
-                    </p>
-                    <p className="text-white/50 text-xs">
-                      View profile
-                    </p>
-                  </div>
-                </button>
-              </div>
+              <button
+                onClick={openProfile}
+                className="flex items-center gap-3 active:scale-95 transition"
+              >
+                <div className="w-12 h-12 rounded-full bg-rose-600 text-white flex items-center justify-center text-lg font-semibold">
+                  {initials}
+                </div>
+                <div className="text-left">
+                  <p className="text-white font-semibold text-sm">{user?.name}</p>
+                  <p className="text-white/50 text-xs">View profile</p>
+                </div>
+              </button>
 
-              <div>
-                <button
-                  onClick={() => setProfileOpen((v) => !v)}
-                  className="p-2 rounded-md text-white/70 hover:bg-gray-800 transition"
-                  aria-expanded={profileOpen}
-                  aria-label="Profile options"
-                >
-                  {profileOpen ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
-                </button>
-              </div>
+              <button
+                onClick={() => setProfileOpen(!profileOpen)}
+                className="p-2 rounded-md text-white/70 hover:bg-gray-800 transition"
+              >
+                {profileOpen ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
+              </button>
             </div>
 
             {profileOpen && (
               <div className="mt-3 bg-gray-900/95 border border-white/6 rounded-xl shadow-xl overflow-hidden">
                 <button
                   onClick={openProfile}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-white/95 hover:bg-gray-800 transition text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-white/95 hover:bg-gray-800 transition"
                 >
                   <MdOutlinePerson size={18} /> <span>Profile</span>
                 </button>
 
                 <button
                   onClick={openSettings}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-white/95 hover:bg-gray-800 transition text-left"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-white/95 hover:bg-gray-800 transition"
                 >
                   <MdSettings size={18} /> <span>Settings</span>
                 </button>
 
+                {/* 🔥 Logout now opens modal */}
                 <button
-                  onClick={logout}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800 transition text-left"
+                  onClick={() => setShowLogoutConfirm(true)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-gray-800 transition"
                 >
                   <FiLogOut size={18} /> <span>Logout</span>
                 </button>
@@ -276,6 +233,33 @@ export default function ResidentHamburgerMenu() {
           </div>
         </aside>
       </div>
+
+      {/* 🔥 LOGOUT CONFIRMATION MODAL */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[999] bg-black/70 backdrop-blur-sm flex items-center justify-center px-6">
+          <div className="bg-gray-900 px-6 py-6 rounded-2xl w-full max-w-sm border border-gray-700">
+            <p className="text-white text-center font-semibold text-lg mb-6">
+              Are you sure you want to logout?
+            </p>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 py-3 rounded-xl bg-gray-700 text-white font-medium"
+              >
+                No
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-medium"
+              >
+                Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
