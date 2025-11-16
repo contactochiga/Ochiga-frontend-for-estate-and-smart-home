@@ -51,7 +51,7 @@ export default function AuthLanding() {
           transition={{ type: "spring", stiffness: 120, damping: 20 }}
         >
           <motion.div
-            className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center"
+            className="w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center" // Bigger logo
             initial={{ scale: 1 }}
             animate={{ scale: 0.7 }}
             transition={{ type: "spring", stiffness: 120, damping: 20 }}
