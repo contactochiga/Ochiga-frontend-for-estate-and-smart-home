@@ -12,19 +12,15 @@ export default function AuthLanding() {
   const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
-    // First hide splash
     const t = setTimeout(() => {
       setShowSplash(false);
-
-      // Slight delay before auth UI slides in
       setTimeout(() => setShowAuth(true), 300);
     }, 2500);
-
     return () => clearTimeout(t);
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center relative">
+    <div className="h-screen w-screen bg-black text-white flex flex-col items-center justify-center overflow-hidden relative">
 
       {/* ---------------------------
           SPLASH SCREEN
@@ -44,25 +40,33 @@ export default function AuthLanding() {
       </AnimatePresence>
 
       {/* ---------------------------
-          SLIDING LOGO (ChatGPT style)
+          SLIDING LOGO + TAGLINE
       ---------------------------- */}
       <motion.div
         initial={{ y: 140, scale: 1.2, opacity: 0 }}
         animate={
           showAuth
-            ? { y: 40, scale: 0.7, opacity: 1 }
+            ? { y: 0, scale: 1, opacity: 1 }
             : { y: 140, scale: 1.2, opacity: 0 }
         }
         transition={{ type: "spring", stiffness: 120, damping: 18 }}
-        className="mt-10"
+        className="flex flex-col items-center mb-10"
       >
         <div className="w-28 h-28 flex items-center justify-center">
           <OyiLiquidWave />
         </div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-4 text-center text-gray-400 text-sm font-medium"
+        >
+          Smart Infrastructure Suite
+        </motion.div>
       </motion.div>
 
       {/* ---------------------------
-          AUTH CARD SLIDES UP
+          AUTH CARD
       ---------------------------- */}
       <AnimatePresence>
         {showAuth && (
@@ -71,7 +75,7 @@ export default function AuthLanding() {
             initial={{ y: 120, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 160, damping: 20 }}
-            className="w-full max-w-md bg-[#111] border border-gray-800 rounded-2xl px-8 py-10 mt-6 shadow-xl"
+            className="w-full max-w-md bg-[#111] border border-gray-800 rounded-2xl px-8 py-10 shadow-xl"
           >
             {/* Buttons */}
             <motion.div
@@ -113,7 +117,7 @@ export default function AuthLanding() {
               <motion.button
                 onClick={() => router.push("/auth/estate-complete")}
                 variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
-                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                className="w-full py-3 rounded-xl bg-[#1E90FF] hover:bg-[#1C86EE] text-white font-medium"
               >
                 Sign Up
               </motion.button>
@@ -124,7 +128,6 @@ export default function AuthLanding() {
               <button className="hover:text-gray-200">
                 Enter Home
               </button>
-
               <button className="hover:text-gray-200">
                 Forgot your password?
               </button>
