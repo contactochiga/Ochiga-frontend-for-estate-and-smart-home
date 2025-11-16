@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import OyiLoader from "../../components/OyiLoader";
 import OyiLiquidWave from "../../components/OyiLiquidWave";
+import { FaGoogle, FaApple } from "react-icons/fa"; // Import Google & Apple logos
 
 export default function AuthLanding() {
   const router = useRouter();
@@ -42,18 +43,11 @@ export default function AuthLanding() {
       {/* ---------------------------
           LOGO + TAGLINE
       ---------------------------- */}
-      <motion.div
-        className="flex flex-col items-center justify-center"
-      >
-        {/* Logo */}
+      <div className="flex flex-col items-center justify-center z-10">
         <motion.div
-          initial={{ y: 140, scale: 1.2, opacity: 0 }}
-          animate={
-            showAuth
-              ? { y: 0, scale: 0.7, opacity: 1 } // Shrinks after splash
-              : { y: 140, scale: 1.2, opacity: 0 }
-          }
-          transition={{ type: "spring", stiffness: 120, damping: 18 }}
+          initial={{ scale: 1.5, y: 0 }}
+          animate={showAuth ? { scale: 0.7, y: 0 } : { scale: 1.5, y: 0 }}
+          transition={{ type: "spring", stiffness: 120, damping: 20 }}
           className="flex items-center justify-center"
         >
           <div className="w-20 h-20 sm:w-24 sm:h-24">
@@ -62,17 +56,19 @@ export default function AuthLanding() {
         </motion.div>
 
         {/* Tagline */}
-        {showAuth && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-2 text-center text-gray-400 text-xs sm:text-sm md:text-base font-medium"
-          >
-            Smart Infrastructure Suite
-          </motion.div>
-        )}
-      </motion.div>
+        <AnimatePresence>
+          {showAuth && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-2 text-center text-gray-400 text-xs sm:text-sm md:text-base font-medium"
+            >
+              Smart Infrastructure Suite
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* ---------------------------
           AUTH CARD
@@ -81,7 +77,7 @@ export default function AuthLanding() {
         {showAuth && (
           <motion.div
             key="auth-card"
-            initial={{ y: 120, opacity: 0 }}
+            initial={{ y: 80, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 160, damping: 20 }}
             className="w-full max-w-sm sm:max-w-md bg-[#111] border border-gray-800 rounded-2xl px-6 sm:px-8 py-8 sm:py-10 shadow-xl mt-6"
@@ -92,20 +88,23 @@ export default function AuthLanding() {
               variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
               className="flex flex-col gap-4"
             >
+              {/* Google */}
               <motion.button
                 variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
-                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-sm sm:text-base"
+                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-sm sm:text-base flex items-center justify-center gap-2"
               >
-                Continue with Google
+                <FaGoogle className="text-white" /> Continue with Google
               </motion.button>
 
+              {/* Apple */}
               <motion.button
                 variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
-                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-sm sm:text-base"
+                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium text-sm sm:text-base flex items-center justify-center gap-2"
               >
-                Continue with Apple
+                <FaApple className="text-white" /> Continue with Apple
               </motion.button>
 
+              {/* Email */}
               <motion.button
                 onClick={() => router.push("/auth/resident-complete")}
                 variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
@@ -114,6 +113,7 @@ export default function AuthLanding() {
                 Continue with Email
               </motion.button>
 
+              {/* Sign Up */}
               <motion.button
                 onClick={() => router.push("/auth/estate-complete")}
                 variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
