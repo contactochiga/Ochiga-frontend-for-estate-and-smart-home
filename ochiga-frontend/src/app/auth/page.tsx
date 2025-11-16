@@ -1,84 +1,137 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import OyiLoader from "../../components/OyiLoader";
 import OyiLiquidWave from "../../components/OyiLiquidWave";
 
 export default function AuthLanding() {
   const router = useRouter();
   const [showSplash, setShowSplash] = useState(true);
+  const [showAuth, setShowAuth] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowSplash(false), 3000);
+    // First hide splash
+    const t = setTimeout(() => {
+      setShowSplash(false);
+
+      // Slight delay before auth UI slides in
+      setTimeout(() => setShowAuth(true), 300);
+    }, 2500);
+
     return () => clearTimeout(t);
   }, []);
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6 relative text-white">
+    <div className="min-h-screen bg-black text-white flex flex-col items-center relative">
 
-      {/* SPLASH SCREEN */}
-      <AnimatePresence mode="wait">
+      {/* ---------------------------
+          SPLASH SCREEN
+      ---------------------------- */}
+      <AnimatePresence>
         {showSplash && (
           <motion.div
             key="splash"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.45 } }}
-            className="fixed inset-0 z-50 flex items-center justify-center"
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center z-50"
           >
-            <OyiLoader size={220} />
+            <OyiLoader size={260} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* LANDING CARD */}
+      {/* ---------------------------
+          SLIDING LOGO (ChatGPT style)
+      ---------------------------- */}
       <motion.div
-        key="landing"
-        initial={{ opacity: 0, scale: 0.995 }}
-        animate={{
-          opacity: showSplash ? 0 : 1,
-          scale: showSplash ? 0.995 : 1,
-        }}
-        transition={{ duration: 0.45 }}
-        className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center shadow-xl"
-        style={{ pointerEvents: showSplash ? "none" : "auto" }}
+        initial={{ y: 140, scale: 1.2, opacity: 0 }}
+        animate={
+          showAuth
+            ? { y: 40, scale: 0.7, opacity: 1 }
+            : { y: 140, scale: 1.2, opacity: 0 }
+        }
+        transition={{ type: "spring", stiffness: 120, damping: 18 }}
+        className="mt-10"
       >
-
-        {/* CENTERED LOGO + TAGLINE */}
-        <div className="flex flex-col items-center mb-6 pt-2">
-          <div className="w-16 h-16 flex items-center justify-center">
-            <OyiLiquidWave />
-          </div>
-
-          <p className="text-gray-400 text-sm mt-3">
-            Your Smart Infrastructure Suite
-          </p>
-        </div>
-
-        {/* BUTTONS */}
-        <div className="flex flex-col gap-3 mt-4">
-          <button
-            onClick={() => router.push("/auth/resident-complete")}
-            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
-          >
-            Resident Login
-          </button>
-
-          <button
-            onClick={() => router.push("/auth/estate-complete")}
-            className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 font-medium transition"
-          >
-            Estate Admin Signup
-          </button>
-        </div>
-
-        {/* FOOTER */}
-        <div className="mt-8 text-xs text-gray-500">
-          Built & Designed by <span className="text-gray-300">Ochiga</span>
+        <div className="w-28 h-28 flex items-center justify-center">
+          <OyiLiquidWave />
         </div>
       </motion.div>
+
+      {/* ---------------------------
+          AUTH CARD SLIDES UP
+      ---------------------------- */}
+      <AnimatePresence>
+        {showAuth && (
+          <motion.div
+            key="auth-card"
+            initial={{ y: 120, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 160, damping: 20 }}
+            className="w-full max-w-md bg-[#111] border border-gray-800 rounded-2xl px-8 py-10 mt-6 shadow-xl"
+          >
+            {/* Buttons */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                visible: {
+                  transition: { staggerChildren: 0.1 }
+                }
+              }}
+              className="flex flex-col gap-4"
+            >
+              {/* Google */}
+              <motion.button
+                variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium"
+              >
+                Continue with Google
+              </motion.button>
+
+              {/* Apple */}
+              <motion.button
+                variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium"
+              >
+                Continue with Apple
+              </motion.button>
+
+              {/* Email */}
+              <motion.button
+                onClick={() => router.push("/auth/resident-complete")}
+                variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+                className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium"
+              >
+                Continue with Email
+              </motion.button>
+
+              {/* Sign Up */}
+              <motion.button
+                onClick={() => router.push("/auth/estate-complete")}
+                variants={{ hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1 } }}
+                className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium"
+              >
+                Sign Up
+              </motion.button>
+            </motion.div>
+
+            {/* Footer links */}
+            <div className="flex items-center justify-between mt-6 text-xs text-gray-400">
+              <button className="hover:text-gray-200">
+                Enter Home
+              </button>
+
+              <button className="hover:text-gray-200">
+                Forgot your password?
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
