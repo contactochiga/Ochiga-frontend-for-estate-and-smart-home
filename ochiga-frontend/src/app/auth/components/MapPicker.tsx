@@ -1,59 +1,44 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { loadGoogleMaps } from "@/lib/GoogleMapLoader";
 
 interface MapPickerProps {
   setLocation: (coords: { lat: number; lng: number } | null) => void;
 }
 
 export default function MapPicker({ setLocation }: MapPickerProps) {
-  const mapRef = useRef<HTMLDivElement | null>(null);
-  const mapInstance = useRef<google.maps.Map | null>(null);
-
-  // Wait for Google Maps global object
-  const waitForGoogleMaps = () =>
-    new Promise<void>((resolve) => {
-      const interval = setInterval(() => {
-        if ((window as any).google?.maps) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, 100);
-    });
+  const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let listener: google.maps.MapsEventListener | null = null;
+    async function initMap() {
+      await loadGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY || "");
 
-    const initMap = async () => {
-      await waitForGoogleMaps();
+      if (!mapRef.current || !window.google?.maps) return;
 
-      if (!mapRef.current) return;
+      const defaultCenter = { lat: 6.4402, lng: 3.4179 };
 
-      mapInstance.current = new google.maps.Map(mapRef.current, {
-        center: { lat: 6.465422, lng: 3.406448 }, // Lagos default
-        zoom: 14,
-        disableDefaultUI: true,
+      const map = new google.maps.Map(mapRef.current, {
+        zoom: 15,
+        center: defaultCenter,
       });
 
-      listener = mapInstance.current.addListener("click", (e: any) => {
-        setLocation({
-          lat: e.latLng.lat(),
-          lng: e.latLng.lng(),
-        });
+      const marker = new google.maps.Marker({
+        position: defaultCenter,
+        map,
+        draggable: true,
       });
-    };
+
+      marker.addListener("dragend", () => {
+        const pos = marker.getPosition();
+        if (pos) {
+          setLocation({ lat: pos.lat(), lng: pos.lng() });
+        }
+      });
+    }
 
     initMap();
+  }, []);
 
-    return () => {
-      if (listener) listener.remove();
-    };
-  }, [setLocation]);
-
-  return (
-    <div
-      ref={mapRef}
-      className="w-full h-64 rounded-lg border border-gray-700"
-    />
-  );
+  return <div ref={mapRef} className="h-[300px] w-full rounded-lg" />;
 }
