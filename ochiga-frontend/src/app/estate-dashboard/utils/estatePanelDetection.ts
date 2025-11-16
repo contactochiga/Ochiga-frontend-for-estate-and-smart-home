@@ -2,7 +2,33 @@
 export function detectEstatePanelType(message: string): string | null {
   const lower = message.toLowerCase();
 
-  // Estate devices (security, access, lights, CCTV, AC, gates, doors)
+  /* ---------------------------------------------------------
+     HOME CREATION (new)
+     Detect when user wants to create/register a home/unit
+  --------------------------------------------------------- */
+  if (
+    lower.includes("create home") ||
+    lower.includes("add home") ||
+    lower.includes("new home") ||
+    lower.includes("set up home") ||
+    lower.includes("setup home") ||
+    lower.includes("register home") ||
+    lower.includes("add a unit") ||
+    lower.includes("create a unit") ||
+    lower.includes("add new unit") ||
+    lower.includes("setup a house") ||
+    lower.includes("set up a house") ||
+    lower.includes("create apartment") ||
+    lower.includes("add apartment") ||
+    lower.includes("add flat") ||
+    lower.includes("create flat")
+  ) {
+    return "home_creation";
+  }
+
+  /* ---------------------------------------------------------
+     ESTATE DEVICES (security, access, lights, CCTV, AC, gates)
+  --------------------------------------------------------- */
   if (
     lower.includes("light") ||
     lower.includes("lights") ||
@@ -18,7 +44,9 @@ export function detectEstatePanelType(message: string): string | null {
     return "estate_devices";
   }
 
-  // Estate power controls (water, electricity, general utilities)
+  /* ---------------------------------------------------------
+     ESTATE POWER (water, electricity, general utilities)
+  --------------------------------------------------------- */
   if (
     lower.includes("power") ||
     lower.includes("electricity") ||
@@ -28,7 +56,9 @@ export function detectEstatePanelType(message: string): string | null {
     return "estate_power";
   }
 
-  // Estate accounting (payments, debts, service charges)
+  /* ---------------------------------------------------------
+     ESTATE ACCOUNTING (payments, debts, service charges)
+  --------------------------------------------------------- */
   if (
     lower.includes("account") ||
     lower.includes("billing") ||
@@ -40,11 +70,14 @@ export function detectEstatePanelType(message: string): string | null {
     return "estate_accounting";
   }
 
-  // Estate community (residents, visitor management, announcements)
+  /* ---------------------------------------------------------
+     ESTATE COMMUNITY (residents, visitors, announcements)
+  --------------------------------------------------------- */
   if (
     lower.includes("community") ||
     lower.includes("resident") ||
     lower.includes("visitors") ||
+    lower.includes("visitor") ||
     lower.includes("announcement") ||
     lower.includes("event")
   ) {
