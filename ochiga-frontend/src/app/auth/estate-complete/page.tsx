@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { FaGoogle, FaApple } from "react-icons/fa";
 
 export default function EstateAuthPage() {
   const router = useRouter();
@@ -21,8 +22,8 @@ export default function EstateAuthPage() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-black">
-      <div className="w-[90%] max-w-md bg-gray-900 p-8 rounded-xl border border-gray-700 animate-fadeIn">
+    <div className="fixed inset-0 bg-black flex items-center justify-center overflow-hidden">
+      <div className="w-[90%] max-w-md bg-[#111] p-8 rounded-2xl border border-gray-800 shadow-xl animate-fadeIn">
         
         <h1 className="text-2xl text-center text-white font-semibold mb-6">
           Create Estate Account
@@ -33,7 +34,7 @@ export default function EstateAuthPage() {
         <input
           type="email"
           placeholder="Email"
-          className="w-full p-3 mb-3 rounded bg-black border border-gray-700 text-white"
+          className="w-full p-3 mb-3 rounded-xl bg-black border border-gray-700 text-white focus:outline-none focus:border-[#B22222]"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -41,14 +42,14 @@ export default function EstateAuthPage() {
         <input
           type="password"
           placeholder="Create password"
-          className="w-full p-3 mb-6 rounded bg-black border border-gray-700 text-white"
+          className="w-full p-3 mb-6 rounded-xl bg-black border border-gray-700 text-white focus:outline-none focus:border-[#B22222]"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button
           onClick={handleSignup}
-          className="w-full p-3 bg-blue-600 rounded text-white font-semibold hover:bg-blue-700 transition"
+          className="w-full p-3 mb-4 bg-[#B22222] hover:bg-[#8B0000] rounded-xl text-white font-semibold transition"
         >
           Create Account
         </button>
@@ -59,14 +60,14 @@ export default function EstateAuthPage() {
           <div className="flex-1 h-[1px] bg-gray-700" />
         </div>
 
-        {/* Google */}
-        <button className="w-full p-3 mb-3 bg-white text-black rounded font-medium">
-          Continue with Google
+        {/* Apple */}
+        <button className="w-full p-3 mb-3 bg-gray-800 text-white rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-700 transition">
+          <FaApple /> Continue with Apple
         </button>
 
-        {/* Apple */}
-        <button className="w-full p-3 bg-white text-black rounded font-medium">
-          Continue with Apple
+        {/* Google */}
+        <button className="w-full p-3 mb-0 bg-gray-800 text-white rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-gray-700 transition">
+          <FaGoogle /> Continue with Google
         </button>
 
       </div>
