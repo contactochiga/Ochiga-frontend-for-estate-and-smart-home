@@ -70,7 +70,15 @@ export default function AuthLanding() {
         </div>
 
         <div className="flex items-center justify-between mt-6 text-xs text-gray-400">
-          <button className="hover:text-gray-200">Enter Home</button>
+          
+          {/* UPDATED: Enter Home now leads to resident activation */}
+          <button
+            onClick={() => router.push("/auth/resident-complete")}
+            className="hover:text-gray-200"
+          >
+            Enter Home
+          </button>
+
           <button className="hover:text-gray-200">Forgot your password?</button>
         </div>
       </motion.div>
