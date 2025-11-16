@@ -1,37 +1,29 @@
-// src/middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export async function middleware(req: NextRequest) {
+export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ✅ Public routes (root, login, auth, etc.)
-  if (
-    pathname === "/" ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/auth")
-  ) {
-    return NextResponse.next();
-  }
+  const estateAuth = req.cookies.get("ochiga_estate_auth")?.value;
+  const residentAuth = req.cookies.get("ochiga_resident_auth")?.value;
 
-  // ✅ Temporary dev shortcuts
-  if (pathname === "/manager") {
-    return NextResponse.redirect(new URL("/manager-dashboard", req.url));
-  }
+  // Resident login page free
+  if (pathname.startsWith("/auth/resident")) return NextResponse.next();
+  
+  // Estate signup page free
+  if (pathname.startsWith("/auth/estate")) return NextResponse.next();
 
-  if (pathname === "/resident") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
+  // Protect Resident Dashboard
+  if (pathname.startsWith("/ai-dashboard") && !residentAuth)
+    return NextResponse.redirect(new URL("/auth/resident", req.url));
 
-  // ✅ Still allow dashboards directly (bypass auth for now)
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/manager-dashboard")) {
-    return NextResponse.next();
-  }
+  // Protect Estate Dashboard
+  if (pathname.startsWith("/estate-dashboard") && !estateAuth)
+    return NextResponse.redirect(new URL("/auth/estate", req.url));
 
-  // Default fallback → 404
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/:path*"], // applies middleware to all routes
+  matcher: ["/:path*"],
 };
