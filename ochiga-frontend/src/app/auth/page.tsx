@@ -8,7 +8,13 @@ export default function AuthLanding() {
   const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6">
+    <div className="min-h-screen bg-black flex items-center justify-center px-6 relative">
+
+      {/* FOOTER BRAND CREDIT */}
+      <div className="absolute bottom-6 w-full text-center text-xs text-gray-600">
+        Built & Designed by <span className="text-gray-400">Ochiga</span>
+      </div>
+
       <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center shadow-xl animate-fade-in">
 
         {/* APP NAME */}
@@ -16,9 +22,9 @@ export default function AuthLanding() {
           Oyi
         </h1>
 
-        {/* BUILT BY */}
+        {/* SUBHEADER */}
         <p className="text-gray-400 mt-2 text-sm">
-          Built & Designed by <span className="text-blue-400">Ochiga</span>
+          Your Smart Infrastructure Suite
         </p>
 
         {/* BUTTONS */}
