@@ -3,15 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import OyiLiquidWave from "../../components/OyiLiquidWave";
-import { FaO } from "react-icons/fa"; // optional, remove if not used
 
 /**
- * Auth landing that first shows a Jelly-wave splash,
- * then fades into the landing selection UI (Resident / Estate).
- *
- * - No auto-login.
- * - Splash runs ~2600ms then reveals landing.
+ * Auth landing (clean version)
+ * - Removes all old OyiLiquidWave animations
+ * - Keeps the splash and transitions
  */
 
 export default function AuthLanding() {
@@ -19,13 +15,13 @@ export default function AuthLanding() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowSplash(false), 2600); // ~2.6s animation
+    const t = setTimeout(() => setShowSplash(false), 2600);
     return () => clearTimeout(t);
   }, []);
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-6 relative text-white">
-      {/* Splash overlay */}
+      {/* Splash Screen */}
       <AnimatePresence mode="wait">
         {showSplash && (
           <motion.div
@@ -38,10 +34,15 @@ export default function AuthLanding() {
             <motion.div
               initial={{ scale: 0.86, rotate: -6, opacity: 0 }}
               animate={{ scale: 1, rotate: 0, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 20, duration: 0.9 }}
+              transition={{
+                type: "spring",
+                stiffness: 200,
+                damping: 20,
+                duration: 0.9,
+              }}
               className="flex flex-col items-center gap-6"
             >
-              {/* Circular badge with wave inside */}
+              {/* Badge */}
               <motion.div
                 initial={{ scale: 0.9 }}
                 animate={{ scale: [1, 1.06, 1] }}
@@ -49,18 +50,13 @@ export default function AuthLanding() {
                 className="w-40 h-40 rounded-full bg-white/6 border border-white/8 flex items-center justify-center shadow-2xl"
                 style={{ backdropFilter: "blur(6px)" }}
               >
-                {/* small badge background circle */}
+                {/* inner circle (EMPTY NOW) */}
                 <div className="w-[86%] h-[86%] rounded-full bg-black flex items-center justify-center overflow-hidden">
-                  <div className="w-[78%] h-[78%] rounded-full bg-gradient-to-tr from-[#111318] to-[#0b0d10] flex items-center justify-center">
-                    {/* the wave sits horizontally centered */}
-                    <div style={{ width: "78%", height: "34px", overflow: "hidden", borderRadius: 999 }}>
-                      <OyiLiquidWave color="#e11d48" size="medium" barCount={88} />
-                    </div>
-                  </div>
+                  <div className="w-[78%] h-[78%] rounded-full bg-gradient-to-tr from-[#111318] to-[#0b0d10] flex items-center justify-center"></div>
                 </div>
               </motion.div>
 
-              {/* App name below splash */}
+              {/* Title under splash */}
               <motion.h2
                 initial={{ y: 8, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
@@ -83,7 +79,7 @@ export default function AuthLanding() {
         )}
       </AnimatePresence>
 
-      {/* Main landing content (revealed after splash) */}
+      {/* Main Landing */}
       <motion.div
         key="landing"
         initial={{ opacity: 0, scale: 0.995 }}
@@ -92,22 +88,20 @@ export default function AuthLanding() {
         className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center shadow-xl"
         style={{ pointerEvents: showSplash ? "none" : "auto" }}
       >
-        {/* Title row with icon */}
+        {/* Title Row */}
         <div className="flex items-center justify-center gap-3 mb-2">
-          {/* Icon badge left of title (small) */}
           <div className="w-10 h-10 rounded-full bg-white/6 border border-white/8 flex items-center justify-center">
             <div style={{ width: 34, height: 34 }} className="flex items-center justify-center">
-              {/* reuse the wave as mini logo inside the icon */}
-              <div style={{ width: 34, height: 12, overflow: "hidden", borderRadius: 999 }}>
-                <OyiLiquidWave color="#e11d48" size="small" barCount={40} />
-              </div>
+              {/* EMPTY NOW */}
             </div>
           </div>
 
           <h1 className="text-3xl font-bold">Oyi</h1>
         </div>
 
-        <p className="text-gray-400 text-sm mb-8">Your Smart Infrastructure Suite</p>
+        <p className="text-gray-400 text-sm mb-8">
+          Your Smart Infrastructure Suite
+        </p>
 
         {/* Buttons */}
         <div className="flex flex-col gap-3">
@@ -126,7 +120,6 @@ export default function AuthLanding() {
           </button>
         </div>
 
-        {/* Footer credit */}
         <div className="mt-8 text-xs text-gray-500">
           Built & Designed by <span className="text-gray-300">Ochiga</span>
         </div>
