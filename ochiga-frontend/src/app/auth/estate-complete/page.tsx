@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FaGoogle, FaApple } from "react-icons/fa";
+import { IoChevronBack } from "react-icons/io5";
 
 export default function EstateAuthPage() {
   const router = useRouter();
@@ -16,13 +17,26 @@ export default function EstateAuthPage() {
       return;
     }
 
-    // Temporary dummy success
     document.cookie = "ochiga_estate_auth=true; path=/";
     router.push("/estate-dashboard");
   };
 
   return (
     <div className="fixed inset-0 bg-black flex items-center justify-center overflow-hidden">
+
+      {/* ---------------------------
+          BACK ARROW (top-left)
+      ---------------------------- */}
+      <button
+        onClick={() => router.push("/auth")}
+        className="absolute top-6 left-6 text-gray-400 hover:text-white transition"
+      >
+        <IoChevronBack size={28} />
+      </button>
+
+      {/* ---------------------------
+          AUTH CARD
+      ---------------------------- */}
       <div className="w-[90%] max-w-md bg-[#111] p-8 rounded-2xl border border-gray-800 shadow-xl animate-fadeIn">
         
         <h1 className="text-2xl text-center text-white font-semibold mb-6">
