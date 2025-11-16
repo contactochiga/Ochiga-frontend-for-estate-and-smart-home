@@ -1,216 +1,176 @@
-// ochiga-frontend/src/components/OyiAnimatedLogo.tsx
-"use client";
-
+// OyiLoader.tsx
 import React from "react";
-import { motion, useAnimation } from "framer-motion";
 
-type Props = {
-  size?: number; // px width/height (square)
-  color?: string; // primary red
-  duration?: number; // fill duration in seconds
-  onComplete?: () => void;
-};
+/**
+ * OyiLoader
+ * Simple, self-contained React component for a 3s loading animation.
+ *
+ * Usage:
+ *  <OyiLoader size={220} />   // size in px (square)
+ *
+ * This component:
+ *  - fades the rounded red background in
+ *  - animates a gradient "liquid" rising inside the wave shape
+ *  - after liquid is full, the "Oyi" text slides up and fades in
+ *
+ * Note: This is a stylized vector recreation designed for animation.
+ */
 
-export default function OyiAnimatedLogo({
-  size = 160,
-  color = "#e11d48",
-  duration = 1.8,
-  onComplete,
-}: Props) {
-  const controls = useAnimation();
+export default function OyiLoader({ size = 220 }: { size?: number }) {
+  const s = size;
+  const viewBox = "0 0 200 200";
 
-  // Start the fill animation when component mounts
-  React.useEffect(() => {
-    (async () => {
-      // tiny delay so everything renders before anim
-      await controls.start({
-        y: ["12%", "0%"],
-        transition: { duration: duration, ease: "easeOut" },
-      });
-      // fade out the white shell to reveal the filled shape
-      await controls.start({
-        shellOpacity: 0,
-        transition: { duration: 0.28, ease: "easeOut" },
-      });
-
-      // optional settle pulse
-      await controls.start({
-        scale: [1, 1.03, 1],
-        transition: { duration: 0.9, ease: "easeInOut" },
-      });
-
-      if (onComplete) onComplete();
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // SVG paths — blob for the amoeba/wave shape.
-  // You can replace 'amoebaPath' with any custom path if you want a different shape.
-  const amoebaPath =
-    "M24.4,10.7 C28.2,9.1 33.6,8.9 38.3,10.9 C44.5,13.6 49.3,15.9 57.0,14.8 C64.6,13.7 73.1,9.6 78.5,12.7 C83.9,15.8 83.1,24.6 79.5,30.9 C75.9,37.3 68.7,40.2 62.0,42.7 C55.3,45.2 48.1,47.1 41.0,45.7 C33.8,44.3 27.3,40.3 22.3,36.5 C17.4,32.7 13.6,18.9 24.4,10.7 Z";
-
-  // We will use viewBox 0 0 100 100 and scale paths accordingly.
   return (
     <div
       style={{
-        width: size,
-        height: size,
+        width: s,
+        height: s,
         display: "inline-block",
-        lineHeight: 0,
+        // center contents
+        position: "relative",
       }}
-      aria-hidden
+      aria-hidden="true"
     >
       <svg
-        viewBox="0 0 100 100"
+        viewBox={viewBox}
         width="100%"
         height="100%"
         preserveAspectRatio="xMidYMid meet"
-        xmlns="http://www.w3.org/2000/svg"
+        style={{ display: "block" }}
       >
-        {/* rounded rect background (the tile) */}
+        <defs>
+          {/* gradient for the filling fluid */}
+          <linearGradient id="liquidGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#7bdff5" />
+            <stop offset="100%" stopColor="#1eaedb" />
+          </linearGradient>
+
+          {/* wave path used as a clipPath so the blue rect only shows inside the wave shape */}
+          <clipPath id="waveClip">
+            {/* Wave path - tuned to sit in top half */}
+            <path
+              d="M18,80 C45,50 80,55 110,68 C140,80 165,72 182,58 C178,76 160,95 125,98 C95,100 70,105 45,98 C30,92 20,86 18,80 Z"
+              transform="translate(0,-6)"
+            />
+          </clipPath>
+
+          {/* path itself used for the white wave shape stroke/fill */}
+          <path
+            id="waveShape"
+            d="M18,80 C45,50 80,55 110,68 C140,80 165,72 182,58 C178,76 160,95 125,98 C95,100 70,105 45,98 C30,92 20,86 18,80 Z"
+            transform="translate(0,-6)"
+          />
+        </defs>
+
+        {/* Rounded background. It will fade in (see CSS below). */}
         <rect
-          x="2"
-          y="2"
-          rx="16"
-          ry="16"
-          width="96"
-          height="96"
-          fill={color}
+          x="10"
+          y="10"
+          rx="28"
+          ry="28"
+          width="180"
+          height="180"
+          className="bgRect"
         />
 
-        {/* Group for centered content */}
-        <g transform="translate(10,12) scale(0.78)">
-          {/* The amoeba shape outline (shell). We'll fade this shell out during animation */}
-          <motion.path
-            d={amoebaPath}
+        {/* Place the white wave outline on top */}
+        <g transform="translate(0,0)">
+          {/* the white shape (stroke/soft fill) */}
+          <use href="#waveShape" fill="#ffffff" className="waveBase" />
+        </g>
+
+        {/* Liquid: a rect animated upwards that is clipped to the wave shape */}
+        <g clipPath="url(#waveClip)">
+          {/* The liquid rect is positioned below the wave and will translate up */}
+          <rect
+            className="liquidRect"
+            x="0"
+            y="120"
+            width="200"
+            height="120"
+            fill="url(#liquidGrad)"
+          />
+        </g>
+
+        {/* "Oyi" text - initially translated down & transparent, then slides up & fades */}
+        <g className="oyiGroup" transform="translate(0,0)">
+          <text
+            x="50%"
+            y="146"
+            dominantBaseline="middle"
+            textAnchor="middle"
+            fontFamily="Inter, Roboto, Helvetica, Arial, sans-serif"
+            fontWeight="700"
+            fontSize="44"
             fill="#ffffff"
-            // give it a subtle shadow via opacity and tiny blur style (svg filter could be added)
-            style={{ opacity: 1 }}
-            animate={{
-              // custom animated prop handled below via controls
-            }}
-            // use custom animate keys via style object
-            initial={{ opacity: 1 }}
-            // we control shellOpacity via animation controls
-            animate={controls}
-            // To allow changing opacity key name used below:
-            custom={{}}
-            // map a custom key name used earlier
-            // Framer-motion doesn't accept custom props arbitrarily, so we supply style manually below via attribute
-          />
-
-          {/* Create a mask that matches the amoeba path.
-              Inside that mask we place a rectangle (liquid) that will translate up to simulate filling. */}
-          <defs>
-            <mask id="amoeba-mask">
-              {/* mask uses white to show fill */}
-              <rect x="0" y="0" width="100" height="100" fill="black" />
-              {/* draw path in white to allow fill to show through */}
-              <path d={amoebaPath} fill="white" />
-            </mask>
-
-            {/* small bubble shape used as repeated circle */}
-            <circle id="bubble" cx="0" cy="0" r="1.8" fill="#fff" opacity="0.9" />
-          </defs>
-
-          {/* Liquid group masked by amoeba (the rising red inside the white amoeba) */}
-          <g mask="url(#amoeba-mask)">
-            {/* background behind the clip to ensure correct color */}
-            <rect x="-10" y="0" width="140" height="120" fill={color} />
-
-            {/* animated rising rectangle (we will animate its translateY via framer-motion) */}
-            <motion.rect
-              x="-10"
-              width="140"
-              // start below and animate upward — initial y set by framer-motion
-              y="100"
-              height="120"
-              fill={color}
-              animate={{ y: 100 }}
-              initial={{ y: 120 }}
-              // we will start animation using the same controls so timing matches, but using a separate smaller animation
-              // Instead of controls.start for this element, we use the same sequence via on mount effect. For simpler control,
-              // animate attribute is updated above by the global `controls` effect via start({ y: ["12%", "0%"] })
-              // however, framer-motion cannot animate svg rect y using percent easily, so we do numeric y animation below with controls
-              // To sync, use the same controls (works because controls.start accepted generic keys).
-              // attach controls now:
-              // (we will override animation via a little hack: supply animate prop equal to controls; this will accept custom fields.)
-              style={{ translateY: 0 }}
-            />
-          </g>
-
-          {/* overlay - subtle inner white stroke to show shell even when fill starts (we'll fade this out) */}
-          <motion.path
-            d={amoebaPath}
-            fill="none"
-            stroke="rgba(255,255,255,0.28)"
-            strokeWidth="1.2"
-            initial={{ opacity: 1 }}
-            animate={controls}
-            // We'll animate a custom 'shellOpacity' prop via the controls above.
-            style={{ mixBlendMode: "overlay" }}
-          />
-
-          {/* small bubbles that float up while filling — we animate them in sequence */}
-          <g>
-            <motion.g
-              initial={{ opacity: 0, y: 12, scale: 0.6 }}
-              animate={{
-                opacity: [0.0, 0.9, 0.0],
-                y: [12, -6, -18],
-                scale: [0.6, 1.0, 0.6],
-              }}
-              transition={{ repeat: Infinity, duration: duration + 0.8, ease: "easeOut", delay: 0.15 }}
-              style={{ transformBox: "fill-box", transformOrigin: "center" }}
-            >
-              <circle cx="22" cy="52" r="1.9" fill="white" opacity={0.9} />
-            </motion.g>
-
-            <motion.g
-              initial={{ opacity: 0, y: 8, scale: 0.6 }}
-              animate={{
-                opacity: [0.0, 0.9, 0.0],
-                y: [8, -10, -24],
-                scale: [0.6, 1.0, 0.6],
-              }}
-              transition={{ repeat: Infinity, duration: duration + 1.0, ease: "easeOut", delay: 0.45 }}
-              style={{ transformBox: "fill-box", transformOrigin: "center" }}
-            >
-              <circle cx="50" cy="52" r="1.6" fill="white" opacity={0.85} />
-            </motion.g>
-
-            <motion.g
-              initial={{ opacity: 0, y: 10, scale: 0.6 }}
-              animate={{
-                opacity: [0.0, 0.85, 0.0],
-                y: [10, -8, -22],
-                scale: [0.6, 1.0, 0.6],
-              }}
-              transition={{ repeat: Infinity, duration: duration + 1.2, ease: "easeOut", delay: 0.9 }}
-              style={{ transformBox: "fill-box", transformOrigin: "center" }}
-            >
-              <circle cx="74" cy="50" r="1.4" fill="white" opacity={0.8} />
-            </motion.g>
-          </g>
-
-          {/* small cleanup: a subtle highlight along the top edge of the amoeba */}
-          <path
-            d={amoebaPath}
-            fill="none"
-            stroke="rgba(255,255,255,0.06)"
-            strokeWidth="0.6"
-            transform="translate(0,-1)"
-          />
+            className="oyiText"
+          >
+            Oyi
+          </text>
         </g>
       </svg>
 
-      {/* Controls to run synchronized animation: we animate the mask-rect via CSS keyframes approach for reliability */}
-      <style jsx>{`
-        /* fallback/aux animation for the masked rect filling up */
-        svg rect[fill="${color}"] {
-          /* target the rect inside the mask; select last matching rect */
+      {/* Inline CSS for animations */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        /* timing: total ~3s */
+        .bgRect {
+          fill: #ffffff;            /* start white (invisible on white page) then fades to red */
+          transition: fill 0.6s linear;
+          animation: bgFade 0.6s forwards 0.0s;
         }
-      `}</style>
+
+        /* After the bg fade we set to final red so the rounded tile stays red */
+        @keyframes bgFade {
+          0% { fill: #ffffff; }
+          100% { fill: #e4232d; } /* final background red */
+        }
+
+        /* subtle soft white wave (base) opacity anim so it feels polished */
+        .waveBase {
+          opacity: 0;
+          transform-origin: 50% 20%;
+          animation: waveAppear 0.5s ease-in 0.7s forwards;
+        }
+        @keyframes waveAppear {
+          from { opacity: 0; transform: translateY(4px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0px) scale(1); }
+        }
+
+        /* Liquid rectangle: animate translateY up so it looks like filling */
+        .liquidRect {
+          transform: translateY(0px);
+          transform-origin: 50% 50%;
+          animation: liquidRise 1.8s cubic-bezier(.2,.9,.2,1) 0.2s forwards;
+        }
+        @keyframes liquidRise {
+          0%   { transform: translateY(40px); opacity: 1; }
+          60%  { transform: translateY(8px); }   /* fast rise */
+          90%  { transform: translateY(0px); }   /* settle */
+          100% { transform: translateY(0px); } 
+        }
+
+        /* Text group animation: starts after the liquid mostly filled */
+        .oyiGroup {
+          transform: translateY(8px);
+          opacity: 0;
+          animation: oyiSlide 0.6s ease-out 2.0s forwards;
+        }
+        @keyframes oyiSlide {
+          0% { transform: translateY(12px); opacity: 0;}
+          100% { transform: translateY(0px); opacity: 1; }
+        }
+
+        /* ensure text crispness */
+        .oyiText {
+          filter: drop-shadow(0 0 0 rgba(0,0,0,0));
+          letter-spacing: -0.5px;
+        }
+
+        /* small responsive tweak if container is tiny */
+        @media (max-width: 120px) {
+          .oyiText { font-size: 28px; }
+        }
+      ` }} />
     </div>
   );
 }
