@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import OyiLoader from "../../components/OyiLoader";
-import OyiLiquidWave from "../../components/OyiLiquidWave"; // mini static logo
+import OyiLiquidWave from "../../components/OyiLiquidWave";
 
 export default function AuthLanding() {
   const router = useRouter();
@@ -17,10 +17,8 @@ export default function AuthLanding() {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-6 relative text-white">
-      
-      {/* ============================
-          SPLASH SCREEN
-      ============================= */}
+
+      {/* SPLASH SCREEN */}
       <AnimatePresence mode="wait">
         {showSplash && (
           <motion.div
@@ -35,9 +33,7 @@ export default function AuthLanding() {
         )}
       </AnimatePresence>
 
-      {/* ============================
-          LANDING CONTENT
-      ============================= */}
+      {/* LANDING CARD */}
       <motion.div
         key="landing"
         initial={{ opacity: 0, scale: 0.995 }}
@@ -49,24 +45,20 @@ export default function AuthLanding() {
         className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center shadow-xl"
         style={{ pointerEvents: showSplash ? "none" : "auto" }}
       >
-        
-        {/* ============================
-            STATIC LOGO HEADER (REPLACES Oyi TEXT)
-        ============================= */}
-        <div className="flex flex-col items-center justify-center mb-6">
-          <div className="w-20 h-20">
+
+        {/* CENTERED LOGO + TAGLINE */}
+        <div className="flex flex-col items-center mb-6 pt-2">
+          <div className="w-16 h-16 flex items-center justify-center">
             <OyiLiquidWave />
           </div>
+
+          <p className="text-gray-400 text-sm mt-3">
+            Your Smart Infrastructure Suite
+          </p>
         </div>
 
-        <p className="text-gray-400 text-sm mb-8">
-          Your Smart Infrastructure Suite
-        </p>
-
-        {/* ============================
-            BUTTONS
-        ============================= */}
-        <div className="flex flex-col gap-3">
+        {/* BUTTONS */}
+        <div className="flex flex-col gap-3 mt-4">
           <button
             onClick={() => router.push("/auth/resident-complete")}
             className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium transition"
@@ -82,6 +74,7 @@ export default function AuthLanding() {
           </button>
         </div>
 
+        {/* FOOTER */}
         <div className="mt-8 text-xs text-gray-500">
           Built & Designed by <span className="text-gray-300">Ochiga</span>
         </div>
