@@ -1,62 +1,46 @@
+// ochiga-frontend/src/app/auth/page.tsx
+
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function AuthPage() {
+export default function AuthLanding() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-
-  const handleLogin = () => {
-    setError("");
-
-    // 🔐 Dummy authentication for now
-    if (email === "admin@ochiga.com" && password === "123456") {
-      // Store token as cookie (middleware compatible)
-      document.cookie = "ochiga_auth=true; path=/";
-
-      // Redirect to your dashboard (choose your path)
-      router.push("/dashboard");
-    } else {
-      setError("Invalid login details");
-    }
-  };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-black">
-      <div className="w-[90%] max-w-md bg-gray-900 p-8 rounded-xl border border-gray-700">
-        <h1 className="text-2xl text-white text-center font-semibold mb-6">
-          Ochiga Login
+    <div className="min-h-screen bg-black flex items-center justify-center px-6">
+      <div className="w-full max-w-md bg-gray-900 border border-gray-800 rounded-2xl p-10 text-center shadow-xl animate-fade-in">
+
+        {/* APP NAME */}
+        <h1 className="text-4xl font-bold text-white tracking-wide">
+          Oyi
         </h1>
 
-        {error && (
-          <p className="text-red-400 text-sm mb-3 text-center">{error}</p>
-        )}
+        {/* BUILT BY */}
+        <p className="text-gray-400 mt-2 text-sm">
+          Built & Designed by <span className="text-blue-400">Ochiga</span>
+        </p>
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-3 mb-4 rounded bg-black border border-gray-700 text-white"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {/* BUTTONS */}
+        <div className="mt-10 flex flex-col gap-4">
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-3 mb-6 rounded bg-black border border-gray-700 text-white"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <button
+            onClick={() => router.push("/auth/resident-complete")}
+            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 
+            text-white font-medium transition-all"
+          >
+            Resident Login
+          </button>
 
-        <button
-          onClick={handleLogin}
-          className="w-full p-3 bg-blue-600 rounded text-white font-medium hover:bg-blue-700 active:scale-95 transition"
-        >
-          Log In
-        </button>
+          <button
+            onClick={() => router.push("/auth/estate-complete")}
+            className="w-full py-3 rounded-xl bg-gray-800 hover:bg-gray-700 
+            text-gray-200 border border-gray-700 font-medium transition-all"
+          >
+            Estate Admin Signup
+          </button>
+
+        </div>
       </div>
     </div>
   );
