@@ -11,13 +11,11 @@ export default function EstateHamburgerMenu() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  // toggle body class so layout shifts
   useEffect(() => {
     if (open) document.body.classList.add("sidebar-open");
     else document.body.classList.remove("sidebar-open");
   }, [open]);
 
-  // close on Escape key
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -37,8 +35,8 @@ export default function EstateHamburgerMenu() {
 
   return (
     <>
-      {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent px-4 py-3 flex items-center justify-between">
+      {/* FIXED HEADER — restored original position */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-transparent px-4 py-3 flex items-center gap-3">
         <button
           onClick={() => {
             setOpen(!open);
@@ -49,6 +47,7 @@ export default function EstateHamburgerMenu() {
           {open ? <FiX className="text-xl" /> : <FiMenu className="text-xl" />}
         </button>
 
+        {/* 🔥 Back to original left-side alignment */}
         <span className="text-white text-sm md:text-base font-medium tracking-wide">
           Estate Dashboard
         </span>
@@ -56,9 +55,8 @@ export default function EstateHamburgerMenu() {
 
       {/* SIDEBAR */}
       <aside
-        className={`fixed top-0 left-0 h-[100dvh] w-[72%] max-w-[360px] z-40 transform transition-transform duration-300 
-          ${open ? "translate-x-0" : "-translate-x-full"}
-        `}
+        className={`fixed top-0 left-0 h-[100dvh] w-[72%] max-w-[360px] z-40 transform transition-transform duration-300
+          ${open ? "translate-x-0" : "-translate-x-full"}`}
         style={{
           background: "linear-gradient(180deg, rgba(7,10,16,1) 0%, rgba(11,12,17,1) 100%)",
           borderRight: "1px solid rgba(255,255,255,0.03)",
@@ -66,19 +64,14 @@ export default function EstateHamburgerMenu() {
       >
         <div className="h-16" />
 
-        {/* SEARCH */}
         <div className="px-4 mt-2">
           <div className="flex items-center bg-gray-800/60 rounded-xl px-3 py-2">
             <FiSearch className="opacity-50 text-gray-300" size={18} />
-            <input
-              type="text"
-              placeholder="Search houses, estates or devices"
-              className="bg-transparent outline-none text-sm ml-3 w-full text-gray-100 placeholder-gray-400"
-            />
+            <input type="text" placeholder="Search houses, estates or devices"
+              className="bg-transparent outline-none text-sm ml-3 w-full text-gray-100 placeholder-gray-400" />
           </div>
         </div>
 
-        {/* MENU BUTTONS */}
         <nav className="px-4 mt-6 space-y-2 text-gray-200">
           <button className="w-full text-left py-3 px-3 rounded-lg hover:bg-gray-800 transition">Dashboard Overview</button>
           <button className="w-full text-left py-3 px-3 rounded-lg hover:bg-gray-800 transition">Estate Management</button>
@@ -87,7 +80,6 @@ export default function EstateHamburgerMenu() {
           <button className="w-full text-left py-3 px-3 rounded-lg hover:bg-gray-800 transition">Residents & Access</button>
         </nav>
 
-        {/* PROFILE */}
         <div className="absolute bottom-0 left-0 w-full px-4 py-5 border-t border-white/6 bg-black/40">
           <div className="flex items-center justify-between">
             <button className="flex items-center gap-3">
@@ -126,10 +118,16 @@ export default function EstateHamburgerMenu() {
         </div>
       </aside>
 
-      {/* OVERLAY */}
-      {open && <div onClick={() => { setOpen(false); setProfileOpen(false); }} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30" />}
+      {open && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
+          onClick={() => {
+            setOpen(false);
+            setProfileOpen(false);
+          }}
+        />
+      )}
 
-      {/* LOGOUT CONFIRM MODAL */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center px-6">
           <div className="bg-gray-900 px-6 py-6 rounded-2xl w-full max-w-sm border border-gray-700">
