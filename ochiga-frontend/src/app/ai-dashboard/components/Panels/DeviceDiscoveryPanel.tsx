@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FaBroadcastTower, FaPlus, FaCheck, FaSync } from "react-icons/fa";
-import { deviceService } from "../services/deviceService";
+import { deviceService } from "../../services/deviceService";
 
 type Device = {
   id: string | number;
