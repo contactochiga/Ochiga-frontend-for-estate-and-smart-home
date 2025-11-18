@@ -1,8 +1,9 @@
+// src/app/ai-dashboard/components/Panels/DeviceDiscoveryPanel.tsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { FaBroadcastTower, FaPlus, FaCheck, FaSync } from "react-icons/fa";
-import { deviceService } from "../../services/deviceService";
+import { deviceService } from "../../services/deviceService"; // ✅ fixed path
 
 type Device = {
   id: string | number;
@@ -26,20 +27,8 @@ export default function DeviceDiscoveryPanel() {
       setError("");
       setDevices([]);
 
-      const discovered = await deviceService.discoverDevices();
-      if (!discovered.length) {
-        setError("No devices found");
-      }
-      // Map to expected shape
-      const mappedDevices = discovered.map((d: any) => ({
-        id: d.id,
-        name: d.name,
-        protocol: d.protocol || "unknown",
-        status: "found",
-        aiSummary: d.aiSummary,
-      }));
-
-      setDevices(mappedDevices);
+      const discoveredDevices = await deviceService.discoverDevices();
+      setDevices(discoveredDevices);
     } catch (err: any) {
       setError(err.message || "Failed to discover devices");
     } finally {
@@ -52,18 +41,21 @@ export default function DeviceDiscoveryPanel() {
   -------------------------- */
   const connectDevice = async (id: string | number) => {
     try {
-      const token = await deviceService.getToken(); // or use your authService
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/devices/connect/${id}`, {
+      const token = await deviceService.getToken?.(); // optional if needed
+      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+      const res = await fetch(`${BACKEND_URL}/devices/connect/${id}`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Connection failed");
 
       setDevices((prev) =>
-        prev.map((d) =>
-          d.id === id ? { ...d, status: "connected" } : d
-        )
+        prev.map((d) => (d.id === id ? { ...d, status: "connected" } : d))
       );
     } catch (err: any) {
       setError(err.message || "Failed to connect device");
@@ -79,6 +71,7 @@ export default function DeviceDiscoveryPanel() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <p className="text-green-400 font-semibold">📡 AI Device Discovery</p>
+
         <button
           onClick={discoverDevices}
           disabled={isScanning}
@@ -108,6 +101,7 @@ export default function DeviceDiscoveryPanel() {
                   : "border-gray-700 bg-gray-800"
               } transition-all duration-300`}
             >
+              {/* Name & Protocol */}
               <div className="flex items-center justify-between mb-1">
                 <span className="text-gray-200 font-medium">{dev.name}</span>
                 <span
@@ -116,6 +110,8 @@ export default function DeviceDiscoveryPanel() {
                       ? "text-blue-400"
                       : dev.protocol.toLowerCase() === "zigbee"
                       ? "text-pink-400"
+                      : dev.protocol.toLowerCase() === "ssdp"
+                      ? "text-yellow-400"
                       : "text-gray-400"
                   }`}
                 >
@@ -123,12 +119,14 @@ export default function DeviceDiscoveryPanel() {
                 </span>
               </div>
 
+              {/* AI Summary */}
               {dev.aiSummary && (
                 <p className="text-gray-400 text-[10px] italic mb-1">
                   {dev.aiSummary}
                 </p>
               )}
 
+              {/* Connect Button */}
               {dev.status === "connected" ? (
                 <div className="flex items-center text-green-400 text-[11px]">
                   <FaCheck className="mr-1" /> Connected
@@ -156,7 +154,7 @@ export default function DeviceDiscoveryPanel() {
       {isScanning && (
         <div className="absolute inset-0 bg-gray-900/70 flex flex-col items-center justify-center rounded-xl">
           <FaBroadcastTower className="text-green-400 text-3xl animate-pulse mb-2" />
-          <p className="text-gray-400 text-[11px]">AI scanning nearby network...</p>
+          <p className="text-gray-400 text-[11px]">Scanning nearby devices...</p>
         </div>
       )}
     </div>
