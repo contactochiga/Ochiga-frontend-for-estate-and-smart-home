@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { FaBroadcastTower, FaPlus, FaCheck, FaSync } from "react-icons/fa";
 
 type Device = {
@@ -9,13 +8,10 @@ type Device = {
   name: string;
   protocol: string;
   status: "found" | "connected";
+  ip?: string;
+  port?: number;
   aiSummary?: string;
 };
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export default function DeviceDiscoveryPanel() {
   const [isScanning, setIsScanning] = useState(false);
@@ -23,8 +19,7 @@ export default function DeviceDiscoveryPanel() {
   const [error, setError] = useState("");
 
   const BACKEND_URL =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    "http://localhost:5000"; // updated fallback
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
   /* -------------------------
       FETCH: Discover Devices
@@ -35,24 +30,27 @@ export default function DeviceDiscoveryPanel() {
       setError("");
       setDevices([]);
 
-      // fetch supabase access token
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const token = session?.access_token;
-      if (!token) throw new Error("Not authenticated");
-
       const res = await fetch(`${BACKEND_URL}/devices/discover`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include", // send cookies / JWT if using session
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Discovery failed");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Discovery failed");
+      }
 
-      setDevices(data.devices || []);
+      const data = await res.json();
+      const foundDevices: Device[] = (data.devices || []).map((d: any) => ({
+        id: d.id,
+        name: d.name,
+        protocol: d.protocol,
+        status: "found",
+        ip: d.ip,
+        port: d.port,
+        aiSummary: d.aiSummary,
+      }));
+
+      setDevices(foundDevices);
     } catch (err: any) {
       setError(err.message || "Failed to discover devices");
     } finally {
@@ -65,22 +63,15 @@ export default function DeviceDiscoveryPanel() {
   -------------------------- */
   const connectDevice = async (id: string | number) => {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const token = session?.access_token;
-      if (!token) throw new Error("Not authenticated");
-
       const res = await fetch(`${BACKEND_URL}/devices/connect/${id}`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Connection failed");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Connection failed");
+      }
 
       setDevices((prev) =>
         prev.map((d) =>
@@ -98,7 +89,7 @@ export default function DeviceDiscoveryPanel() {
 
   return (
     <div className="relative mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm transition-all duration-300 animate-fadeIn">
-
+      {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <p className="text-green-400 font-semibold">📡 AI Device Discovery</p>
 
@@ -116,8 +107,10 @@ export default function DeviceDiscoveryPanel() {
         </button>
       </div>
 
+      {/* Error */}
       {error && <p className="text-red-400 text-[11px] mb-2">{error}</p>}
 
+      {/* Device List */}
       <div className="grid grid-cols-2 gap-2">
         {devices.length ? (
           devices.map((dev) => (
@@ -129,6 +122,7 @@ export default function DeviceDiscoveryPanel() {
                   : "border-gray-700 bg-gray-800"
               } transition-all duration-300`}
             >
+              {/* Name & Protocol */}
               <div className="flex items-center justify-between mb-1">
                 <span className="text-gray-200 font-medium">{dev.name}</span>
                 <span
@@ -137,6 +131,10 @@ export default function DeviceDiscoveryPanel() {
                       ? "text-blue-400"
                       : dev.protocol.toLowerCase() === "zigbee"
                       ? "text-pink-400"
+                      : dev.protocol.toLowerCase() === "ssdp"
+                      ? "text-yellow-400"
+                      : dev.protocol.toLowerCase() === "mqtt"
+                      ? "text-purple-400"
                       : "text-gray-400"
                   }`}
                 >
@@ -144,12 +142,14 @@ export default function DeviceDiscoveryPanel() {
                 </span>
               </div>
 
+              {/* AI Summary */}
               {dev.aiSummary && (
                 <p className="text-gray-400 text-[10px] italic mb-1">
                   {dev.aiSummary}
                 </p>
               )}
 
+              {/* Connect Button */}
               {dev.status === "connected" ? (
                 <div className="flex items-center text-green-400 text-[11px]">
                   <FaCheck className="mr-1" /> Connected
@@ -173,6 +173,7 @@ export default function DeviceDiscoveryPanel() {
         )}
       </div>
 
+      {/* Scanning Overlay */}
       {isScanning && (
         <div className="absolute inset-0 bg-gray-900/70 flex flex-col items-center justify-center rounded-xl">
           <FaBroadcastTower className="text-green-400 text-3xl animate-pulse mb-2" />
