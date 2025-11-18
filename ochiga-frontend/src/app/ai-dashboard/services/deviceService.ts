@@ -8,13 +8,13 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
  * deviceService - wrapper for backend /devices endpoints
- * Handles JWT from Supabase automatically
+ * Handles JWT from Supabase automatically (v2)
  */
 export const deviceService = {
   // Get current user's JWT
   async getToken(): Promise<string | null> {
-    const session = supabase.auth.session();
-    return session?.access_token || null;
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || null;
   },
 
   async getDevices(estateId?: string) {
