@@ -9,40 +9,52 @@ export default function ResidentActivationPage() {
   const router = useRouter();
   const params = useSearchParams();
 
-  // --- Temporary token simulation ---------------------------
-  const token = params.get("token") || "FAKE_TOKEN_PLACEHOLDER";
-
-  const fakeValidateToken = async () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (token && token !== "") resolve(true);
-        else resolve(false);
-      }, 700);
-    });
-  };
-  // -----------------------------------------------------------
+  const token = params.get("token") || null;
 
   const [tokenValid, setTokenValid] = useState<boolean | null>(null);
   const [username, setUsername] = useState("");
-  const [pass, setPass] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   useEffect(() => {
-    const validate = async () => {
-      const valid = await fakeValidateToken();
-      setTokenValid(valid);
-    };
-    validate();
-  }, []);
+    if (!token) {
+      setTokenValid(false);
+    } else {
+      // Optionally validate token with backend
+      setTokenValid(true);
+    }
+  }, [token]);
 
-  const handleActivation = () => {
+  const handleActivation = async () => {
     if (!username.trim()) return setError("Username is required");
-    if (pass.length < 6) return setError("Password must be at least 6 characters");
-    if (pass !== confirmPass) return setError("Passwords do not match");
+    if (password.length < 6) return setError("Password must be at least 6 characters");
+    if (password !== confirmPass) return setError("Passwords do not match");
 
-    document.cookie = "ochiga_resident_auth=true; path=/";
-    router.push("/ai-dashboard");
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/activate-resident`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Activation failed");
+
+      // ✅ store JWT
+      localStorage.setItem("ochiga_token", data.token);
+
+      router.push("/ai-dashboard");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,10 +91,9 @@ export default function ResidentActivationPage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           className="w-[92%] max-w-md bg-gray-900 rounded-xl p-6 border border-gray-800 shadow-xl flex flex-col justify-center overflow-hidden"
-          style={{ maxHeight: "85vh" }} // Lock card height
+          style={{ maxHeight: "85vh" }}
         >
 
-          {/* Logo & Title */}
           <div className="text-center mb-4">
             <h1 className="text-4xl font-bold text-white">OYI</h1>
             <p className="text-gray-400 text-sm">Activate Your Home Profile</p>
@@ -102,8 +113,8 @@ export default function ResidentActivationPage() {
             type="password"
             placeholder="New Password"
             className="w-full p-3 mb-3 rounded-lg bg-black border border-gray-700 text-white placeholder-gray-500"
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
 
           <input
@@ -116,15 +127,15 @@ export default function ResidentActivationPage() {
 
           <button
             onClick={handleActivation}
+            disabled={loading}
             className="w-full p-3 bg-red-600 rounded-lg text-white font-semibold hover:bg-red-700 transition"
           >
-            Activate Home
+            {loading ? "Activating..." : "Activate Home"}
           </button>
 
           <p className="text-gray-600 text-xs text-center mt-4 opacity-80">
             This activation link can only be used once.
           </p>
-
         </motion.div>
       )}
 
