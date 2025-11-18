@@ -3,9 +3,17 @@
 import { useState, useEffect } from "react";
 import { FaBroadcastTower, FaPlus, FaCheck, FaSync } from "react-icons/fa";
 
+type Device = {
+  id: string | number;
+  name: string;
+  protocol: string;
+  status: "found" | "connected";
+  aiSummary?: string;
+};
+
 export default function DeviceDiscoveryPanel() {
   const [isScanning, setIsScanning] = useState(false);
-  const [devices, setDevices] = useState<any[]>([]);
+  const [devices, setDevices] = useState<Device[]>([]);
   const [error, setError] = useState("");
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
@@ -24,9 +32,9 @@ export default function DeviceDiscoveryPanel() {
 
       if (!res.ok) throw new Error(data.message || "Discovery failed");
 
-      setDevices(data.devices);
+      setDevices(data.devices || []);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to discover devices");
     } finally {
       setIsScanning(false);
     }
@@ -35,13 +43,13 @@ export default function DeviceDiscoveryPanel() {
   /* -------------------------
      CONNECT SPECIFIC DEVICE
   -------------------------- */
-  const connectDevice = async (id: string) => {
+  const connectDevice = async (id: string | number) => {
     try {
       const res = await fetch(`${BACKEND_URL}/devices/connect/${id}`, {
         method: "POST",
       });
-
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.message || "Connection failed");
 
       setDevices((prev) =>
@@ -50,7 +58,7 @@ export default function DeviceDiscoveryPanel() {
         )
       );
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Failed to connect device");
     }
   };
 
@@ -79,65 +87,64 @@ export default function DeviceDiscoveryPanel() {
       </div>
 
       {/* Error */}
-      {error && (
-        <p className="text-red-400 text-[11px] mb-2">{error}</p>
-      )}
+      {error && <p className="text-red-400 text-[11px] mb-2">{error}</p>}
 
       {/* Device List */}
       <div className="grid grid-cols-2 gap-2">
-        {devices.map((dev) => (
-          <div
-            key={dev.id}
-            className={`p-3 rounded-lg border ${
-              dev.status === "connected"
-                ? "border-green-500 bg-green-900/20"
-                : "border-gray-700 bg-gray-800"
-            } transition-all duration-300`}
-          >
-            {/* Name & protocol */}
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-gray-200 font-medium">{dev.name}</span>
-              <span
-                className={`text-[10px] ${
-                  dev.protocol === "wifi"
-                    ? "text-blue-400"
-                    : dev.protocol === "zigbee"
-                    ? "text-pink-400"
-                    : "text-gray-400"
-                }`}
-              >
-                {dev.protocol?.toUpperCase()}
-              </span>
-            </div>
-
-            {/* AI Summary */}
-            {dev.aiSummary && (
-              <p className="text-gray-400 text-[10px] italic mb-1">
-                {dev.aiSummary}
-              </p>
-            )}
-
-            {/* Connect Button */}
-            {dev.status === "connected" ? (
-              <div className="flex items-center text-green-400 text-[11px]">
-                <FaCheck className="mr-1" /> Connected
+        {devices.length ? (
+          devices.map((dev) => (
+            <div
+              key={dev.id}
+              className={`p-3 rounded-lg border ${
+                dev.status === "connected"
+                  ? "border-green-500 bg-green-900/20"
+                  : "border-gray-700 bg-gray-800"
+              } transition-all duration-300`}
+            >
+              {/* Name & Protocol */}
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-gray-200 font-medium">{dev.name}</span>
+                <span
+                  className={`text-[10px] ${
+                    dev.protocol.toLowerCase() === "wifi"
+                      ? "text-blue-400"
+                      : dev.protocol.toLowerCase() === "zigbee"
+                      ? "text-pink-400"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {dev.protocol.toUpperCase()}
+                </span>
               </div>
-            ) : (
-              <button
-                onClick={() => connectDevice(dev.id)}
-                className="flex items-center justify-center w-full bg-green-700 hover:bg-green-600 text-white rounded-full text-[11px] py-1 mt-1 transition"
-              >
-                <FaPlus className="mr-1" /> Connect
-              </button>
-            )}
-          </div>
-        ))}
 
-        {/* No Devices */}
-        {devices.length === 0 && !isScanning && (
-          <div className="col-span-2 text-center py-6 text-gray-400 text-[11px] italic">
-            No devices found.
-          </div>
+              {/* AI Summary */}
+              {dev.aiSummary && (
+                <p className="text-gray-400 text-[10px] italic mb-1">
+                  {dev.aiSummary}
+                </p>
+              )}
+
+              {/* Connect Button */}
+              {dev.status === "connected" ? (
+                <div className="flex items-center text-green-400 text-[11px]">
+                  <FaCheck className="mr-1" /> Connected
+                </div>
+              ) : (
+                <button
+                  onClick={() => connectDevice(dev.id)}
+                  className="flex items-center justify-center w-full bg-green-700 hover:bg-green-600 text-white rounded-full text-[11px] py-1 mt-1 transition"
+                >
+                  <FaPlus className="mr-1" /> Connect
+                </button>
+              )}
+            </div>
+          ))
+        ) : (
+          !isScanning && (
+            <div className="col-span-2 text-center py-6 text-gray-400 text-[11px] italic">
+              No devices found.
+            </div>
+          )
         )}
       </div>
 
