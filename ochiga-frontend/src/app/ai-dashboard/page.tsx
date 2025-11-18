@@ -32,6 +32,9 @@ import { detectPanelType } from "./utils/panelDetection";
 import { speak } from "./utils/speak";
 import { FaArrowDown } from "react-icons/fa";
 
+import { aiService } from "./services/aiService";
+import { deviceService } from "./services/deviceService";
+
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -59,6 +62,7 @@ export default function AIDashboard() {
   const { listening, startListening, stopListening } = useSpeechRecognition(handleSend);
   const chatRef = useRef<HTMLDivElement | null>(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
+  const [discoveredDevices, setDiscoveredDevices] = useState<any[]>([]);
   const messageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const createId = () => Math.random().toString(36).substring(2, 9);
@@ -199,6 +203,15 @@ export default function AIDashboard() {
         else appendPanelBlock(userText, reply, panel);
 
         setActivePanel(panel);
+
+        // If discovering devices, fetch from backend
+        if (panel === "devices") {
+          (async () => {
+            const estateId = typeof window !== "undefined" ? localStorage.getItem("ochiga_estate") : undefined;
+            const devices = await deviceService.getDevices(estateId ?? undefined);
+            setDiscoveredDevices(devices || []);
+          })();
+        }
       } else {
         const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
@@ -232,7 +245,7 @@ export default function AIDashboard() {
     });
   };
 
-  function handleSend(text?: string, spoken = false) {
+  async function handleSend(text?: string, spoken = false) {
     const messageText = (text ?? input).trim();
     if (!messageText) return;
 
@@ -278,29 +291,60 @@ export default function AIDashboard() {
       time: now,
     };
 
-    const replyMsg: ChatMessage = {
-      id: createId(),
-      role: "assistant",
-      content: `Okay — I processed: "${messageText}".`,
-      panel: panel ?? null,
-      panelTag: panel ?? null,
-      time: now,
-    };
+    // Append the user message immediately
+    setMessages((prev) => [...prev, userMsg]);
 
-    if (panel) {
-      const exists = messages.some((m) => m.panelTag === panel);
-      if (exists) movePanelBlockToBottom(panel);
-      else appendPanelBlock(messageText, replyMsg.content, panel);
-      setActivePanel(panel);
-    } else {
-      setMessages((prev) => [...prev, userMsg, replyMsg]);
-      setTimeout(() => {
-        if (isAtBottom()) scrollToBottom();
-        else setShowScrollDown(true);
-      }, 120);
+    // Call backend AI using aiService
+    try {
+      const aiResp = await aiService.chat(messageText);
+      const replyText = aiResp.reply || `Okay — I processed: "${messageText}".`;
+      const panelFromAI = aiResp.panel ?? panel ?? null;
 
-      if (spoken) speak(replyMsg.content);
+      const replyMsg: ChatMessage = {
+        id: createId(),
+        role: "assistant",
+        content: replyText,
+        panel: panelFromAI ?? null,
+        panelTag: panelFromAI ?? null,
+        time: now,
+      };
+
+      if (panelFromAI) {
+        const exists = messages.some((m) => m.panelTag === panelFromAI);
+        if (exists) movePanelBlockToBottom(panelFromAI);
+        else appendPanelBlock(messageText, replyText, panelFromAI);
+
+        setActivePanel(panelFromAI);
+
+        // if AI requests devices panel, fetch devices
+        if (panelFromAI === "devices") {
+          const estateId = typeof window !== "undefined" ? localStorage.getItem("ochiga_estate") : undefined;
+          const devices = await deviceService.getDevices(estateId ?? undefined);
+          setDiscoveredDevices(devices || []);
+        }
+      } else {
+        setMessages((prev) => [...prev, replyMsg]);
+      }
+
+      // speak it if we are using audio
+      if (spoken) speak(replyText);
+    } catch (err) {
+      console.error("AI error", err);
+      const fallback: ChatMessage = {
+        id: createId(),
+        role: "assistant",
+        content: `Sorry, I couldn't reach the AI service.`,
+        panel: null,
+        panelTag: null,
+        time: now,
+      };
+      setMessages((prev) => [...prev, fallback]);
     }
+
+    setTimeout(() => {
+      if (isAtBottom()) scrollToBottom();
+      else setShowScrollDown(true);
+    }, 120);
   }
 
   const suggestions = [
@@ -347,7 +391,7 @@ export default function AIDashboard() {
       case "ai":
         return <AiPanel />;
       case "devices":
-        return <DeviceDiscoveryPanel />;
+        return <DeviceDiscoveryPanel devices={discoveredDevices} />;
       default:
         return null;
     }
