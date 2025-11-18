@@ -12,7 +12,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = () => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
+
+  const handleLogin = async () => {
     if (!usernameOrEmail || !password) {
       setError("All fields required");
       return;
@@ -21,24 +23,35 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    setTimeout(() => {
-      const email = usernameOrEmail.toLowerCase().trim();
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usernameOrEmail, password }),
+      });
 
-      // 🔹 MOCK ROLE DETECTION (replace later with backend/Firebase)
-      if (email === "manager@ochiga.com") {
-        document.cookie = "ochiga_estate_auth=true; path=/";
-        router.push("/estate-dashboard");
-      } 
-      else if (email === "resident@ochiga.com") {
-        document.cookie = "ochiga_resident_auth=true; path=/";
-        router.push("/ai-dashboard");
-      } 
-      else {
-        setError("Invalid credentials");
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Login failed");
+
+      if (data.token) {
+        // Save JWT to localStorage for device discovery / API calls
+        localStorage.setItem("ochiga_token", data.token);
+
+        // Redirect based on role
+        if (data.user.role === "estate") {
+          router.push("/estate-dashboard");
+        } else {
+          router.push("/ai-dashboard");
+        }
+      } else {
+        throw new Error("Login failed: token missing");
       }
-
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+    } finally {
       setLoading(false);
-    }, 1200);
+    }
   };
 
   return (
@@ -65,9 +78,7 @@ export default function LoginPage() {
           Login to Your Account
         </h1>
 
-        {error && (
-          <p className="text-red-400 text-center mb-3">{error}</p>
-        )}
+        {error && <p className="text-red-400 text-center mb-3">{error}</p>}
 
         {/* Username or Email */}
         <input
@@ -89,7 +100,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* Login Button (Brand Color) */}
+        {/* Login Button */}
         <button
           onClick={handleLogin}
           disabled={loading}
