@@ -5,44 +5,67 @@ import { FaBroadcastTower, FaPlus, FaCheck, FaSync } from "react-icons/fa";
 
 export default function DeviceDiscoveryPanel() {
   const [isScanning, setIsScanning] = useState(false);
-  const [devices, setDevices] = useState<
-    { id: number; name: string; type: string; status: "found" | "connected" }[]
-  >([]);
+  const [devices, setDevices] = useState<any[]>([]);
+  const [error, setError] = useState("");
 
-  // Mock scan function (simulate discovering devices)
-  const handleScan = () => {
-    setIsScanning(true);
-    setDevices([]);
-    setTimeout(() => {
-      setDevices([
-        { id: 1, name: "Smart Bulb", type: "Wi-Fi", status: "found" },
-        { id: 2, name: "Door Lock", type: "Zigbee", status: "found" },
-        { id: 3, name: "AC Controller", type: "Wi-Fi", status: "found" },
-      ]);
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000";
+
+  /* -------------------------
+      FETCH: Discover Devices
+  -------------------------- */
+  const discoverDevices = async () => {
+    try {
+      setIsScanning(true);
+      setError("");
+      setDevices([]);
+
+      const res = await fetch(`${BACKEND_URL}/devices/discover`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Discovery failed");
+
+      setDevices(data.devices);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
       setIsScanning(false);
-    }, 2500);
+    }
   };
 
-  // Mock connect function
-  const handleConnect = (id: number) => {
-    setDevices((prev) =>
-      prev.map((dev) =>
-        dev.id === id ? { ...dev, status: "connected" } : dev
-      )
-    );
+  /* -------------------------
+     CONNECT SPECIFIC DEVICE
+  -------------------------- */
+  const connectDevice = async (id: string) => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/devices/connect/${id}`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Connection failed");
+
+      setDevices((prev) =>
+        prev.map((d) =>
+          d.id === id ? { ...d, status: "connected" } : d
+        )
+      );
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   useEffect(() => {
-    // Auto scan on mount
-    handleScan();
+    discoverDevices();
   }, []);
 
   return (
-    <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm animate-fadeIn transition-all duration-300">
+    <div className="relative mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm transition-all duration-300 animate-fadeIn">
+      {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <p className="text-green-400 font-semibold">📡 Device Discovery</p>
+        <p className="text-green-400 font-semibold">📡 AI Device Discovery</p>
+
         <button
-          onClick={handleScan}
+          onClick={discoverDevices}
           disabled={isScanning}
           className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs ${
             isScanning
@@ -55,6 +78,11 @@ export default function DeviceDiscoveryPanel() {
         </button>
       </div>
 
+      {/* Error */}
+      {error && (
+        <p className="text-red-400 text-[11px] mb-2">{error}</p>
+      )}
+
       {/* Device List */}
       <div className="grid grid-cols-2 gap-2">
         {devices.map((dev) => (
@@ -66,28 +94,37 @@ export default function DeviceDiscoveryPanel() {
                 : "border-gray-700 bg-gray-800"
             } transition-all duration-300`}
           >
+            {/* Name & protocol */}
             <div className="flex items-center justify-between mb-1">
               <span className="text-gray-200 font-medium">{dev.name}</span>
               <span
                 className={`text-[10px] ${
-                  dev.type === "Wi-Fi"
+                  dev.protocol === "wifi"
                     ? "text-blue-400"
-                    : dev.type === "Zigbee"
+                    : dev.protocol === "zigbee"
                     ? "text-pink-400"
                     : "text-gray-400"
                 }`}
               >
-                {dev.type}
+                {dev.protocol?.toUpperCase()}
               </span>
             </div>
 
+            {/* AI Summary */}
+            {dev.aiSummary && (
+              <p className="text-gray-400 text-[10px] italic mb-1">
+                {dev.aiSummary}
+              </p>
+            )}
+
+            {/* Connect Button */}
             {dev.status === "connected" ? (
               <div className="flex items-center text-green-400 text-[11px]">
                 <FaCheck className="mr-1" /> Connected
               </div>
             ) : (
               <button
-                onClick={() => handleConnect(dev.id)}
+                onClick={() => connectDevice(dev.id)}
                 className="flex items-center justify-center w-full bg-green-700 hover:bg-green-600 text-white rounded-full text-[11px] py-1 mt-1 transition"
               >
                 <FaPlus className="mr-1" /> Connect
@@ -96,18 +133,19 @@ export default function DeviceDiscoveryPanel() {
           </div>
         ))}
 
-        {devices.length === 0 && (
+        {/* No Devices */}
+        {devices.length === 0 && !isScanning && (
           <div className="col-span-2 text-center py-6 text-gray-400 text-[11px] italic">
-            {isScanning ? "Scanning for nearby devices..." : "No devices found."}
+            No devices found.
           </div>
         )}
       </div>
 
-      {/* Optional scanning animation when active */}
+      {/* Scanning Overlay */}
       {isScanning && (
         <div className="absolute inset-0 bg-gray-900/70 flex flex-col items-center justify-center rounded-xl">
           <FaBroadcastTower className="text-green-400 text-3xl animate-pulse mb-2" />
-          <p className="text-gray-400 text-[11px]">Scanning nearby network...</p>
+          <p className="text-gray-400 text-[11px]">AI scanning nearby network...</p>
         </div>
       )}
     </div>
