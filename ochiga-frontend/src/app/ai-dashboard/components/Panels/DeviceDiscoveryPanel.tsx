@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { FaBroadcastTower, FaPlus, FaCheck, FaSync } from "react-icons/fa";
+import { deviceService } from "../services/deviceService";
 
 type Device = {
   id: string | number;
   name: string;
   protocol: string;
   status: "found" | "connected";
-  ip?: string;
-  port?: number;
   aiSummary?: string;
 };
 
@@ -17,9 +16,6 @@ export default function DeviceDiscoveryPanel() {
   const [isScanning, setIsScanning] = useState(false);
   const [devices, setDevices] = useState<Device[]>([]);
   const [error, setError] = useState("");
-
-  const BACKEND_URL =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
   /* -------------------------
       FETCH: Discover Devices
@@ -30,27 +26,20 @@ export default function DeviceDiscoveryPanel() {
       setError("");
       setDevices([]);
 
-      const res = await fetch(`${BACKEND_URL}/devices/discover`, {
-        credentials: "include", // send cookies / JWT if using session
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Discovery failed");
+      const discovered = await deviceService.discoverDevices();
+      if (!discovered.length) {
+        setError("No devices found");
       }
-
-      const data = await res.json();
-      const foundDevices: Device[] = (data.devices || []).map((d: any) => ({
+      // Map to expected shape
+      const mappedDevices = discovered.map((d: any) => ({
         id: d.id,
         name: d.name,
-        protocol: d.protocol,
+        protocol: d.protocol || "unknown",
         status: "found",
-        ip: d.ip,
-        port: d.port,
         aiSummary: d.aiSummary,
       }));
 
-      setDevices(foundDevices);
+      setDevices(mappedDevices);
     } catch (err: any) {
       setError(err.message || "Failed to discover devices");
     } finally {
@@ -63,15 +52,13 @@ export default function DeviceDiscoveryPanel() {
   -------------------------- */
   const connectDevice = async (id: string | number) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/devices/connect/${id}`, {
+      const token = await deviceService.getToken(); // or use your authService
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/devices/connect/${id}`, {
         method: "POST",
-        credentials: "include",
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Connection failed");
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Connection failed");
 
       setDevices((prev) =>
         prev.map((d) =>
@@ -92,7 +79,6 @@ export default function DeviceDiscoveryPanel() {
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <p className="text-green-400 font-semibold">📡 AI Device Discovery</p>
-
         <button
           onClick={discoverDevices}
           disabled={isScanning}
@@ -122,7 +108,6 @@ export default function DeviceDiscoveryPanel() {
                   : "border-gray-700 bg-gray-800"
               } transition-all duration-300`}
             >
-              {/* Name & Protocol */}
               <div className="flex items-center justify-between mb-1">
                 <span className="text-gray-200 font-medium">{dev.name}</span>
                 <span
@@ -131,10 +116,6 @@ export default function DeviceDiscoveryPanel() {
                       ? "text-blue-400"
                       : dev.protocol.toLowerCase() === "zigbee"
                       ? "text-pink-400"
-                      : dev.protocol.toLowerCase() === "ssdp"
-                      ? "text-yellow-400"
-                      : dev.protocol.toLowerCase() === "mqtt"
-                      ? "text-purple-400"
                       : "text-gray-400"
                   }`}
                 >
@@ -142,14 +123,12 @@ export default function DeviceDiscoveryPanel() {
                 </span>
               </div>
 
-              {/* AI Summary */}
               {dev.aiSummary && (
                 <p className="text-gray-400 text-[10px] italic mb-1">
                   {dev.aiSummary}
                 </p>
               )}
 
-              {/* Connect Button */}
               {dev.status === "connected" ? (
                 <div className="flex items-center text-green-400 text-[11px]">
                   <FaCheck className="mr-1" /> Connected
