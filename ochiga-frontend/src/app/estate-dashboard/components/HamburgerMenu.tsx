@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { FiMenu, FiX, FiSearch, FiChevronDown, FiChevronUp, FiLogOut } from "react-icons/fi";
 import { MdOutlinePerson, MdSettings } from "react-icons/md";
 import { useRouter } from "next/navigation";
+import useAuth from "@/hooks/useAuth"; // <-- added
 
 export default function EstateHamburgerMenu() {
   const router = useRouter();
+  const { user } = useAuth(); // <-- added
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -30,12 +32,18 @@ export default function EstateHamburgerMenu() {
 
   const handleLogout = () => {
     document.cookie = "ochiga_estate_auth=; Max-Age=0; path=/";
+    localStorage.removeItem("ochiga_user");
     router.push("/auth");
   };
 
+  // auto initials
+  const initials = user?.username
+    ? user.username.slice(0, 1).toUpperCase()
+    : "E";
+
   return (
     <>
-      {/* FIXED HEADER — restored original position */}
+      {/* FIXED HEADER */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-transparent px-4 py-3 flex items-center gap-3">
         <button
           onClick={() => {
@@ -47,7 +55,6 @@ export default function EstateHamburgerMenu() {
           {open ? <FiX className="text-xl" /> : <FiMenu className="text-xl" />}
         </button>
 
-        {/* 🔥 Back to original left-side alignment */}
         <span className="text-white text-sm md:text-base font-medium tracking-wide">
           Estate Dashboard
         </span>
@@ -80,15 +87,20 @@ export default function EstateHamburgerMenu() {
           <button className="w-full text-left py-3 px-3 rounded-lg hover:bg-gray-800 transition">Residents & Access</button>
         </nav>
 
+        {/* USER SECTION (UPDATED ONLY) */}
         <div className="absolute bottom-0 left-0 w-full px-4 py-5 border-t border-white/6 bg-black/40">
           <div className="flex items-center justify-between">
             <button className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-rose-600 flex items-center justify-center text-white font-semibold">
-                E
+                {initials}
               </div>
               <div className="text-left">
-                <p className="text-white font-semibold text-sm">Estate Admin</p>
-                <p className="text-white/50 text-xs">View profile</p>
+                <p className="text-white font-semibold text-sm">
+                  {user?.username || "Estate Admin"}
+                </p>
+                <p className="text-white/50 text-xs">
+                  {user?.email || "View profile"}
+                </p>
               </div>
             </button>
 
