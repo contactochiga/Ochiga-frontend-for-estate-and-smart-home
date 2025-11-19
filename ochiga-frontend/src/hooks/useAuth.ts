@@ -1,24 +1,18 @@
-"use client";
-
 import { useEffect, useState } from "react";
 
-type User = {
-  id: string;
-  email: string;
-  username: string;
-};
-
 export default function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    try {
+    if (typeof window !== "undefined") {
       const stored = localStorage.getItem("ochiga_user");
       if (stored) {
-        setUser(JSON.parse(stored));
+        try {
+          setUser(JSON.parse(stored));
+        } catch {
+          setUser(null);
+        }
       }
-    } catch (e) {
-      console.error("Auth parse error", e);
     }
   }, []);
 
