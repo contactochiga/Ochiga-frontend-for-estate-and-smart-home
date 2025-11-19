@@ -20,15 +20,28 @@ export default function ResidentActivationPage() {
 
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+  // 🔍 Validate token when page loads
   useEffect(() => {
     if (!token) {
       setTokenValid(false);
-    } else {
-      // Optionally validate token with backend
-      setTokenValid(true);
+      return;
     }
-  }, [token]);
 
+    const validateToken = async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/auth/onboard/validate/${token}`);
+        if (!res.ok) return setTokenValid(false);
+
+        setTokenValid(true);
+      } catch {
+        setTokenValid(false);
+      }
+    };
+
+    validateToken();
+  }, [token, BACKEND_URL]);
+
+  // 🔥 Activate Resident Account
   const handleActivation = async () => {
     if (!username.trim()) return setError("Username is required");
     if (password.length < 6) return setError("Password must be at least 6 characters");
@@ -38,15 +51,17 @@ export default function ResidentActivationPage() {
     setError("");
 
     try {
-      const res = await fetch(`${BACKEND_URL}/auth/activate-resident`, {
+      const res = await fetch(`${BACKEND_URL}/auth/onboard/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, username, password }),
+        body: JSON.stringify({ username, password }),
       });
+
       const data = await res.json();
+
       if (!res.ok) throw new Error(data.error || "Activation failed");
 
-      // ✅ store JWT
+      // Store JWT
       localStorage.setItem("ochiga_token", data.token);
 
       router.push("/ai-dashboard");
@@ -77,15 +92,16 @@ export default function ResidentActivationPage() {
         </motion.div>
       )}
 
-      {/* Loading Token */}
+      {/* Token validation animation */}
       {tokenValid === null && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="text-gray-400 text-lg"
         >
-          Validating activation...
+          Validating activation link...
         </motion.div>
       )}
 
+      {/* Form */}
       {tokenValid === true && (
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -138,7 +154,6 @@ export default function ResidentActivationPage() {
           </p>
         </motion.div>
       )}
-
     </div>
   );
 }
