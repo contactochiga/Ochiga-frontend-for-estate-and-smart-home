@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
+const BRAND = {
+  primary: "#8A1A20",
+  primaryHover: "#701218",
+};
+
 type Props = {
   onSave?: (payload: any) => void;
   onShare?: (email: string, payload: any) => void;
@@ -10,6 +15,9 @@ type Props = {
 
 export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
   const [step, setStep] = useState(1);
+  const [showModal, setShowModal] = useState(false);
+
+  const [onboardingLink, setOnboardingLink] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -48,7 +56,13 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
 
   const handleSave = () => {
     if (onSave) onSave(form);
-    alert("Home saved!");
+
+    // Create test onboarding link
+    const tempCode = `TEST-${Date.now()}`;
+    const link = `https://app.ochiga.com/onboarding/${tempCode}`;
+
+    setOnboardingLink(link);
+    setShowModal(true);
   };
 
   const handleShare = () => {
@@ -57,7 +71,10 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
       return;
     }
     if (onShare) onShare(form.residentEmail, form);
-    alert("Details shared!");
+  };
+
+  const copyText = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
@@ -70,15 +87,18 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
             <div
               key={i}
               className={`w-2.5 h-2.5 rounded-full ${
-                step === i ? "bg-blue-500" : "bg-gray-700"
+                step === i ? "bg-[var(--brand-primary)]" : "bg-gray-700"
               }`}
+              style={{
+                backgroundColor: step === i ? BRAND.primary : "#3f3f46",
+              }}
             />
           ))}
         </div>
       </div>
 
       {/* =============================== */}
-      {/* STEP 1 — HOME BASIC DETAILS     */}
+      {/* STEP 1 — HOME BASIC DETAILS */}
       {/* =============================== */}
       {step === 1 && (
         <motion.div
@@ -132,7 +152,8 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
 
           <button
             onClick={() => setStep(2)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg mt-2"
+            className="w-full text-white py-2 rounded-lg mt-2"
+            style={{ backgroundColor: BRAND.primary }}
           >
             Next
           </button>
@@ -140,7 +161,7 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
       )}
 
       {/* =============================== */}
-      {/* STEP 2 — PRIMARY RESIDENT       */}
+      {/* STEP 2 — PRIMARY RESIDENT */}
       {/* =============================== */}
       {step === 2 && (
         <motion.div
@@ -172,7 +193,8 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
 
           <button
             onClick={() => setStep(3)}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg mt-2"
+            className="w-full text-white py-2 rounded-lg mt-2"
+            style={{ backgroundColor: BRAND.primary }}
           >
             Next
           </button>
@@ -187,7 +209,7 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
       )}
 
       {/* =============================== */}
-      {/* STEP 3 — UTILITIES + IOT        */}
+      {/* STEP 3 — UTILITIES + IOT */}
       {/* =============================== */}
       {step === 3 && (
         <motion.div
@@ -245,7 +267,8 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
               <span className="text-xs text-gray-400">IoT Devices</span>
               <button
                 onClick={addIoTDevice}
-                className="text-blue-400 text-xs hover:underline"
+                className="text-xs"
+                style={{ color: BRAND.primary }}
               >
                 + Add
               </button>
@@ -275,7 +298,8 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
           <div className="space-y-2 pt-4">
             <button
               onClick={handleSave}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+              className="w-full text-white py-2 rounded-lg"
+              style={{ backgroundColor: BRAND.primary }}
             >
               Save Home
             </button>
@@ -295,6 +319,76 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
             </button>
           </div>
         </motion.div>
+      )}
+
+      {/* =============================== */}
+      {/* SUCCESS MODAL */}
+      {/* =============================== */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-[200] px-6">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md text-center">
+            <h2 className="text-white font-semibold text-lg">
+              Home Created Successfully
+            </h2>
+
+            <p className="text-gray-400 text-xs mt-1">
+              Below are the onboarding details.
+            </p>
+
+            <div className="mt-4 space-y-3 text-left">
+              <div>
+                <h4 className="text-gray-400 text-xs">Home Name</h4>
+                <p className="text-white text-sm">{form.name}</p>
+              </div>
+
+              <div>
+                <h4 className="text-gray-400 text-xs">Resident</h4>
+                <p className="text-white text-sm">{form.residentName}</p>
+              </div>
+
+              <div>
+                <h4 className="text-gray-400 text-xs">Email</h4>
+                <p className="text-white text-sm">{form.residentEmail}</p>
+              </div>
+
+              <div>
+                <h4 className="text-gray-400 text-xs">Onboarding Link</h4>
+                <p className="text-white text-xs break-all">{onboardingLink}</p>
+              </div>
+            </div>
+
+            {/* BUTTONS */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => copyText(onboardingLink)}
+                className="flex-1 py-2 rounded-lg text-white"
+                style={{ backgroundColor: BRAND.primary }}
+              >
+                Copy
+              </button>
+
+              <button
+                onClick={() => {
+                  navigator.share &&
+                    navigator.share({
+                      title: "Resident Onboarding",
+                      text: `Welcome to your estate dashboard.\n${onboardingLink}`,
+                    });
+                }}
+                className="flex-1 py-2 rounded-lg bg-gray-700 text-gray-200"
+              >
+                Share
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-4 text-gray-400 text-xs underline"
+            >
+              Close
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
