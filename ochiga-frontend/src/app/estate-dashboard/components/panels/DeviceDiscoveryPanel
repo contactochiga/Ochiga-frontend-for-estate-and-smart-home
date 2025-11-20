@@ -1,78 +1,44 @@
-"use client";
 import { useState, useEffect } from "react";
 
 type Device = { id: string; name: string; type: string };
 
-export default function DeviceDiscoveryPanel({ estateId, homeId }: { estateId: string; homeId: string }) {
+interface DeviceDiscoveryPanelProps {
+  estateId: string;
+  homeId: string;
+}
+
+export default function DeviceDiscoveryPanel({ estateId, homeId }: DeviceDiscoveryPanelProps) {
   const [devices, setDevices] = useState<Device[]>([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const fetchDevices = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/devices/discover/${estateId}`);
-      const data = await res.json();
-      setDevices(data.devices || []);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to fetch devices");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const assignDevice = async (deviceId: string) => {
-    try {
-      const res = await fetch(`/api/devices/assign`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ homeId, deviceId }),
-      });
-      const data = await res.json();
-      alert(data.message);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to assign device");
-    }
-  };
 
   useEffect(() => {
-    fetchDevices();
-  }, []);
+    // TODO: fetch devices from backend using estateId
+    async function fetchDevices() {
+      try {
+        const res = await fetch(`/api/estate/${estateId}/devices`);
+        const data = await res.json();
+        setDevices(data);
+      } catch (err) {
+        console.error("Failed to fetch devices", err);
+      }
+    }
 
-  const filteredDevices = devices.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase())
-  );
+    if (estateId) fetchDevices();
+  }, [estateId]);
 
   return (
-    <div className="space-y-3 p-4 border rounded bg-gray-900">
-      <h3 className="font-semibold text-white">Device Discovery</h3>
-
-      <input
-        type="text"
-        placeholder="Search devices..."
-        className="w-full p-2 rounded bg-gray-800 text-white"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-
-      {loading ? (
-        <p className="text-gray-400 text-sm">Loading devices...</p>
-      ) : filteredDevices.length > 0 ? (
-        filteredDevices.map((d) => (
-          <div key={d.id} className="flex justify-between items-center p-2 bg-gray-800 rounded mb-1">
-            <span className="text-white">{d.name} ({d.type})</span>
-            <button
-              onClick={() => assignDevice(d.id)}
-              className="bg-blue-600 px-2 py-1 rounded text-white text-xs"
-            >
-              Assign
-            </button>
-          </div>
-        ))
+    <div className="space-y-2">
+      <h3 className="text-lg font-semibold mb-2">Device Discovery</h3>
+      <p>Home ID: {homeId}</p>
+      {devices.length ? (
+        <ul className="space-y-1">
+          {devices.map((d) => (
+            <li key={d.id} className="p-2 border rounded">
+              {d.name} ({d.type})
+            </li>
+          ))}
+        </ul>
       ) : (
-        <p className="text-gray-400 text-sm">No devices found</p>
+        <p>No devices found. Start scanning your estate.</p>
       )}
     </div>
   );
