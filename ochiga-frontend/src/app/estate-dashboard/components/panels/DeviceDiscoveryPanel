@@ -5,6 +5,7 @@ type Device = { id: string; name: string; type: string };
 
 export default function DeviceDiscoveryPanel({ estateId, homeId }: { estateId: string; homeId: string }) {
   const [devices, setDevices] = useState<Device[]>([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
   const fetchDevices = async () => {
@@ -40,17 +41,39 @@ export default function DeviceDiscoveryPanel({ estateId, homeId }: { estateId: s
     fetchDevices();
   }, []);
 
+  const filteredDevices = devices.filter((d) =>
+    d.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="space-y-2">
-      <h3 className="font-semibold">Available Devices</h3>
-      {loading && <p>Loading devices...</p>}
-      {devices.map((d) => (
-        <div key={d.id} className="flex justify-between p-2 border rounded">
-          <span>{d.name} ({d.type})</span>
-          <button onClick={() => assignDevice(d.id)} className="bg-blue-600 px-2 rounded">Assign</button>
-        </div>
-      ))}
-      {devices.length === 0 && !loading && <p>No devices found</p>}
+    <div className="space-y-3 p-4 border rounded bg-gray-900">
+      <h3 className="font-semibold text-white">Device Discovery</h3>
+
+      <input
+        type="text"
+        placeholder="Search devices..."
+        className="w-full p-2 rounded bg-gray-800 text-white"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      {loading ? (
+        <p className="text-gray-400 text-sm">Loading devices...</p>
+      ) : filteredDevices.length > 0 ? (
+        filteredDevices.map((d) => (
+          <div key={d.id} className="flex justify-between items-center p-2 bg-gray-800 rounded mb-1">
+            <span className="text-white">{d.name} ({d.type})</span>
+            <button
+              onClick={() => assignDevice(d.id)}
+              className="bg-blue-600 px-2 py-1 rounded text-white text-xs"
+            >
+              Assign
+            </button>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-400 text-sm">No devices found</p>
+      )}
     </div>
   );
 }
