@@ -1,83 +1,80 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-interface Device {
-  id: string;
-  name: string;
-  type: string;
-}
-
-interface DeviceDiscoveryPanelProps {
-  estateId: string;
-  homeId: string;
-  onAction?: (deviceId: string, action: string) => void;
-}
-
-export default function DeviceDiscoveryPanel({
-  estateId,
-  homeId,
-  onAction,
-}: DeviceDiscoveryPanelProps) {
-  const [devices, setDevices] = useState<Device[]>([]);
+export default function DeviceDiscoveryPanel() {
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
+  const [devices, setDevices] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchDevices = async () => {
+  const handleScan = async () => {
+    try {
       setLoading(true);
-      try {
-        // Replace with your real API endpoint
-        const res = await fetch(`/api/devices?estateId=${estateId}&homeId=${homeId}`);
-        const data: Device[] = await res.json();
-        setDevices(data);
-      } catch (err) {
-        console.error("Error fetching devices:", err);
-      } finally {
-        setLoading(false);
+      setError(null);
+
+      // Call BACKEND to scan estate network
+      const res = await fetch("/api/estate/discover-devices");
+
+      if (!res.ok) {
+        throw new Error("Failed to scan estate for devices");
       }
-    };
 
-    fetchDevices();
-  }, [estateId, homeId]);
-
-  const filteredDevices = devices.filter((d) =>
-    d.name.toLowerCase().includes(search.toLowerCase())
-  );
+      const data = await res.json();
+      setDevices(data.devices || []);
+    } catch (err: any) {
+      setError(err.message || "An error occurred during scan");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="space-y-4 text-gray-200">
-      <h3 className="font-semibold text-lg">Device Discovery</h3>
-      <input
-        type="text"
-        placeholder="Search devices..."
-        className="w-full p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      {loading && <p className="text-gray-400 text-sm">Loading devices...</p>}
-      {filteredDevices.length === 0 && !loading && (
-        <p className="text-gray-500 text-sm">No devices found.</p>
+    <div className="w-full px-4 py-4">
+      <h2 className="text-xl font-bold mb-3">Estate Device Discovery</h2>
+
+      <p className="text-gray-600 mb-4">
+        Scan the **entire estate network** to automatically detect IoT devices 
+        such as CCTV cameras, boom gates, access controllers, street lights, 
+        water pumps, utility meters, and other estate-level devices.
+      </p>
+
+      <button
+        onClick={handleScan}
+        disabled={loading}
+        className="bg-black text-white px-4 py-2 rounded-lg mb-4 disabled:bg-gray-400"
+      >
+        {loading ? "Scanning..." : "Scan Estate Network"}
+      </button>
+
+      {error && (
+        <p className="text-red-500 font-medium mb-4">{error}</p>
       )}
-      <div className="space-y-2">
-        {filteredDevices.map((d) => (
-          <div
-            key={d.id}
-            className="bg-gray-800 p-3 rounded-md flex justify-between items-center"
-          >
-            <span>{d.name}</span>
-            <span className="text-gray-400 text-xs">{d.type}</span>
-            {onAction && (
-              <button
-                onClick={() => onAction(d.id, "toggle")}
-                className="ml-2 px-2 py-1 bg-blue-600 rounded-md text-white text-xs hover:bg-blue-700"
+
+      {devices.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-lg font-semibold mb-2">Discovered Devices</h3>
+
+          <div className="space-y-3">
+            {devices.map((dev, idx) => (
+              <div
+                key={idx}
+                className="border p-3 rounded-lg bg-gray-50 shadow-sm"
               >
-                Toggle
-              </button>
-            )}
+                <p><strong>Name:</strong> {dev.name}</p>
+                <p><strong>Type:</strong> {dev.type}</p>
+                <p><strong>IP Address:</strong> {dev.ip}</p>
+                <p><strong>Status:</strong> {dev.status}</p>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      )}
+
+      {!loading && devices.length === 0 && !error && (
+        <p className="text-gray-500 text-sm">
+          No devices scanned yet. Click the button above to start detection.
+        </p>
+      )}
     </div>
   );
 }
