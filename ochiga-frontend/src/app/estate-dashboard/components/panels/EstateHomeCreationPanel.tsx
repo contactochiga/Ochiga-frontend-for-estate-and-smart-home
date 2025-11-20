@@ -17,7 +17,7 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
   const [step, setStep] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [onboardingLink, setOnboardingLink] = useState("");
-  const [loading, setLoading] = useState(false); // NEW
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "",
     unit: "",
@@ -53,10 +53,13 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
     }));
   };
 
+  /* ---------------------------------------------------- */
+  /*  UPDATED FETCH URL → /api/estates/create-home        */
+  /* ---------------------------------------------------- */
   const handleSave = async () => {
-    setLoading(true); // NEW
+    setLoading(true);
     try {
-      const res = await fetch("/api/estate/create-home", {
+      const res = await fetch("/api/estates/create-home", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -66,14 +69,16 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
 
       if (!res.ok) {
         alert(data.message || "Error creating home");
-        setLoading(false); // NEW
+        setLoading(false);
         return;
       }
 
       alert("Home created successfully!");
       console.log("Backend response:", data);
 
-      const link = data.onboardingLink || `https://app.ochiga.com/onboarding/TEST-${Date.now()}`;
+      const link =
+        data.onboardingLink || `https://app.ochiga.com/onboarding/TEST-${Date.now()}`;
+
       setOnboardingLink(link);
       setShowModal(true);
 
@@ -82,7 +87,7 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
       console.error(err);
       alert("Network error");
     } finally {
-      setLoading(false); // NEW
+      setLoading(false);
     }
   };
 
@@ -120,7 +125,11 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
 
       {/* STEP 1 — HOME BASIC DETAILS */}
       {step === 1 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
           <h3 className="font-semibold text-lg">Home Details</h3>
           <div>
             <label className="text-gray-400 text-xs">Home Name</label>
@@ -172,7 +181,11 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
 
       {/* STEP 2 — PRIMARY RESIDENT */}
       {step === 2 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
           <h3 className="font-semibold text-lg">Primary Resident</h3>
           <div>
             <label className="text-gray-400 text-xs">Resident Email</label>
@@ -207,7 +220,11 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
 
       {/* STEP 3 — UTILITIES + IOT */}
       {step === 3 && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-5"
+        >
           <h3 className="font-semibold text-lg">Utilities & IoT Devices</h3>
           <div className="grid grid-cols-1 gap-4">
             <div>
@@ -256,9 +273,14 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
                 + Add
               </button>
             </div>
-            {form.iotDevices.length === 0 && <div className="text-gray-500 text-xs">No IoT devices added.</div>}
+            {form.iotDevices.length === 0 && (
+              <div className="text-gray-500 text-xs">No IoT devices added.</div>
+            )}
             {form.iotDevices.map((d) => (
-              <div key={d} className="flex justify-between items-center bg-gray-800 p-2 rounded-lg text-xs mt-2">
+              <div
+                key={d}
+                className="flex justify-between items-center bg-gray-800 p-2 rounded-lg text-xs mt-2"
+              >
                 {d}
                 <button onClick={() => removeIoT(d)} className="text-red-400 hover:underline">
                   Remove
@@ -273,11 +295,14 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
               onClick={handleSave}
               className="w-full text-white py-2 rounded-lg"
               style={{ backgroundColor: BRAND.primary }}
-              disabled={loading} // NEW
+              disabled={loading}
             >
-              {loading ? "Saving..." : "Save Home"} {/* NEW */}
+              {loading ? "Saving..." : "Save Home"}
             </button>
-            <button onClick={handleShare} className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 py-2 rounded-lg">
+            <button
+              onClick={handleShare}
+              className="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 py-2 rounded-lg"
+            >
               Share Details with Resident
             </button>
             <button onClick={() => setStep(2)} className="w-full text-gray-400 mt-1 text-xs">
@@ -293,6 +318,7 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
           <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md text-center">
             <h2 className="text-white font-semibold text-lg">Home Created Successfully</h2>
             <p className="text-gray-400 text-xs mt-1">Below are the onboarding details.</p>
+
             <div className="mt-4 space-y-3 text-left">
               <div>
                 <h4 className="text-gray-400 text-xs">Home Name</h4>
@@ -314,7 +340,11 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
 
             {/* BUTTONS */}
             <div className="flex gap-3 mt-6">
-              <button onClick={() => copyText(onboardingLink)} className="flex-1 py-2 rounded-lg text-white" style={{ backgroundColor: BRAND.primary }}>
+              <button
+                onClick={() => copyText(onboardingLink)}
+                className="flex-1 py-2 rounded-lg text-white"
+                style={{ backgroundColor: BRAND.primary }}
+              >
                 Copy
               </button>
               <button
@@ -330,7 +360,11 @@ export default function EstateHomeCreationPanel({ onSave, onShare }: Props) {
                 Share
               </button>
             </div>
-            <button onClick={() => setShowModal(false)} className="mt-4 text-gray-400 text-xs underline">
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="mt-4 text-gray-400 text-xs underline"
+            >
               Close
             </button>
           </div>
