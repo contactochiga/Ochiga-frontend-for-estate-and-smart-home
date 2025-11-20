@@ -19,7 +19,7 @@ export default function DeviceDiscoveryPanel() {
   const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
   /* -----------------------------------------------
-     SCAN FOR ESTATE DEVICES (no home required)
+        DISCOVER DEVICES — Estate Version
   ------------------------------------------------ */
   const discoverDevices = async () => {
     try {
@@ -27,9 +27,11 @@ export default function DeviceDiscoveryPanel() {
       setError("");
       setDevices([]);
 
-      const res = await fetch(`${BACKEND_URL}/estate/devices/discover`);
-      const data = await res.json();
+      const res = await fetch(`${BACKEND_URL}/estate/devices/discover`, {
+        method: "GET",
+      });
 
+      const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to discover devices");
 
       setDevices(data.devices || []);
@@ -41,7 +43,7 @@ export default function DeviceDiscoveryPanel() {
   };
 
   /* -----------------------------------------------
-     CONNECT A FOUND DEVICE
+        CONNECT DEVICE — Estate Version
   ------------------------------------------------ */
   const connectDevice = async (id: string | number) => {
     try {
@@ -52,6 +54,7 @@ export default function DeviceDiscoveryPanel() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Connection failed");
 
+      // Update UI
       setDevices((prev) =>
         prev.map((d) =>
           d.id === id ? { ...d, status: "connected" } : d
@@ -68,6 +71,7 @@ export default function DeviceDiscoveryPanel() {
 
   return (
     <div className="relative mt-2 p-3 bg-gray-900 border border-gray-700 rounded-xl text-xs md:text-sm transition-all duration-300 animate-fadeIn">
+      
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <p className="text-green-400 font-semibold">📡 Estate Device Discovery</p>
