@@ -1,0 +1,56 @@
+"use client";
+import { useState, useEffect } from "react";
+
+type Device = { id: string; name: string; type: string };
+
+export default function DeviceDiscoveryPanel({ estateId, homeId }: { estateId: string; homeId: string }) {
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchDevices = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/devices/discover/${estateId}`);
+      const data = await res.json();
+      setDevices(data.devices || []);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch devices");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const assignDevice = async (deviceId: string) => {
+    try {
+      const res = await fetch(`/api/devices/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ homeId, deviceId }),
+      });
+      const data = await res.json();
+      alert(data.message);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to assign device");
+    }
+  };
+
+  useEffect(() => {
+    fetchDevices();
+  }, []);
+
+  return (
+    <div className="space-y-2">
+      <h3 className="font-semibold">Available Devices</h3>
+      {loading && <p>Loading devices...</p>}
+      {devices.map((d) => (
+        <div key={d.id} className="flex justify-between p-2 border rounded">
+          <span>{d.name} ({d.type})</span>
+          <button onClick={() => assignDevice(d.id)} className="bg-blue-600 px-2 rounded">Assign</button>
+        </div>
+      ))}
+      {devices.length === 0 && !loading && <p>No devices found</p>}
+    </div>
+  );
+}
