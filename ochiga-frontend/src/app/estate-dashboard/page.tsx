@@ -11,8 +11,6 @@ import EstatePowerPanel from "./components/panels/EstatePowerPanel";
 import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
 import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
 import EstateHomeCreationPanel from "./components/panels/EstateHomeCreationPanel";
-
-// NEW: Device Discovery Panel
 import DeviceDiscoveryPanel from "./components/panels/DeviceDiscoveryPanel";
 
 import { detectEstatePanelType } from "./utils/estatePanelDetection";
@@ -135,7 +133,7 @@ export default function EstateDashboard() {
 
       if (a.type === "device") {
         panel = "device_discovery";
-        reply = `Opening device discovery panel.`;
+        reply = "Opening device discovery panel.";
       }
 
       const userText = userMessage ?? `${a.action} ${a.target}`;
@@ -177,7 +175,9 @@ export default function EstateDashboard() {
 
     if (panel) {
       const reply =
-        panel === "estate_devices"
+        panel === "device_discovery"
+          ? "Device discovery panel opened."
+          : panel === "estate_devices"
           ? "Estate device panel opened."
           : panel === "estate_power"
           ? "Estate power control opened."
@@ -187,8 +187,6 @@ export default function EstateDashboard() {
           ? "Estate community panel opened."
           : panel === "home_creation"
           ? "Home creation panel opened."
-          : panel === "device_discovery"
-          ? "Device discovery panel opened."
           : `Opened ${panel}.`;
 
       const exists = messages.some((m) => m.panelTag === panel);
@@ -244,16 +242,33 @@ export default function EstateDashboard() {
         return <EstateCommunityPanel />;
       case "home_creation":
         return <EstateHomeCreationPanel />;
-
-      // NEW PANEL: Device Discovery
       case "device_discovery":
         return (
-          <DeviceDiscoveryPanel
-            estateId="currentEstateId" // replace with actual estate ID from context or state
-            homeId={selectedHomeId}
-          />
+          <div className="space-y-4">
+            {homes.length > 1 && (
+              <select
+                className="w-full p-2 rounded-md bg-gray-700 border border-gray-600 text-white focus:outline-none"
+                value={selectedHomeId}
+                onChange={(e) => setSelectedHomeId(e.target.value)}
+              >
+                <option value="">Select home</option>
+                {homes.map((h) => (
+                  <option key={h.id} value={h.id}>
+                    {h.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            {selectedHomeId ? (
+              <DeviceDiscoveryPanel
+                estateId="currentEstateId" // Replace with actual estate ID
+                homeId={selectedHomeId}
+              />
+            ) : (
+              <p className="text-gray-400 text-sm">Select a home to discover devices.</p>
+            )}
+          </div>
         );
-
       default:
         return null;
     }
