@@ -261,7 +261,7 @@ export default function EstateDashboard() {
             )}
             {selectedHomeId ? (
               <DeviceDiscoveryPanel
-                estateId="currentEstateId" // Replace with actual estate ID
+                estateId="currentEstateId"
                 homeId={selectedHomeId}
               />
             ) : (
