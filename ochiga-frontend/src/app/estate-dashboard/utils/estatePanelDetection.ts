@@ -4,7 +4,6 @@ export function detectEstatePanelType(message: string): string | null {
 
   /* ---------------------------------------------------------
      HOME CREATION (new)
-     Detect when user wants to create/register a home/unit
   --------------------------------------------------------- */
   if (
     lower.includes("create home") ||
@@ -42,6 +41,22 @@ export function detectEstatePanelType(message: string): string | null {
     lower.includes("security")
   ) {
     return "estate_devices";
+  }
+
+  /* ---------------------------------------------------------
+     DEVICE DISCOVERY (new)
+     Detect when user wants to discover or scan devices in homes
+  --------------------------------------------------------- */
+  if (
+    lower.includes("discover devices") ||
+    lower.includes("scan devices") ||
+    lower.includes("device discovery") ||
+    lower.includes("scan home devices") ||
+    lower.includes("find devices") ||
+    lower.includes("scan my home") ||
+    lower.includes("discover home devices")
+  ) {
+    return "device_discovery";
   }
 
   /* ---------------------------------------------------------
