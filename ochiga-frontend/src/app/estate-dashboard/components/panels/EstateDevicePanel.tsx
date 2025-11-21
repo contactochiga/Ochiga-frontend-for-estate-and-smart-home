@@ -22,22 +22,41 @@ export default function EstateDevicePanel({
   devices?: Device[];
   onAction?: (id: string, action: string) => void;
 }) {
-  
   const [devices, setDevices] = useState<Device[]>(initial);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
 
-  const maroon = "#8A0C0C";            // Ochiga Red
-  const darkBlue = "#0A0F1F";          // Panel BG
-  const cardBlue = "#111726";          // Device Card BG
-  const borderBlue = "#1E2638";        // Borders
+  const maroon = "#8A0C0C";
+  const darkBlue = "#0A0F1F";
+  const cardBlue = "#111726";
+  const borderBlue = "#1E2638";
 
-  /* Load devices */
-  const load = async () => {
+  /* Load estate devices from backend */
+  const loadEstateDevices = async () => {
     setLoading(true);
     try {
-      const d = await deviceService.listEstateDevices(estateId);
-      setDevices(d || []);
+      const res = await deviceService.getDevices(estateId);
+      setDevices(res.devices || []);
+    } catch (err) {
+      console.warn(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* Discover live IoT devices */
+  const scanDevices = async () => {
+    setLoading(true);
+    try {
+      const res = await deviceService.discoverDevices();
+      if (res.devices) {
+        // Merge discovered devices with current estate devices
+        setDevices((prev) => {
+          const existingIds = new Set(prev.map((d) => d.id));
+          const newDevices = res.devices.filter((d: Device) => !existingIds.has(d.id));
+          return [...prev, ...newDevices];
+        });
+      }
     } catch (err) {
       console.warn(err);
     } finally {
@@ -46,10 +65,10 @@ export default function EstateDevicePanel({
   };
 
   useEffect(() => {
-    load();
+    loadEstateDevices();
   }, []);
 
-  /* Toggle Device */
+  /* Toggle Device Status */
   const toggle = async (id: string) => {
     const current = devices.find((d) => d.id === id);
     if (!current) return;
@@ -63,9 +82,9 @@ export default function EstateDevicePanel({
     );
 
     try {
-      await deviceService.toggleDevice(id, newStatus);
+      await deviceService.triggerDeviceAction(id, newStatus);
     } catch {
-      load();
+      loadEstateDevices();
     }
   };
 
@@ -76,33 +95,6 @@ export default function EstateDevicePanel({
           .includes(filter.toLowerCase())
       )
     : devices;
-
-  /* Sample Devices */
-  const sample = [
-    {
-      id: "1",
-      name: "Gate Control Unit",
-      type: "Access",
-      status: "online",
-      location: "Main Gate"
-    },
-    {
-      id: "2",
-      name: "Perimeter Camera 01",
-      type: "Camera",
-      status: "online",
-      location: "Fence North"
-    },
-    {
-      id: "3",
-      name: "Street Light Controller",
-      type: "Lighting",
-      status: "offline",
-      location: "Zone B"
-    }
-  ];
-
-  const finalDevices = devices.length === 0 ? sample : filtered;
 
   return (
     <div
@@ -124,28 +116,24 @@ export default function EstateDevicePanel({
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         className="w-full px-3 py-2 mb-3 rounded text-sm text-white bg-[#131A2B] border"
-        style={{
-          borderColor: borderBlue
-        }}
+        style={{ borderColor: borderBlue }}
       />
 
       {/* Scan Button */}
       <button
-        onClick={load}
+        onClick={scanDevices}
         className="w-full py-2 rounded-lg text-white text-sm font-medium mb-4"
-        style={{
-          backgroundColor: maroon
-        }}
+        style={{ backgroundColor: maroon }}
       >
-        Scan for New Devices
+        {loading ? "Scanning..." : "Scan for New Devices"}
       </button>
 
       {/* Device List */}
       <div className="flex flex-col gap-2 max-h-72 overflow-auto pr-1">
-        {loading ? (
-          <div className="text-gray-300 text-sm">Scanning...</div>
+        {filtered.length === 0 && !loading ? (
+          <div className="text-gray-300 text-sm">No devices found</div>
         ) : (
-          finalDevices.map((d) => (
+          filtered.map((d) => (
             <div
               key={d.id}
               className="p-3 rounded-lg cursor-pointer transition"
@@ -191,9 +179,7 @@ export default function EstateDevicePanel({
                 </div>
                 <div
                   className={
-                    d.status === "online"
-                      ? "text-green-400"
-                      : "text-red-400"
+                    d.status === "online" ? "text-green-400" : "text-red-400"
                   }
                 >
                   {d.status}
