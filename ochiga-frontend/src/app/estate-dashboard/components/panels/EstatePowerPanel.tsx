@@ -17,10 +17,7 @@ type PowerModule = {
   sub?: string;
 };
 
-const maroon = "#8A0C0C";
-const darkBlue = "#0A0F1F";
-const cardBlue = "#111726";
-const borderBlue = "#1E2638";
+const brandColor = "#8A0C0C"; // Ochiga maroon
 
 export default function EstatePowerPanel({ estateId = "current-estate" }: { estateId?: string }) {
   const [modules, setModules] = useState<PowerModule[]>([
@@ -88,49 +85,56 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
   };
 
   const toggleModule = async (m: PowerModule) => (m.status === "on" ? sendAction(m, "off") : sendAction(m, "on"));
-  const statusColor = (s: PowerModule["status"]) => (s === "on" ? "text-green-400" : s === "off" ? "text-red-400" : "text-yellow-300");
+  const statusColor = (s: PowerModule["status"]) => (s === "on" ? "text-green-500" : s === "off" ? "text-red-500" : "text-yellow-400");
 
   const Sparkline = ({ data }: { data: number[] }) => {
-    const w = 160;
-    const h = 40;
+    const w = 200;
+    const h = 50;
     const max = Math.max(...data, 1);
     const min = Math.min(...data, 0);
     const points = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / (max - min || 1)) * h}`);
-    return <svg width={w} height={h}><polyline fill="none" stroke={maroon} strokeWidth={2} points={points.join(" ")} strokeLinecap="round" strokeLinejoin="round" /></svg>;
+    return <svg width={w} height={h}><polyline fill="none" stroke={brandColor} strokeWidth={2} points={points.join(" ")} strokeLinecap="round" strokeLinejoin="round" /></svg>;
   };
 
   const totalConsumption = useMemo(() => metrics.reduce((a, b) => a + b, 0), [metrics]);
   const avg = useMemo(() => (metrics.length ? Math.round(totalConsumption / metrics.length) : 0), [metrics, totalConsumption]);
 
   return (
-    <div className="w-full p-3 rounded-lg" style={{ backgroundColor: darkBlue, border: `1px solid ${borderBlue}` }}>
-      <div className="mb-3 text-white font-semibold text-lg flex items-center gap-2"><FaBolt color={maroon} />Estate Power</div>
+    <div className="w-full p-6 space-y-6 bg-gray-50">
+      <div className="text-2xl font-light text-gray-800 flex items-center gap-2 mb-4"><FaBolt color={brandColor} />Estate Power Dashboard</div>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         {modules.map((m) => (
-          <div key={m.id} className="p-3 rounded-lg" style={{ backgroundColor: cardBlue, border: `1px solid ${borderBlue}` }}>
-            <div className="flex justify-between items-center mb-2">
+          <div key={m.id} className="p-4 rounded-lg bg-white shadow-sm border border-gray-200 flex flex-col justify-between">
+            <div className="flex justify-between items-start mb-3">
               <div className="flex flex-col">
-                <div className="flex items-center gap-1 font-semibold text-sm text-white">
+                <div className="flex items-center gap-2 font-light text-gray-800 text-base">
                   {m.key === "grid" && <FaBolt />} {m.key === "generator" && <FaGasPump />} {m.key === "solar" && <FaSolarPanel />}
                   {m.title}
                 </div>
                 <div className="text-xs text-gray-400">{m.sub}</div>
               </div>
-              <div className={`text-xs ${statusColor(m.status)} font-medium`}>{m.status.toUpperCase()}</div>
+              <div className={`text-sm font-light ${statusColor(m.status)}`}>{m.status.toUpperCase()}</div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <button className="px-2 py-1 text-xs rounded-md bg-maroon text-white flex items-center gap-1" onClick={() => toggleModule(m)} disabled={loading}>
+            <div className="flex items-center justify-between mb-3">
+              <button
+                className="px-3 py-1 rounded-md bg-maroon text-white text-sm font-light flex items-center gap-1"
+                onClick={() => toggleModule(m)}
+                disabled={loading}
+              >
                 {m.status === "on" ? <FaPowerOff /> : <FaPlay />} {m.status === "on" ? "Turn Off" : "Turn On"}
               </button>
-              <button className="px-2 py-1 text-xs rounded-md border border-gray-700 text-gray-300" onClick={() => setExpanded((p) => ({ ...p, [m.key]: !p[m.key] }))}>
+              <button
+                className="px-3 py-1 rounded-md border border-gray-300 text-gray-600 text-sm font-light"
+                onClick={() => setExpanded((p) => ({ ...p, [m.key]: !p[m.key] }))}
+              >
                 Details
               </button>
             </div>
 
             {expanded[m.key] && (
-              <div className="mt-2 text-xs text-gray-300 border-t border-gray-700 pt-2">
+              <div className="text-xs text-gray-500 space-y-1 border-t border-gray-200 pt-2">
                 <div>Metric: {m.metricValue} {m.metricLabel}</div>
                 <div>Auto-switch: <input type="checkbox" className="ml-1" onChange={() => toast("Toggled")} /></div>
               </div>
@@ -139,20 +143,19 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
         ))}
       </div>
 
-      {/* Analytics + notifications */}
-      <div className="mt-3 grid grid-cols-1 gap-3">
-        <div className="p-3 rounded-lg" style={{ backgroundColor: cardBlue, border: `1px solid ${borderBlue}` }}>
-          <div className="flex items-center justify-between text-white font-semibold mb-2"><FaChartLine />Analytics <span className="text-xs">Avg {avg} kWh</span></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
+          <div className="flex items-center justify-between mb-2 font-light text-gray-700 text-base"><FaChartLine /> Power Analytics <span className="text-sm">{avg} kWh Avg</span></div>
           <Sparkline data={metrics} />
         </div>
 
-        <div className="p-3 rounded-lg" style={{ backgroundColor: cardBlue, border: `1px solid ${borderBlue}` }}>
-          <div className="flex justify-between items-center mb-2 text-white font-semibold">Notifications <button className="text-xs text-gray-400" onClick={() => setNotifications([])}>Clear</button></div>
+        <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
+          <div className="flex justify-between items-center mb-2 text-gray-700 font-light text-base">Notifications <button className="text-xs text-gray-400" onClick={() => setNotifications([])}>Clear</button></div>
           <div className="space-y-1 max-h-32 overflow-auto text-xs">
             {notifications.length === 0 && <div className="text-gray-400">No incidents</div>}
             {notifications.map((n) => (
-              <div key={n.id} className={`p-1 rounded ${n.level === "critical" ? "bg-red-900 text-white" : n.level === "warning" ? "bg-yellow-900 text-black" : "bg-gray-900 text-gray-100"}`}>
-                {n.message} <span className="text-[10px] opacity-75">{n.time}</span>
+              <div key={n.id} className={`p-1 rounded ${n.level === "critical" ? "bg-red-200 text-red-800" : n.level === "warning" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-700"}`}>
+                {n.message} <span className="text-[10px] opacity-70">{n.time}</span>
               </div>
             ))}
           </div>
