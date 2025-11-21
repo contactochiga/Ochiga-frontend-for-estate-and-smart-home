@@ -11,6 +11,7 @@ import EstatePowerPanel from "./components/panels/EstatePowerPanel";
 import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
 import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
 import EstateHomeCreationPanel from "./components/panels/EstateHomeCreationPanel";
+import DeviceDiscoveryPanel from "./components/panels/DeviceDiscoveryPanel";
 
 import { detectEstatePanelType } from "./utils/estatePanelDetection";
 import { FaArrowDown, FaLightbulb, FaWallet, FaVideo, FaBolt } from "react-icons/fa";
@@ -260,7 +261,7 @@ export default function EstateDashboard() {
               </select>
             )}
             {selectedHomeId ? (
-              <EstateDevicePanel estateId="currentEstateId" />
+              <DeviceDiscoveryPanel estateId="currentEstateId" homeId={selectedHomeId} />
             ) : (
               <p className="text-gray-400 text-sm">Select a home to discover devices.</p>
             )}
