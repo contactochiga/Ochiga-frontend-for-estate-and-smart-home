@@ -23,9 +23,10 @@ export default function EstateDevicePanel({
   devices?: Device[];
   onAction?: (id: string, action: string) => void;
 }) {
-  const [devices, setDevices] = useState<Device[]>(initial);
+  const [devices, setDevices] = useState<Device[]>(initial || []);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const maroon = "#8A0C0C";
   const darkBlue = "#0A0F1F";
@@ -37,11 +38,14 @@ export default function EstateDevicePanel({
   ------------------------------------------------- */
   const loadEstateDevices = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await deviceService.getDevices(estateId);
-      setDevices(res.devices || res || []);
-    } catch (err) {
+      const fetchedDevices = res.devices || res || [];
+      setDevices(fetchedDevices);
+    } catch (err: any) {
       console.warn(err);
+      setError("Failed to load estate devices");
       toast.error("Failed to load estate devices");
     } finally {
       setLoading(false);
@@ -53,28 +57,31 @@ export default function EstateDevicePanel({
   ------------------------------------------------- */
   const scanDevices = async () => {
     setLoading(true);
+    setError(null);
     try {
-      toast("Scanning for live devices...");
+      toast("🔍 Scanning for live devices...");
       const res = await deviceService.discoverDevices();
 
-      if (res.devices && res.devices.length > 0) {
+      if (res.error) {
+        setError(res.error);
+        toast.error(res.error);
+        return;
+      }
+
+      const devicesFound = res.devices || [];
+      if (devicesFound.length === 0) {
+        toast("No devices discovered");
+      } else {
         setDevices((prev) => {
           const existingIds = new Set(prev.map((d) => d.id));
-          const newDevices = res.devices.filter((d: Device) => !existingIds.has(d.id));
-
-          if (newDevices.length > 0) {
-            toast.success(`${newDevices.length} new device(s) discovered!`);
-          } else {
-            toast("No new devices found");
-          }
-
+          const newDevices = devicesFound.filter(d => !existingIds.has(d.id));
+          if (newDevices.length > 0) toast.success(`${newDevices.length} new device(s) discovered!`);
           return [...prev, ...newDevices];
         });
-      } else {
-        toast("No devices discovered");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn(err);
+      setError("Failed to scan devices");
       toast.error("Failed to scan devices");
     } finally {
       setLoading(false);
@@ -89,18 +96,15 @@ export default function EstateDevicePanel({
     if (!current) return;
 
     const newStatus = current.status === "online" ? "offline" : "online";
-
     setDevices((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, status: newStatus } : p
-      )
+      prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d))
     );
 
     try {
       await deviceService.triggerDeviceAction(id, newStatus);
       toast.success(`${current.name} is now ${newStatus}`);
     } catch {
-      loadEstateDevices();
+      await loadEstateDevices();
       toast.error(`Failed to toggle ${current.name}`);
     }
   };
@@ -110,12 +114,10 @@ export default function EstateDevicePanel({
   }, []);
 
   const filtered = filter
-    ? devices.filter((d) =>
-        (d.name + d.type + d.location)
-          .toLowerCase()
-          .includes(filter.toLowerCase())
+    ? (devices || []).filter(d =>
+        (d.name + d.type + d.location).toLowerCase().includes(filter.toLowerCase())
       )
-    : devices;
+    : devices || [];
 
   return (
     <div
@@ -128,7 +130,10 @@ export default function EstateDevicePanel({
         <h3 className="text-sm font-semibold text-white">Estate Devices</h3>
       </div>
 
-      {/* Search */}
+      {/* Error Message */}
+      {error && <div className="text-red-500 text-xs mb-2">{error}</div>}
+
+      {/* Search Box */}
       <input
         placeholder="Search devices..."
         value={filter}
@@ -142,6 +147,7 @@ export default function EstateDevicePanel({
         onClick={scanDevices}
         className="w-full py-2 rounded-lg text-white text-sm font-medium mb-4"
         style={{ backgroundColor: maroon }}
+        disabled={loading}
       >
         {loading ? "Scanning..." : "Scan for New Devices"}
       </button>
@@ -161,17 +167,12 @@ export default function EstateDevicePanel({
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium text-white">{d.name}</div>
-                  <div className="text-xs text-gray-400">
-                    {d.type} • {d.location}
-                  </div>
+                  <div className="text-xs text-gray-400">{d.type} • {d.location}</div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
-                  <button
-                    className="text-gray-300 text-sm"
-                    onClick={() => onAction?.(d.id, "open")}
-                  >
+                  <button className="text-gray-300 text-sm" onClick={() => onAction?.(d.id, "open")}>
                     <FaWrench />
                   </button>
 
