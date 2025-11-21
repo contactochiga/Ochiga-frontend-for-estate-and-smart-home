@@ -10,9 +10,9 @@ import EstateDevicePanel from "./components/panels/EstateDevicePanel";
 import EstatePowerPanel from "./components/panels/EstatePowerPanel";
 import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
 import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
-
-// UPDATED: Correct home creation panel import
 import EstateHomeCreationPanel from "./components/panels/EstateHomeCreationPanel";
+
+// Removed DeviceDiscoveryPanel import
 
 import { detectEstatePanelType } from "./utils/estatePanelDetection";
 import { FaArrowDown, FaLightbulb, FaWallet, FaVideo, FaBolt } from "react-icons/fa";
@@ -124,25 +124,16 @@ export default function EstateDashboard() {
     }, 120);
   };
 
+  // -------- Updated handleAction --------
   const handleAction = (actions: Array<{ type: string; action: string; target: string }>, userMessage?: string) => {
     actions.forEach((a) => {
       let reply = "I didn't quite get that. Can you repeat?";
       let panel: string | null = null;
 
       if (a.type === "device") {
-        if (["light", "ac", "camera"].includes(a.target)) panel = "estate_devices";
-        if (a.action === "discover") panel = "estate_devices";
-        reply = `Opening ${a.target} panel.`;
-      }
-
-      if (a.type === "info" && a.target === "status") {
-        reply = "Estate status: security steady, power stable.";
-        panel = "estate_power";
-      }
-
-      if (a.type === "schedule" && a.target === "visitor") {
-        reply = "Opening visitor management.";
-        panel = "estate_community";
+        // Removed device_discovery references
+        panel = "estate_devices";
+        reply = "Opening estate devices panel.";
       }
 
       const userText = userMessage ?? `${a.action} ${a.target}`;
@@ -182,7 +173,7 @@ export default function EstateDashboard() {
 
     const panel = detectEstatePanelType(messageText);
 
-    if (panel) {
+    if (panel && panel !== "device_discovery") { // Removed device_discovery
       const reply =
         panel === "estate_devices"
           ? "Estate device panel opened."
@@ -230,12 +221,13 @@ export default function EstateDashboard() {
     }, 120);
   }
 
+  // ---------------- Suggestions ----------------
   const suggestions = [
-    { title: "Check estate devices", icon: FaLightbulb, description: "Manage all devices across your estate" },
+    { title: "View estate devices", icon: FaLightbulb, description: "Scan and assign devices to homes" },
     { title: "View power status", icon: FaBolt, description: "Monitor estate power and consumption" },
     { title: "Open accounting panel", icon: FaWallet, description: "Track estate finances and payments" },
     { title: "Open community panel", icon: FaVideo, description: "Manage visitor and community interactions" },
-  ];
+  ].map((s) => ({ ...s, id: crypto.randomUUID() }));
 
   const renderPanel = (panel: string | null | undefined) => {
     switch (panel) {
@@ -247,11 +239,8 @@ export default function EstateDashboard() {
         return <EstateAccountingPanel />;
       case "estate_community":
         return <EstateCommunityPanel />;
-
-      // UPDATED: Correct home creation panel
       case "home_creation":
         return <EstateHomeCreationPanel />;
-
       default:
         return null;
     }
