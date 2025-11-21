@@ -16,7 +16,7 @@ type Device = {
 export default function EstateDevicePanel({
   estateId = "current-estate",
   devices: initial = [],
-  onAction
+  onAction,
 }: {
   estateId?: string;
   devices?: Device[];
@@ -27,9 +27,6 @@ export default function EstateDevicePanel({
   const [filter, setFilter] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
 
-  /* -----------------------------------------------------------
-     LOAD ALL DEVICES FOR THE ESTATE
-  ----------------------------------------------------------- */
   const load = async () => {
     setLoading(true);
     try {
@@ -46,33 +43,25 @@ export default function EstateDevicePanel({
     load();
   }, []);
 
-  /* -----------------------------------------------------------
-     TOGGLE DEVICE ONLINE/OFFLINE
-     Uses new: deviceService.toggleDevice()
-  ----------------------------------------------------------- */
   const toggle = async (id: string) => {
     const current = devices.find((d) => d.id === id);
     if (!current) return;
 
     const newStatus = current.status === "online" ? "offline" : "online";
 
-    // Optimistic UI
     setDevices((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, status: newStatus } : p
-      )
+      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
     );
 
     try {
       await deviceService.toggleDevice(id, newStatus);
     } catch (err) {
       console.error(err);
-      load(); // rollback
+      load();
       alert("Action failed");
     }
   };
 
-  /* FILTER DEVICES */
   const filtered = filter
     ? devices.filter((d) =>
         (d.name + d.type + d.location)
@@ -82,59 +71,69 @@ export default function EstateDevicePanel({
     : devices;
 
   return (
-    <div className="p-3 bg-gray-900 rounded border border-gray-700">
-      <div className="flex items-center justify-between mb-3">
+    <div className="p-4 bg-white rounded-lg border border-gray-300 shadow-sm">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <FaPlug className="text-green-400" />
-          <h3 className="text-white">Estate Devices</h3>
+          <FaPlug className="text-[#8A0A0A]" size={18} />
+          <h3 className="text-[#8A0A0A] font-semibold text-lg">
+            Estate Devices
+          </h3>
         </div>
-        <div className="flex gap-2">
+
+        {/* SEARCH BAR */}
+        <div className="flex items-center gap-2 max-w-[250px] w-full">
           <input
-            placeholder="search devices"
+            placeholder="Search devices..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="px-2 py-1 rounded bg-gray-800 border border-gray-700"
+            className="px-3 py-2 rounded border border-gray-300 text-black bg-white focus:outline-none w-full"
           />
-          <button onClick={load} className="bg-blue-600 px-3 rounded">
+          <button
+            onClick={load}
+            className="px-3 py-2 rounded bg-[#8A0A0A] text-white"
+          >
             <FaSearch />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 max-h-64 overflow-auto">
+      {/* DEVICE LIST */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-72 overflow-auto">
         {loading ? (
-          <div className="text-gray-400">Loading...</div>
+          <div className="text-gray-500">Loading...</div>
         ) : (
           filtered.map((d) => (
             <div
               key={d.id}
-              className="bg-gray-800 p-2 rounded flex flex-col gap-2"
+              className="bg-gray-100 border border-gray-300 p-3 rounded flex flex-col gap-2"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-white">{d.name}</div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-black font-medium">{d.name}</div>
+                  <div className="text-xs text-gray-600">
                     {d.type || "Unknown"} • {d.location || "Unassigned"}
                   </div>
                 </div>
+
+                {/* Action buttons */}
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => {
                       setSelected(d.id);
                       onAction?.(d.id, "open");
                     }}
-                    className="p-1"
+                    className="p-1 text-[#8A0A0A]"
                   >
                     <FaWrench />
                   </button>
 
-                  {/* Toggle button */}
                   <button
                     onClick={() => toggle(d.id)}
                     className={`px-2 py-1 rounded ${
                       d.status === "online"
-                        ? "bg-green-600"
-                        : "bg-gray-700"
+                        ? "bg-green-600 text-white"
+                        : "bg-gray-400 text-white"
                     }`}
                   >
                     <FaToggleOn />
@@ -142,7 +141,7 @@ export default function EstateDevicePanel({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-400">
+              <div className="flex items-center justify-between text-xs text-gray-600">
                 <div>
                   {d.lastSeen
                     ? `seen ${new Date(d.lastSeen).toLocaleTimeString()}`
@@ -155,21 +154,5 @@ export default function EstateDevicePanel({
         )}
       </div>
 
-      {/* Bottom buttons */}
-      <div className="mt-3 flex gap-2">
-        <button
-          onClick={() => alert("Open device assignment")}
-          className="bg-blue-600 px-3 py-2 rounded"
-        >
-          Assign
-        </button>
-        <button
-          onClick={() => alert("Open maintenance queue")}
-          className="bg-gray-700 px-3 py-2 rounded"
-        >
-          Maintenance
-        </button>
-      </div>
-    </div>
-  );
-}
+      {/* FOOTER BUTTONS */}
+      <div className="mt-4 flex gap-3">
