@@ -17,9 +17,9 @@ function authHeaders() {
 }
 
 /* --------------------------------------------------
- * 1. DISCOVER DEVICES (SSDP + MQTT from backend)
+ * DISCOVER DEVICES (SSDP + MQTT from backend)
  * -------------------------------------------------- */
-export async function discoverDevices() {
+async function discoverDevices() {
   try {
     const res = await fetch(`${BASE_URL}/devices/discover`, {
       method: "GET",
@@ -39,9 +39,9 @@ export async function discoverDevices() {
 }
 
 /* --------------------------------------------------
- * 2. GET DEVICES (Estate or Resident)
+ * GET DEVICES (Estate or Resident)
  * -------------------------------------------------- */
-export async function getDevices(estateId?: string) {
+async function getDevices(estateId?: string) {
   try {
     const query = estateId ? `?estateId=${estateId}` : "";
 
@@ -62,9 +62,9 @@ export async function getDevices(estateId?: string) {
 }
 
 /* --------------------------------------------------
- * 3. CREATE DEVICE (Estate Only)
+ * CREATE DEVICE (Estate Only)
  * -------------------------------------------------- */
-export async function createDevice(body: {
+async function createDevice(body: {
   estate_id: string;
   name: string;
   type: string;
@@ -89,9 +89,9 @@ export async function createDevice(body: {
 }
 
 /* --------------------------------------------------
- * 4. TRIGGER DEVICE ACTION
+ * TRIGGER DEVICE ACTION
  * -------------------------------------------------- */
-export async function triggerDeviceAction(
+async function triggerDeviceAction(
   deviceId: string,
   action: string,
   params: any = {}
@@ -113,3 +113,13 @@ export async function triggerDeviceAction(
     return { error: err.message };
   }
 }
+
+/* --------------------------------------------------
+ * EXPORT SINGLE DEVICE SERVICE OBJECT
+ * -------------------------------------------------- */
+export const deviceService = {
+  discoverDevices,
+  getDevices,
+  createDevice,
+  triggerDeviceAction,
+};
