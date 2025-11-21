@@ -11,7 +11,6 @@ import EstatePowerPanel from "./components/panels/EstatePowerPanel";
 import EstateAccountingPanel from "./components/panels/EstateAccountingPanel";
 import EstateCommunityPanel from "./components/panels/EstateCommunityPanel";
 import EstateHomeCreationPanel from "./components/panels/EstateHomeCreationPanel";
-import DeviceDiscoveryPanel from "./components/panels/DeviceDiscoveryPanel";
 
 import { detectEstatePanelType } from "./utils/estatePanelDetection";
 import { FaArrowDown, FaLightbulb, FaWallet, FaVideo, FaBolt } from "react-icons/fa";
