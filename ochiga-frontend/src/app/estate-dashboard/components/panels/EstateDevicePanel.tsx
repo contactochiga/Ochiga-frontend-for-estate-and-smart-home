@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { FaPlug, FaWrench, FaToggleOn } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { deviceService } from "@/services/deviceService";
@@ -32,15 +32,14 @@ export default function EstateDevicePanel({
   const cardBlue = "#111726";
   const borderBlue = "#1E2638";
 
-  const newDevicesRef = useRef<Set<string>>(new Set());
-
-  /* Load estate devices from backend */
+  /* -------------------------------------------------
+     Load estate devices from backend DB
+  ------------------------------------------------- */
   const loadEstateDevices = async () => {
     setLoading(true);
     try {
       const res = await deviceService.getDevices(estateId);
-      setDevices(res.devices || []);
-      newDevicesRef.current = new Set(res.devices?.map((d: Device) => d.id));
+      setDevices(res.devices || res || []);
     } catch (err) {
       console.warn(err);
       toast.error("Failed to load estate devices");
@@ -49,48 +48,42 @@ export default function EstateDevicePanel({
     }
   };
 
-  /* Real-time scan for devices */
+  /* -------------------------------------------------
+     Scan for live IoT devices
+  ------------------------------------------------- */
   const scanDevices = async () => {
     setLoading(true);
-    toast("Scanning for devices...");
-
     try {
+      toast("Scanning for live devices...");
       const res = await deviceService.discoverDevices();
 
       if (res.devices && res.devices.length > 0) {
-        let addedCount = 0;
+        setDevices((prev) => {
+          const existingIds = new Set(prev.map((d) => d.id));
+          const newDevices = res.devices.filter((d: Device) => !existingIds.has(d.id));
 
-        // Add devices incrementally with small delay for live feel
-        for (const d of res.devices) {
-          await new Promise((r) => setTimeout(r, 50)); // small delay for live effect
+          if (newDevices.length > 0) {
+            toast.success(`${newDevices.length} new device(s) discovered!`);
+          } else {
+            toast("No new devices found");
+          }
 
-          setDevices((prev) => {
-            if (!newDevicesRef.current.has(d.id)) {
-              newDevicesRef.current.add(d.id);
-              addedCount++;
-              return [...prev, d];
-            }
-            return prev;
-          });
-        }
-
-        if (addedCount > 0) {
-          toast.success(`${addedCount} new device(s) discovered!`);
-        } else {
-          toast("No new devices found");
-        }
+          return [...prev, ...newDevices];
+        });
       } else {
         toast("No devices discovered");
       }
     } catch (err) {
       console.warn(err);
-      toast.error("Failed to scan for devices");
+      toast.error("Failed to scan devices");
     } finally {
       setLoading(false);
     }
   };
 
-  /* Toggle Device Status */
+  /* -------------------------------------------------
+     Toggle device status
+  ------------------------------------------------- */
   const toggle = async (id: string) => {
     const current = devices.find((d) => d.id === id);
     if (!current) return;
@@ -112,7 +105,10 @@ export default function EstateDevicePanel({
     }
   };
 
-  /* Filter devices by search */
+  useEffect(() => {
+    loadEstateDevices();
+  }, []);
+
   const filtered = filter
     ? devices.filter((d) =>
         (d.name + d.type + d.location)
@@ -121,17 +117,10 @@ export default function EstateDevicePanel({
       )
     : devices;
 
-  useEffect(() => {
-    loadEstateDevices();
-  }, []);
-
   return (
     <div
       className="p-4 rounded-lg shadow-sm w-full"
-      style={{
-        backgroundColor: darkBlue,
-        border: `1px solid ${borderBlue}`
-      }}
+      style={{ backgroundColor: darkBlue, border: `1px solid ${borderBlue}` }}
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
@@ -139,7 +128,7 @@ export default function EstateDevicePanel({
         <h3 className="text-sm font-semibold text-white">Estate Devices</h3>
       </div>
 
-      {/* Search Box */}
+      {/* Search */}
       <input
         placeholder="Search devices..."
         value={filter}
@@ -151,10 +140,7 @@ export default function EstateDevicePanel({
       {/* Scan Button */}
       <button
         onClick={scanDevices}
-        disabled={loading}
-        className={`w-full py-2 rounded-lg text-white text-sm font-medium mb-4 ${
-          loading ? "opacity-70 cursor-not-allowed" : ""
-        }`}
+        className="w-full py-2 rounded-lg text-white text-sm font-medium mb-4"
         style={{ backgroundColor: maroon }}
       >
         {loading ? "Scanning..." : "Scan for New Devices"}
@@ -169,10 +155,7 @@ export default function EstateDevicePanel({
             <div
               key={d.id}
               className="p-3 rounded-lg cursor-pointer transition"
-              style={{
-                backgroundColor: cardBlue,
-                border: `1px solid ${borderBlue}`
-              }}
+              style={{ backgroundColor: cardBlue, border: `1px solid ${borderBlue}` }}
             >
               {/* Row 1 */}
               <div className="flex items-center justify-between">
@@ -194,9 +177,7 @@ export default function EstateDevicePanel({
 
                   <button
                     className="px-2 py-1 rounded text-white text-xs"
-                    style={{
-                      backgroundColor: d.status === "online" ? "green" : "gray"
-                    }}
+                    style={{ backgroundColor: d.status === "online" ? "green" : "gray" }}
                     onClick={() => toggle(d.id)}
                   >
                     <FaToggleOn />
@@ -206,14 +187,8 @@ export default function EstateDevicePanel({
 
               {/* Row 2 */}
               <div className="flex items-center justify-between mt-2 text-xs">
-                <div className="text-gray-400">
-                  {d.status === "online" ? "Active now" : "Offline"}
-                </div>
-                <div
-                  className={d.status === "online" ? "text-green-400" : "text-red-400"}
-                >
-                  {d.status}
-                </div>
+                <div className="text-gray-400">{d.status === "online" ? "Active now" : "Offline"}</div>
+                <div className={d.status === "online" ? "text-green-400" : "text-red-400"}>{d.status}</div>
               </div>
             </div>
           ))
