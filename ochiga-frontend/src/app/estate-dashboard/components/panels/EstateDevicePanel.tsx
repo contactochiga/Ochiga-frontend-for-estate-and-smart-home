@@ -26,12 +26,13 @@ export default function EstateDevicePanel({
   const [devices, setDevices] = useState<Device[]>(initial);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
-  const scanRef = useRef<NodeJS.Timeout | null>(null);
 
   const maroon = "#8A0C0C";
   const darkBlue = "#0A0F1F";
   const cardBlue = "#111726";
   const borderBlue = "#1E2638";
+
+  const newDevicesRef = useRef<Set<string>>(new Set());
 
   /* Load estate devices from backend */
   const loadEstateDevices = async () => {
@@ -39,6 +40,7 @@ export default function EstateDevicePanel({
     try {
       const res = await deviceService.getDevices(estateId);
       setDevices(res.devices || []);
+      newDevicesRef.current = new Set(res.devices?.map((d: Device) => d.id));
     } catch (err) {
       console.warn(err);
       toast.error("Failed to load estate devices");
@@ -47,9 +49,7 @@ export default function EstateDevicePanel({
     }
   };
 
-  /* --------------------------------------------------
-     Scan devices in real-time
-  -------------------------------------------------- */
+  /* Real-time scan for devices */
   const scanDevices = async () => {
     setLoading(true);
     toast("Scanning for devices...");
@@ -60,16 +60,19 @@ export default function EstateDevicePanel({
       if (res.devices && res.devices.length > 0) {
         let addedCount = 0;
 
-        res.devices.forEach((d: Device) => {
+        // Add devices incrementally with small delay for live feel
+        for (const d of res.devices) {
+          await new Promise((r) => setTimeout(r, 50)); // small delay for live effect
+
           setDevices((prev) => {
-            const exists = prev.find((p) => p.id === d.id);
-            if (!exists) {
+            if (!newDevicesRef.current.has(d.id)) {
+              newDevicesRef.current.add(d.id);
               addedCount++;
               return [...prev, d];
             }
             return prev;
           });
-        });
+        }
 
         if (addedCount > 0) {
           toast.success(`${addedCount} new device(s) discovered!`);
@@ -109,7 +112,7 @@ export default function EstateDevicePanel({
     }
   };
 
-  /* Filtered Devices */
+  /* Filter devices by search */
   const filtered = filter
     ? devices.filter((d) =>
         (d.name + d.type + d.location)
@@ -120,11 +123,6 @@ export default function EstateDevicePanel({
 
   useEffect(() => {
     loadEstateDevices();
-
-    // Cleanup interval if needed
-    return () => {
-      if (scanRef.current) clearInterval(scanRef.current);
-    };
   }, []);
 
   return (
@@ -153,7 +151,10 @@ export default function EstateDevicePanel({
       {/* Scan Button */}
       <button
         onClick={scanDevices}
-        className="w-full py-2 rounded-lg text-white text-sm font-medium mb-4"
+        disabled={loading}
+        className={`w-full py-2 rounded-lg text-white text-sm font-medium mb-4 ${
+          loading ? "opacity-70 cursor-not-allowed" : ""
+        }`}
         style={{ backgroundColor: maroon }}
       >
         {loading ? "Scanning..." : "Scan for New Devices"}
