@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaPlug, FaWrench, FaToggleOn, FaSearch } from "react-icons/fa";
-import { deviceService } from "@/app/services/deviceService";
+import { deviceService } from "@/services/deviceService";
 
 type Device = {
   id: string;
