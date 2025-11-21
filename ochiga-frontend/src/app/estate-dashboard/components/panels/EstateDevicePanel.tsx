@@ -38,7 +38,12 @@ export default function EstateDevicePanel({
     try {
       const res = await deviceService.getDevices(estateId);
       const loaded = Array.isArray(res?.devices) ? res.devices : res || [];
-      setDevices(loaded);
+      setDevices(
+        loaded.map(d => ({
+          ...d,
+          id: d.id || Math.random().toString(36).substring(2, 9),
+        }))
+      );
     } catch (err) {
       console.warn(err);
       toast.error("Failed to load estate devices");
@@ -51,17 +56,19 @@ export default function EstateDevicePanel({
   const scanDevices = async () => {
     setLoading(true);
     try {
-      const res = await deviceService.discoverDevices();
-      const foundDevices = Array.isArray(res?.devices) ? res.devices : [];
+      const token = localStorage.getItem("token"); // include auth token
+      const res = await deviceService.discoverDevices(token);
+      const foundDevices = (Array.isArray(res?.devices) ? res.devices : []).map(d => ({
+        ...d,
+        id: d.id || Math.random().toString(36).substring(2, 9),
+      }));
+
       if (foundDevices.length > 0) {
         setDevices(prev => {
           const existingIds = new Set(prev.map(d => d.id));
           const newDevices = foundDevices.filter(d => !existingIds.has(d.id));
-          if (newDevices.length > 0) {
-            toast.success(`${newDevices.length} new device(s) discovered!`);
-          } else {
-            toast("No new devices found");
-          }
+          if (newDevices.length > 0) toast.success(`${newDevices.length} new device(s) discovered!`);
+          else toast("No new devices found");
           return [...prev, ...newDevices];
         });
       } else {
@@ -69,7 +76,7 @@ export default function EstateDevicePanel({
       }
     } catch (err) {
       console.warn(err);
-      toast.error("Failed to scan for devices");
+      toast.error("Failed to scan for devices (401? check auth)");
     } finally {
       setLoading(false);
     }
@@ -82,15 +89,15 @@ export default function EstateDevicePanel({
 
     const newStatus = current.status === "online" ? "offline" : "online";
 
-    setDevices(prev =>
-      prev.map(d => (d.id === id ? { ...d, status: newStatus } : d))
-    );
+    // Optimistic UI update
+    setDevices(prev => prev.map(d => (d.id === id ? { ...d, status: newStatus } : d)));
 
     try {
       await deviceService.triggerDeviceAction(id, newStatus);
       toast.success(`${current.name} is now ${newStatus}`);
     } catch {
-      loadEstateDevices();
+      // Revert on failure
+      setDevices(prev => prev.map(d => (d.id === id ? { ...d, status: current.status } : d)));
       toast.error(`Failed to toggle ${current.name}`);
     }
   };
@@ -99,7 +106,7 @@ export default function EstateDevicePanel({
     loadEstateDevices();
   }, []);
 
-  /** Filtered devices */
+  /** Filtered devices safely */
   const filtered = Array.isArray(devices)
     ? filter
       ? devices.filter(d =>
