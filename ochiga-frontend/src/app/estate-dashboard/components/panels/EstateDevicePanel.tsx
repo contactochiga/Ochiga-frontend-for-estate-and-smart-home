@@ -22,11 +22,14 @@ export default function EstateDevicePanel({
   devices?: Device[];
   onAction?: (id: string, action: string) => void;
 }) {
+  
   const [devices, setDevices] = useState<Device[]>(initial);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
 
-  /* LOAD ESTATE DEVICES */
+  const maroon = "#8A0C0C";
+
+  /* Load devices */
   const load = async () => {
     setLoading(true);
     try {
@@ -43,7 +46,7 @@ export default function EstateDevicePanel({
     load();
   }, []);
 
-  /* TOGGLE DEVICE */
+  /* Toggle */
   const toggle = async (id: string) => {
     const current = devices.find((d) => d.id === id);
     if (!current) return;
@@ -58,10 +61,8 @@ export default function EstateDevicePanel({
 
     try {
       await deviceService.toggleDevice(id, newStatus);
-    } catch (err) {
-      console.error(err);
+    } catch {
       load();
-      alert("Action failed");
     }
   };
 
@@ -73,106 +74,113 @@ export default function EstateDevicePanel({
       )
     : devices;
 
-  /* -------------------------
-     OCHIGA BRAND COLORS
-     maroonRed = #8A0C0C
-  ------------------------- */
-  const maroon = "bg-[#8A0C0C]";
-  const maroonText = "text-[#8A0C0C]";
+  /* SAMPLE DEVICES (If none returned) */
+  const sample = [
+    {
+      id: "1",
+      name: "Gate Control Unit",
+      type: "access",
+      status: "online",
+      location: "Main Gate"
+    },
+    {
+      id: "2",
+      name: "Perimeter Camera 01",
+      type: "camera",
+      status: "online",
+      location: "Fence North"
+    },
+    {
+      id: "3",
+      name: "Street Light Controller",
+      type: "lighting",
+      status: "offline",
+      location: "Zone B"
+    }
+  ];
+
+  const finalDevices = devices.length === 0 ? sample : filtered;
 
   return (
-    <div className="p-4 bg-white rounded-lg border border-gray-300 shadow-sm">
+    <div className="p-4 bg-white rounded-lg border border-gray-300 shadow-sm w-full">
       
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <FaPlug className={`${maroonText}`} />
-          <h3 className="text-gray-900 font-semibold">Estate Devices</h3>
-        </div>
-
-        {/* SEARCH */}
-        <div className="flex items-center gap-2">
-          <input
-            placeholder="Search devices..."
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-3 py-2 rounded border border-gray-300 text-gray-800 w-40 focus:outline-none focus:ring-2 focus:ring-[#8A0C0C]"
-          />
-          <button
-            onClick={load}
-            className={`${maroon} text-white px-3 py-2 rounded`}
-          >
-            <FaSearch />
-          </button>
-        </div>
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <FaPlug color={maroon} className="text-sm" />
+        <h3 className="text-sm font-semibold text-gray-900">Estate Devices</h3>
       </div>
 
-      {/* DEVICE GRID */}
-      <div className="grid grid-cols-2 gap-3 max-h-72 overflow-auto">
+      {/* Search Box */}
+      <input
+        placeholder="Search devices..."
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+        className="w-full px-3 py-2 mb-3 rounded border border-gray-300 text-sm 
+        focus:outline-none focus:ring-2"
+        style={{ focusRingColor: maroon }}
+      />
+
+      {/* Scan Button */}
+      <button
+        onClick={load}
+        className="w-full py-2 rounded-lg text-white text-sm font-medium mb-4"
+        style={{ backgroundColor: maroon }}
+      >
+        Scan for New Devices
+      </button>
+
+      {/* Device List */}
+      <div className="flex flex-col gap-2 max-h-72 overflow-auto pr-1">
         {loading ? (
-          <div className="text-gray-500">Loading...</div>
+          <div className="text-gray-500 text-sm">Scanning...</div>
         ) : (
-          filtered.map((d) => (
+          finalDevices.map((d) => (
             <div
               key={d.id}
-              className="bg-gray-100 p-3 rounded-lg border border-gray-200 flex flex-col gap-2"
+              className="p-3 rounded-lg border border-gray-200 bg-gray-100 cursor-pointer 
+              hover:bg-gray-200 transition"
             >
-              {/* Title Row */}
+              {/* Row 1 */}
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-gray-900 font-medium">{d.name}</div>
+                  <div className="text-sm font-medium text-gray-900">{d.name}</div>
                   <div className="text-xs text-gray-500">
-                    {d.type || "Unknown"} • {d.location || "Unassigned"}
+                    {d.type} • {d.location}
                   </div>
                 </div>
 
+                {/* Actions */}
                 <div className="flex items-center gap-2">
-                  {/* Settings */}
-                  <button
-                    onClick={() => onAction?.(d.id, "open")}
-                    className="p-1 text-gray-700"
-                  >
+                  <button className="text-gray-700 text-sm" onClick={() => onAction?.(d.id, "open")}>
                     <FaWrench />
                   </button>
 
-                  {/* Toggle */}
                   <button
+                    className="px-2 py-1 rounded text-white text-xs"
+                    style={{
+                      backgroundColor: d.status === "online" ? "green" : "gray"
+                    }}
                     onClick={() => toggle(d.id)}
-                    className={`px-2 py-1 rounded text-white ${
-                      d.status === "online"
-                        ? "bg-green-600"
-                        : "bg-gray-500"
-                    }`}
                   >
                     <FaToggleOn />
                   </button>
                 </div>
               </div>
 
-              {/* Status Row */}
-              <div className="flex items-center justify-between text-xs text-gray-600">
-                <div>
-                  {d.lastSeen
-                    ? `seen ${new Date(d.lastSeen).toLocaleTimeString()}`
-                    : "no activity"}
-                </div>
-                <div className={d.status === "online" ? "text-green-700" : "text-red-700"}>
+              {/* Row 2 */}
+              <div className="flex items-center justify-between mt-2 text-xs text-gray-600">
+                <div>{d.status === "online" ? "Active now" : "Offline"}</div>
+                <div
+                  className={
+                    d.status === "online" ? "text-green-700" : "text-red-700"
+                  }
+                >
                   {d.status}
                 </div>
               </div>
             </div>
           ))
         )}
-      </div>
-
-      {/* ACTION BUTTONS */}
-      <div className="mt-4 flex gap-3">
-        <button className={`${maroon} text-white px-4 py-2 rounded`}>
-          Assign
-        </button>
-        <button className="bg-gray-500 text-white px-4 py-2 rounded">
-          Maintenance
-        </button>
       </div>
     </div>
   );
