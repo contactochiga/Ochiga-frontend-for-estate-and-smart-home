@@ -228,7 +228,7 @@ export default function EstateDashboard() {
     { title: "View power status", icon: FaBolt, description: "Monitor estate power and consumption" },
     { title: "Open accounting panel", icon: FaWallet, description: "Track estate finances and payments" },
     { title: "Open community panel", icon: FaVideo, description: "Manage visitor and community interactions" },
-  ].map((s) => ({ ...s, id: crypto.randomUUID() })); // ✅ Unique IDs
+  ].map((s) => ({ ...s, id: crypto.randomUUID() }));
 
   const renderPanel = (panel: string | null | undefined) => {
     switch (panel) {
@@ -260,7 +260,7 @@ export default function EstateDashboard() {
               </select>
             )}
             {selectedHomeId ? (
-              <DeviceDiscoveryPanel estateId="currentEstateId" homeId={selectedHomeId} />
+              <EstateDevicePanel estateId="currentEstateId" />
             ) : (
               <p className="text-gray-400 text-sm">Select a home to discover devices.</p>
             )}
