@@ -34,6 +34,8 @@ export default function EstateDevicePanel({
 
   /** Load estate devices from backend */
   const loadEstateDevices = async () => {
+    if (!estateId) return toast.error("Estate ID is missing");
+
     setLoading(true);
     try {
       const res = await deviceService.getDevices(estateId);
@@ -44,7 +46,7 @@ export default function EstateDevicePanel({
           id: d.id || Math.random().toString(36).substring(2, 9),
         }))
       );
-    } catch (err) {
+    } catch (err: any) {
       console.warn(err);
       toast.error("Failed to load estate devices");
     } finally {
@@ -54,10 +56,13 @@ export default function EstateDevicePanel({
 
   /** Discover live IoT devices */
   const scanDevices = async () => {
+    if (!estateId) return toast.error("Estate ID is missing");
+
     setLoading(true);
     try {
-      const token = localStorage.getItem("token"); // include auth token
-      const res = await deviceService.discoverDevices(token);
+      // Pass estateId only; token handled internally in deviceService
+      const res = await deviceService.discoverDevices(estateId);
+
       const foundDevices = (Array.isArray(res?.devices) ? res.devices : []).map(d => ({
         ...d,
         id: d.id || Math.random().toString(36).substring(2, 9),
@@ -74,9 +79,9 @@ export default function EstateDevicePanel({
       } else {
         toast("No devices discovered");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn(err);
-      toast.error("Failed to scan for devices (401? check auth)");
+      toast.error("Failed to scan for devices (check auth or network)");
     } finally {
       setLoading(false);
     }
@@ -104,9 +109,9 @@ export default function EstateDevicePanel({
 
   useEffect(() => {
     loadEstateDevices();
-  }, []);
+  }, [estateId]);
 
-  /** Filtered devices safely */
+  /** Filter devices by search */
   const filtered = Array.isArray(devices)
     ? filter
       ? devices.filter(d =>
@@ -156,14 +161,12 @@ export default function EstateDevicePanel({
               className="p-3 rounded-lg cursor-pointer transition"
               style={{ backgroundColor: cardBlue, border: `1px solid ${borderBlue}` }}
             >
-              {/* Row 1 */}
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-medium text-white">{d.name}</div>
                   <div className="text-xs text-gray-400">{d.type} • {d.location}</div>
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center gap-2">
                   <button
                     className="text-gray-300 text-sm"
@@ -182,7 +185,6 @@ export default function EstateDevicePanel({
                 </div>
               </div>
 
-              {/* Row 2 */}
               <div className="flex items-center justify-between mt-2 text-xs">
                 <div className="text-gray-400">{d.status === "online" ? "Active now" : "Offline"}</div>
                 <div className={d.status === "online" ? "text-green-400" : "text-red-400"}>{d.status}</div>
