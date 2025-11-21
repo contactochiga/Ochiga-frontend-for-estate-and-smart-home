@@ -23,88 +23,74 @@ export default function EstateDevicePanel({
   devices?: Device[];
   onAction?: (id: string, action: string) => void;
 }) {
-  const [devices, setDevices] = useState<Device[]>(initial || []);
+  const [devices, setDevices] = useState<Device[]>(Array.isArray(initial) ? initial : []);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
-  const [error, setError] = useState<string | null>(null);
 
   const maroon = "#8A0C0C";
   const darkBlue = "#0A0F1F";
   const cardBlue = "#111726";
   const borderBlue = "#1E2638";
 
-  /* -------------------------------------------------
-     Load estate devices from backend DB
-  ------------------------------------------------- */
+  /** Load estate devices from backend */
   const loadEstateDevices = async () => {
     setLoading(true);
-    setError(null);
     try {
       const res = await deviceService.getDevices(estateId);
-      const fetchedDevices = res.devices || res || [];
-      setDevices(fetchedDevices);
-    } catch (err: any) {
+      const loaded = Array.isArray(res?.devices) ? res.devices : res || [];
+      setDevices(loaded);
+    } catch (err) {
       console.warn(err);
-      setError("Failed to load estate devices");
       toast.error("Failed to load estate devices");
     } finally {
       setLoading(false);
     }
   };
 
-  /* -------------------------------------------------
-     Scan for live IoT devices
-  ------------------------------------------------- */
+  /** Discover live IoT devices */
   const scanDevices = async () => {
     setLoading(true);
-    setError(null);
     try {
-      toast("🔍 Scanning for live devices...");
       const res = await deviceService.discoverDevices();
-
-      if (res.error) {
-        setError(res.error);
-        toast.error(res.error);
-        return;
-      }
-
-      const devicesFound = res.devices || [];
-      if (devicesFound.length === 0) {
-        toast("No devices discovered");
-      } else {
-        setDevices((prev) => {
-          const existingIds = new Set(prev.map((d) => d.id));
-          const newDevices = devicesFound.filter(d => !existingIds.has(d.id));
-          if (newDevices.length > 0) toast.success(`${newDevices.length} new device(s) discovered!`);
+      const foundDevices = Array.isArray(res?.devices) ? res.devices : [];
+      if (foundDevices.length > 0) {
+        setDevices(prev => {
+          const existingIds = new Set(prev.map(d => d.id));
+          const newDevices = foundDevices.filter(d => !existingIds.has(d.id));
+          if (newDevices.length > 0) {
+            toast.success(`${newDevices.length} new device(s) discovered!`);
+          } else {
+            toast("No new devices found");
+          }
           return [...prev, ...newDevices];
         });
+      } else {
+        toast("No devices discovered");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.warn(err);
-      setError("Failed to scan devices");
-      toast.error("Failed to scan devices");
+      toast.error("Failed to scan for devices");
     } finally {
       setLoading(false);
     }
   };
 
-  /* -------------------------------------------------
-     Toggle device status
-  ------------------------------------------------- */
+  /** Toggle Device Status */
   const toggle = async (id: string) => {
-    const current = devices.find((d) => d.id === id);
+    const current = devices.find(d => d.id === id);
     if (!current) return;
 
     const newStatus = current.status === "online" ? "offline" : "online";
-    setDevices((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status: newStatus } : d))
+
+    setDevices(prev =>
+      prev.map(d => (d.id === id ? { ...d, status: newStatus } : d))
     );
 
     try {
       await deviceService.triggerDeviceAction(id, newStatus);
       toast.success(`${current.name} is now ${newStatus}`);
     } catch {
-      await loadEstateDevices();
+      loadEstateDevices();
       toast.error(`Failed to toggle ${current.name}`);
     }
   };
@@ -113,11 +99,14 @@ export default function EstateDevicePanel({
     loadEstateDevices();
   }, []);
 
-  const filtered = filter
-    ? (devices || []).filter(d =>
-        (d.name + d.type + d.location).toLowerCase().includes(filter.toLowerCase())
-      )
-    : devices || [];
+  /** Filtered devices */
+  const filtered = Array.isArray(devices)
+    ? filter
+      ? devices.filter(d =>
+          (d.name + d.type + d.location).toLowerCase().includes(filter.toLowerCase())
+        )
+      : devices
+    : [];
 
   return (
     <div
@@ -130,14 +119,11 @@ export default function EstateDevicePanel({
         <h3 className="text-sm font-semibold text-white">Estate Devices</h3>
       </div>
 
-      {/* Error Message */}
-      {error && <div className="text-red-500 text-xs mb-2">{error}</div>}
-
       {/* Search Box */}
       <input
         placeholder="Search devices..."
         value={filter}
-        onChange={(e) => setFilter(e.target.value)}
+        onChange={e => setFilter(e.target.value)}
         className="w-full px-3 py-2 mb-3 rounded text-sm text-white bg-[#131A2B] border"
         style={{ borderColor: borderBlue }}
       />
@@ -157,7 +143,7 @@ export default function EstateDevicePanel({
         {filtered.length === 0 && !loading ? (
           <div className="text-gray-300 text-sm">No devices found</div>
         ) : (
-          filtered.map((d) => (
+          filtered.map(d => (
             <div
               key={d.id}
               className="p-3 rounded-lg cursor-pointer transition"
@@ -172,7 +158,10 @@ export default function EstateDevicePanel({
 
                 {/* Actions */}
                 <div className="flex items-center gap-2">
-                  <button className="text-gray-300 text-sm" onClick={() => onAction?.(d.id, "open")}>
+                  <button
+                    className="text-gray-300 text-sm"
+                    onClick={() => onAction?.(d.id, "open")}
+                  >
                     <FaWrench />
                   </button>
 
