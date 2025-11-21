@@ -18,6 +18,7 @@ type PowerModule = {
 };
 
 const brandColor = "#8A0C0C"; // Ochiga maroon
+const darkBlue = "#0A0F1F"; // panel bg
 
 export default function EstatePowerPanel({ estateId = "current-estate" }: { estateId?: string }) {
   const [modules, setModules] = useState<PowerModule[]>([
@@ -28,14 +29,9 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
 
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState<Record<SourceKey, boolean>>({ grid: false, generator: false, solar: false });
-  const [notifications, setNotifications] = useState<{ id: string; level: "info" | "warning" | "critical"; message: string; time: string }[]>([]);
   const [metrics, setMetrics] = useState<number[]>([]);
 
   const createId = useCallback(() => Math.random().toString(36).substring(2, 9), []);
-  const pushNotification = (level: "info" | "warning" | "critical", message: string) => {
-    const n = { id: createId(), level, message, time: new Date().toLocaleTimeString() };
-    setNotifications((p) => [n, ...p].slice(0, 10));
-  };
 
   const loadStatus = useCallback(async () => {
     setLoading(true);
@@ -53,11 +49,11 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
       }
       setMetrics(Array.from({ length: 12 }, () => Math.round(Math.random() * 100 + 50)));
     } catch {
-      pushNotification("warning", "Failed to load device status");
+      toast.error("Failed to load device status");
     } finally {
       setLoading(false);
     }
-  }, [estateId, createId]);
+  }, [estateId]);
 
   useEffect(() => {
     loadStatus();
@@ -73,11 +69,9 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
       const res = await deviceService.triggerDeviceAction(module.id, action, { estateId });
       if ((res as any).error) throw new Error((res as any).error);
       setModules((p) => p.map((m) => (m.id === module.id ? { ...m, status: action === "on" ? "on" : "off" } : m)));
-      pushNotification("info", `${module.title} ${action === "on" ? "started" : "stopped"}`);
       toast.success(`${module.title} ${action === "on" ? "started" : "stopped"}`);
     } catch {
       setModules((p) => p.map((m) => (m.id === module.id ? { ...m, status: prevStatus } : m)));
-      pushNotification("critical", `Failed to ${action} ${module.title}`);
       toast.error(`Failed to ${action} ${module.title}`);
     } finally {
       setLoading(false);
@@ -85,7 +79,7 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
   };
 
   const toggleModule = async (m: PowerModule) => (m.status === "on" ? sendAction(m, "off") : sendAction(m, "on"));
-  const statusColor = (s: PowerModule["status"]) => (s === "on" ? "text-green-500" : s === "off" ? "text-red-500" : "text-yellow-400");
+  const statusColor = (s: PowerModule["status"]) => (s === "on" ? "text-green-400" : s === "off" ? "text-red-400" : "text-yellow-300");
 
   const Sparkline = ({ data }: { data: number[] }) => {
     const w = 200;
@@ -100,15 +94,15 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
   const avg = useMemo(() => (metrics.length ? Math.round(totalConsumption / metrics.length) : 0), [metrics, totalConsumption]);
 
   return (
-    <div className="w-full p-6 space-y-6 bg-gray-50">
-      <div className="text-2xl font-light text-gray-800 flex items-center gap-2 mb-4"><FaBolt color={brandColor} />Estate Power Dashboard</div>
+    <div className="w-full p-6 space-y-6" style={{ backgroundColor: darkBlue }}>
+      <div className="text-2xl font-light text-white flex items-center gap-2 mb-4"><FaBolt color={brandColor} />Estate Power Dashboard</div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
         {modules.map((m) => (
-          <div key={m.id} className="p-4 rounded-lg bg-white shadow-sm border border-gray-200 flex flex-col justify-between">
+          <div key={m.id} className="p-4 rounded-lg bg-gray-800 border border-gray-700 flex flex-col justify-between">
             <div className="flex justify-between items-start mb-3">
               <div className="flex flex-col">
-                <div className="flex items-center gap-2 font-light text-gray-800 text-base">
+                <div className="flex items-center gap-2 font-light text-white text-base">
                   {m.key === "grid" && <FaBolt />} {m.key === "generator" && <FaGasPump />} {m.key === "solar" && <FaSolarPanel />}
                   {m.title}
                 </div>
@@ -126,7 +120,7 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
                 {m.status === "on" ? <FaPowerOff /> : <FaPlay />} {m.status === "on" ? "Turn Off" : "Turn On"}
               </button>
               <button
-                className="px-3 py-1 rounded-md border border-gray-300 text-gray-600 text-sm font-light"
+                className="px-3 py-1 rounded-md border border-gray-600 text-gray-300 text-sm font-light"
                 onClick={() => setExpanded((p) => ({ ...p, [m.key]: !p[m.key] }))}
               >
                 Details
@@ -134,7 +128,7 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
             </div>
 
             {expanded[m.key] && (
-              <div className="text-xs text-gray-500 space-y-1 border-t border-gray-200 pt-2">
+              <div className="text-xs text-gray-400 space-y-1 border-t border-gray-700 pt-2">
                 <div>Metric: {m.metricValue} {m.metricLabel}</div>
                 <div>Auto-switch: <input type="checkbox" className="ml-1" onChange={() => toast("Toggled")} /></div>
               </div>
@@ -143,22 +137,13 @@ export default function EstatePowerPanel({ estateId = "current-estate" }: { esta
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
-          <div className="flex items-center justify-between mb-2 font-light text-gray-700 text-base"><FaChartLine /> Power Analytics <span className="text-sm">{avg} kWh Avg</span></div>
-          <Sparkline data={metrics} />
-        </div>
-
-        <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
-          <div className="flex justify-between items-center mb-2 text-gray-700 font-light text-base">Notifications <button className="text-xs text-gray-400" onClick={() => setNotifications([])}>Clear</button></div>
-          <div className="space-y-1 max-h-32 overflow-auto text-xs">
-            {notifications.length === 0 && <div className="text-gray-400">No incidents</div>}
-            {notifications.map((n) => (
-              <div key={n.id} className={`p-1 rounded ${n.level === "critical" ? "bg-red-200 text-red-800" : n.level === "warning" ? "bg-yellow-100 text-yellow-800" : "bg-gray-100 text-gray-700"}`}>
-                {n.message} <span className="text-[10px] opacity-70">{n.time}</span>
-              </div>
-            ))}
-          </div>
+      <div className="p-4 bg-gray-800 rounded-lg border border-gray-700 flex flex-col">
+        <div className="flex items-center justify-between mb-2 font-light text-white text-base"><FaChartLine /> Power Analytics <span className="text-sm text-gray-300">{avg} kWh Avg</span></div>
+        <Sparkline data={metrics} />
+        <div className="mt-2 flex justify-between text-xs text-gray-400">
+          <div>Peak: {Math.max(...metrics)} kWh</div>
+          <div>Off-peak: {Math.min(...metrics)} kWh</div>
+          <div>Avg: {avg} kWh</div>
         </div>
       </div>
     </div>
