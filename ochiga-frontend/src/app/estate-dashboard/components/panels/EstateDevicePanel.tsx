@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaPlug, FaWrench, FaToggleOn } from "react-icons/fa";
+import toast from "react-hot-toast";
 import { deviceService } from "@/services/deviceService";
 
 type Device = {
@@ -39,6 +40,7 @@ export default function EstateDevicePanel({
       setDevices(res.devices || []);
     } catch (err) {
       console.warn(err);
+      toast.error("Failed to load estate devices");
     } finally {
       setLoading(false);
     }
@@ -49,16 +51,23 @@ export default function EstateDevicePanel({
     setLoading(true);
     try {
       const res = await deviceService.discoverDevices();
-      if (res.devices) {
-        // Merge discovered devices with current estate devices
+      if (res.devices && res.devices.length > 0) {
         setDevices((prev) => {
           const existingIds = new Set(prev.map((d) => d.id));
           const newDevices = res.devices.filter((d: Device) => !existingIds.has(d.id));
+          if (newDevices.length > 0) {
+            toast.success(`${newDevices.length} new device(s) discovered!`);
+          } else {
+            toast("No new devices found");
+          }
           return [...prev, ...newDevices];
         });
+      } else {
+        toast("No devices discovered");
       }
     } catch (err) {
       console.warn(err);
+      toast.error("Failed to scan for devices");
     } finally {
       setLoading(false);
     }
@@ -83,8 +92,10 @@ export default function EstateDevicePanel({
 
     try {
       await deviceService.triggerDeviceAction(id, newStatus);
+      toast.success(`${current.name} is now ${newStatus}`);
     } catch {
       loadEstateDevices();
+      toast.error(`Failed to toggle ${current.name}`);
     }
   };
 
@@ -178,9 +189,7 @@ export default function EstateDevicePanel({
                   {d.status === "online" ? "Active now" : "Offline"}
                 </div>
                 <div
-                  className={
-                    d.status === "online" ? "text-green-400" : "text-red-400"
-                  }
+                  className={d.status === "online" ? "text-green-400" : "text-red-400"}
                 >
                   {d.status}
                 </div>
