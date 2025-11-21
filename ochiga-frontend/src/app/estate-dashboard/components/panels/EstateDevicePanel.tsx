@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FaPlug, FaWrench, FaToggleOn } from "react-icons/fa";
 import toast from "react-hot-toast";
 import { deviceService } from "@/services/deviceService";
@@ -26,6 +26,7 @@ export default function EstateDevicePanel({
   const [devices, setDevices] = useState<Device[]>(initial);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
+  const scanRef = useRef<NodeJS.Timeout | null>(null);
 
   const maroon = "#8A0C0C";
   const darkBlue = "#0A0F1F";
@@ -46,22 +47,35 @@ export default function EstateDevicePanel({
     }
   };
 
-  /* Discover live IoT devices */
+  /* --------------------------------------------------
+     Scan devices in real-time
+  -------------------------------------------------- */
   const scanDevices = async () => {
     setLoading(true);
+    toast("Scanning for devices...");
+
     try {
       const res = await deviceService.discoverDevices();
+
       if (res.devices && res.devices.length > 0) {
-        setDevices((prev) => {
-          const existingIds = new Set(prev.map((d) => d.id));
-          const newDevices = res.devices.filter((d: Device) => !existingIds.has(d.id));
-          if (newDevices.length > 0) {
-            toast.success(`${newDevices.length} new device(s) discovered!`);
-          } else {
-            toast("No new devices found");
-          }
-          return [...prev, ...newDevices];
+        let addedCount = 0;
+
+        res.devices.forEach((d: Device) => {
+          setDevices((prev) => {
+            const exists = prev.find((p) => p.id === d.id);
+            if (!exists) {
+              addedCount++;
+              return [...prev, d];
+            }
+            return prev;
+          });
         });
+
+        if (addedCount > 0) {
+          toast.success(`${addedCount} new device(s) discovered!`);
+        } else {
+          toast("No new devices found");
+        }
       } else {
         toast("No devices discovered");
       }
@@ -72,10 +86,6 @@ export default function EstateDevicePanel({
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    loadEstateDevices();
-  }, []);
 
   /* Toggle Device Status */
   const toggle = async (id: string) => {
@@ -99,6 +109,7 @@ export default function EstateDevicePanel({
     }
   };
 
+  /* Filtered Devices */
   const filtered = filter
     ? devices.filter((d) =>
         (d.name + d.type + d.location)
@@ -106,6 +117,15 @@ export default function EstateDevicePanel({
           .includes(filter.toLowerCase())
       )
     : devices;
+
+  useEffect(() => {
+    loadEstateDevices();
+
+    // Cleanup interval if needed
+    return () => {
+      if (scanRef.current) clearInterval(scanRef.current);
+    };
+  }, []);
 
   return (
     <div
