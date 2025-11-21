@@ -6,10 +6,9 @@ const BASE_URL =
 
 /** Shared Headers */
 function authHeaders() {
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("token")
-      : null;
+  if (typeof window === "undefined") return { "Content-Type": "application/json" };
+
+  const token = localStorage.getItem("token");
 
   return {
     "Content-Type": "application/json",
@@ -18,7 +17,8 @@ function authHeaders() {
 }
 
 /* --------------------------------------------------
- * DISCOVER LIVE DEVICES (calls backend /devices/discover)
+ * DISCOVER LIVE DEVICES
+ * GET /devices/discover
  * -------------------------------------------------- */
 async function discoverDevices() {
   try {
@@ -28,19 +28,21 @@ async function discoverDevices() {
     });
 
     if (!res.ok) {
-      const error = await res.json().catch(() => null);
-      return { error: error?.message || "Failed to discover devices" };
+      if (res.status === 401) throw new Error("Unauthorized: Please login again");
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message || "Failed to discover devices");
     }
 
     const data = await res.json();
     return { devices: data.devices || [] };
   } catch (err: any) {
-    return { error: err.message };
+    return { error: err.message || "Discover devices failed" };
   }
 }
 
 /* --------------------------------------------------
- * GET ESTATE DEVICES (from DB)
+ * GET ESTATE DEVICES
+ * GET /devices?estateId=
  * -------------------------------------------------- */
 async function getDevices(estateId?: string) {
   try {
@@ -51,18 +53,21 @@ async function getDevices(estateId?: string) {
     });
 
     if (!res.ok) {
-      const error = await res.json().catch(() => null);
-      return { error: error?.message || "Failed to load devices" };
+      if (res.status === 401) throw new Error("Unauthorized: Please login again");
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message || "Failed to load devices");
     }
 
-    return await res.json();
+    const data = await res.json();
+    return { devices: data.devices || [] };
   } catch (err: any) {
-    return { error: err.message };
+    return { error: err.message || "Get devices failed" };
   }
 }
 
 /* --------------------------------------------------
- * TRIGGER DEVICE ACTION (toggle on/off)
+ * TRIGGER DEVICE ACTION
+ * POST /devices/:id/action
  * -------------------------------------------------- */
 async function triggerDeviceAction(
   deviceId: string,
@@ -77,18 +82,19 @@ async function triggerDeviceAction(
     });
 
     if (!res.ok) {
-      const error = await res.json().catch(() => null);
-      return { error: error?.message || "Failed to trigger device action" };
+      if (res.status === 401) throw new Error("Unauthorized: Please login again");
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message || "Failed to trigger device action");
     }
 
     return await res.json();
   } catch (err: any) {
-    return { error: err.message };
+    return { error: err.message || "Trigger device action failed" };
   }
 }
 
 /* --------------------------------------------------
- * EXPORT SINGLE DEVICE SERVICE OBJECT
+ * EXPORT DEVICE SERVICE
  * -------------------------------------------------- */
 export const deviceService = {
   discoverDevices,
