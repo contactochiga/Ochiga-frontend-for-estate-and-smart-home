@@ -1,6 +1,8 @@
 // src/services/deviceService.ts
+
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://laughing-system-97g5rrr74vv6cx6rg-5000.app.github.dev";
 
 /** Shared Headers */
 function authHeaders() {
@@ -16,7 +18,7 @@ function authHeaders() {
 }
 
 /* --------------------------------------------------
- * DISCOVER DEVICES (SSDP + MQTT from backend)
+ * DISCOVER LIVE DEVICES (calls backend /devices/discover)
  * -------------------------------------------------- */
 async function discoverDevices() {
   try {
@@ -38,12 +40,11 @@ async function discoverDevices() {
 }
 
 /* --------------------------------------------------
- * GET DEVICES (Estate or Resident)
+ * GET ESTATE DEVICES (from DB)
  * -------------------------------------------------- */
 async function getDevices(estateId?: string) {
   try {
     const query = estateId ? `?estateId=${estateId}` : "";
-
     const res = await fetch(`${BASE_URL}/devices${query}`, {
       method: "GET",
       headers: authHeaders(),
@@ -54,34 +55,6 @@ async function getDevices(estateId?: string) {
       return { error: error?.message || "Failed to load devices" };
     }
 
-    const data = await res.json();
-    return { devices: data || [] };
-  } catch (err: any) {
-    return { error: err.message };
-  }
-}
-
-/* --------------------------------------------------
- * CREATE DEVICE (Estate Only)
- * -------------------------------------------------- */
-async function createDevice(body: {
-  estate_id: string;
-  name: string;
-  type: string;
-  metadata?: any;
-}) {
-  try {
-    const res = await fetch(`${BASE_URL}/devices`, {
-      method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const error = await res.json().catch(() => null);
-      return { error: error?.message || "Failed to create device" };
-    }
-
     return await res.json();
   } catch (err: any) {
     return { error: err.message };
@@ -89,7 +62,7 @@ async function createDevice(body: {
 }
 
 /* --------------------------------------------------
- * TRIGGER DEVICE ACTION
+ * TRIGGER DEVICE ACTION (toggle on/off)
  * -------------------------------------------------- */
 async function triggerDeviceAction(
   deviceId: string,
@@ -120,6 +93,5 @@ async function triggerDeviceAction(
 export const deviceService = {
   discoverDevices,
   getDevices,
-  createDevice,
   triggerDeviceAction,
 };
