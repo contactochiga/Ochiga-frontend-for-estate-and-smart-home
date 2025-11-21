@@ -1,5 +1,4 @@
 // src/services/deviceService.ts
-
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -32,7 +31,7 @@ async function discoverDevices() {
     }
 
     const data = await res.json();
-    return { devices: data.devices };
+    return { devices: data.devices || [] };
   } catch (err: any) {
     return { error: err.message };
   }
@@ -55,7 +54,8 @@ async function getDevices(estateId?: string) {
       return { error: error?.message || "Failed to load devices" };
     }
 
-    return await res.json();
+    const data = await res.json();
+    return { devices: data || [] };
   } catch (err: any) {
     return { error: err.message };
   }
